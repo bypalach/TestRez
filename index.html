@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="description" content="rez — локальная студия вставки баннеров, нарезки видео в ZIP и загрузки роликов по ссылке" />
+  <meta name="description" content="rez — локальная студия вставки баннеров, нарезки видео в ZIP и загрузки роликов по ссылке в максимальном качестве" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2216%22 fill=%22%23f2efe9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%23101010%22>rez</text></svg>" />
   <title>rez — видео-баннеры, нарезка и загрузчик</title>
 
@@ -1315,7 +1315,7 @@
     .faq-section {
       max-width: 1440px;
       margin: 0 auto;
-      padding: 6px 16px 26px;
+      padding: 12px 16px 32px;
     }
 
     .faq-box {
@@ -1376,7 +1376,7 @@
     footer.site-footer {
       border-top: 1px solid var(--line);
       background: var(--surface);
-      padding: 20px 16px max(24px, env(safe-area-inset-bottom));
+      padding: 20px 16px max(34px, calc(env(safe-area-inset-bottom) + 14px));
     }
 
     .footer-in {
@@ -1639,7 +1639,7 @@
     #toastBox {
       position: fixed;
       left: 50%;
-      bottom: max(18px, env(safe-area-inset-bottom));
+      bottom: max(22px, calc(env(safe-area-inset-bottom) + 8px));
       transform: translateX(-50%);
       z-index: 99;
       pointer-events: none;
@@ -1791,7 +1791,7 @@
         <div class="brand">
           <div class="brand-word">rez<span>.</span></div>
           <span class="engine-tag" id="engineBadge">MP4 Оффлайн</span>
-          <div class="sub" id="saveHint">Локальная обработка без загрузки на сервер</div>
+          <div class="sub" id="saveHint">Локальная обработка без сжатия и серверов</div>
         </div>
       </div>
 
@@ -2283,11 +2283,11 @@
           <div class="card">
             <div class="card-h">
               <h3>Качество и FPS</h3>
-              <span>MP4 (H.264 + AAC)</span>
+              <span id="bitrateBadge">28 Мбит/с · H.264 + AAC</span>
             </div>
             <div class="seg" data-k="q">
-              <button type="button" data-v="max">Макс</button>
-              <button type="button" data-v="hi">1080p</button>
+              <button type="button" data-v="max">Макс (4K)</button>
+              <button type="button" data-v="hi">1080p HD</button>
               <button type="button" data-v="mid">720p</button>
               <button type="button" data-v="lo">Лёгкое</button>
             </div>
@@ -2296,7 +2296,7 @@
               <button type="button" data-v="30">30 FPS</button>
               <button type="button" data-v="60">60 FPS</button>
             </div>
-            <p class="hint">Обработка идёт полностью локально на твоём устройстве без загрузки видео на сервер.</p>
+            <p class="hint">Режим «Макс (4K)» сохраняет оригинальное разрешение вплоть до 2160p с высоким битрейтом без мыла.</p>
           </div>
 
           <div class="card">
@@ -2347,7 +2347,7 @@
       <div class="section-head">
         <div>
           <h2>Скачать видео по ссылке</h2>
-          <p class="hint" style="margin-top:4px">Загружай исходники с YouTube, Shorts, Twitch, TikTok, Instagram Reels или VK Видео и сразу отправляй в редактор rez.</p>
+          <p class="hint" style="margin-top:4px">Загружай исходники с YouTube, Shorts, Twitch, TikTok, Instagram Reels или VK Видео в высоком качестве.</p>
         </div>
         <button type="button" class="btn-sm pri" data-nav="editor">Вернуться в редактор</button>
       </div>
@@ -2372,9 +2372,9 @@
           <div class="field">
             <label>Качество / формат</label>
             <div class="seg" id="dlQualSeg">
-              <button type="button" class="on" data-dlq="1080">1080p MP4</button>
+              <button type="button" class="on" data-dlq="max">Макс (4K)</button>
+              <button type="button" data-dlq="1080">1080p MP4</button>
               <button type="button" data-dlq="720">720p MP4</button>
-              <button type="button" data-dlq="480">480p</button>
               <button type="button" data-dlq="audio">Только MP3</button>
             </div>
           </div>
@@ -2404,14 +2404,14 @@
         <div class="divline"></div>
 
         <div class="card-h">
-          <h3>Запасные шлюзы (если площадка закрыла прямой поток)</h3>
-          <span>Открывают твою ссылку в 1 клик</span>
+          <h3>Быстрые загрузчики по твоей ссылке</h3>
+          <span>Если браузер заблокировал прямой поток</span>
         </div>
         <div class="gateways-grid">
           <button type="button" class="ghost" data-gw="cobalt">cobalt.tools</button>
           <button type="button" class="ghost" data-gw="savefrom">SaveFrom</button>
           <button type="button" class="ghost" data-gw="snaptik">SnapTik (TikTok)</button>
-          <button type="button" class="ghost" data-gw="twitch">Twitch Leecher / Clipr</button>
+          <button type="button" class="ghost" data-gw="twitch">Clipr (Twitch)</button>
         </div>
       </div>
     </div>
@@ -2472,7 +2472,7 @@
           <span>100% оффлайн</span>
         </div>
         <p class="hint">
-          Весь монтаж, удаление чёрного фона, хромакей, кадрирование 9:16 и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs). Видеофайлы никуда не загружаются, поэтому нет очередей, водяных знаков и лимитов по длительности.
+          Весь монтаж, удаление чёрного фона, хромакей, кадрирование 9:16 и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs) с высоким битрейтом. Видеофайлы никуда не загружаются, поэтому нет очередей, водяных знаков и потери чёткости.
         </p>
       </div>
     </div>
@@ -2566,8 +2566,13 @@
       <h2>Популярные вопросы (FAQ)</h2>
       <div class="faq-list">
         <details class="faq-item">
+          <summary>Как получить максимальное качество без потери чёткости?</summary>
+          <p>Во вкладке «Экспорт» по умолчанию выбран режим «Макс (4K)» с битрейтом до 28 Мбит/с и сохранением исходного разрешения и FPS. Баннер и видео обрабатываются в полном разрешении с максимальным сглаживанием.</p>
+        </details>
+
+        <details class="faq-item">
           <summary>Как скачать видео с YouTube, Twitch или TikTok?</summary>
-          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество (1080p / 720p / MP3) и нажми «Скачать видео». При желании ролик сразу загрузится в редактор баннеров или нарезку.</p>
+          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество (Макс 4K / 1080p / MP3) и нажми «Скачать видео».</p>
         </details>
 
         <details class="faq-item">
@@ -2586,11 +2591,6 @@
         </details>
 
         <details class="faq-item">
-          <summary>Загружаются ли мои видео на чужой сервер?</summary>
-          <p>Нет. Обработка проходит полностью оффлайн в памяти твоего браузера. Твои исходники и готовые видео остаются только на твоём телефоне или компьютере.</p>
-        </details>
-
-        <details class="faq-item">
           <summary>Куда писать, если нашёл баг или нужна помощь?</summary>
           <p>Открой раздел «Тикеты» в верхнем меню или в боковой панели слева, либо напиши напрямую в поддержку Telegram: @REZ_support.</p>
         </details>
@@ -2603,7 +2603,7 @@
     <div class="footer-in">
       <div class="footer-info">
         <b>rez — оффлайн-редактор видео-баннеров, нарезки и загрузки</b>
-        <span>Поддержка: @REZ_support • Работает локально без водяных знаков.</span>
+        <span>Поддержка: @REZ_support • Максимальное качество без водяных знаков.</span>
       </div>
 
       <div class="footer-btns">
@@ -2682,6 +2682,8 @@
       const v = $('#v');
       const cv = $('#cv');
       const ctx = cv.getContext('2d', { alpha: false });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
       /* =====================================================================
        * 1. КОШЕЛЬКИ РАЗРАБОТЧИКА
@@ -2776,7 +2778,7 @@
       /* =====================================================================
        * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ (YOUTUBE, TWITCH, TIKTOK, REELS, VK)
        * ===================================================================== */
-      let dlQual = '1080';
+      let dlQual = 'max';
       let dlDest = 'studio';
       let lastResolvedMediaUrl = '';
       let lastResolvedFilename = 'video.mp4';
@@ -2833,13 +2835,14 @@
           if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)) {
             lastResolvedMediaUrl = url;
             lastResolvedFilename = url.split('/').pop().split('?')[0] || 'video.mp4';
-            await onMediaLinkResolved(lastResolvedMediaUrl, lastResolvedFilename, 'Прямой файл');
+            await onMediaLinkResolved(lastResolvedMediaUrl, lastResolvedFilename, 'Прямой исходник');
             return;
           }
 
           const apiEndpoints = [
             'https://api.cobalt.tools/',
-            'https://co.wuk.sh/api/json'
+            'https://cobalt-api.kwiatekmiki.com/',
+            'https://cobalt-backend.canine.tools/'
           ];
 
           let found = null;
@@ -2853,9 +2856,10 @@
                 },
                 body: JSON.stringify({
                   url,
-                  videoQuality: dlQual === 'audio' ? '720' : dlQual,
+                  videoQuality: dlQual === 'audio' ? '1080' : dlQual,
                   downloadMode: dlQual === 'audio' ? 'audio' : 'auto',
-                  filenameStyle: 'basic'
+                  filenameStyle: 'basic',
+                  youtubeVideoCodec: 'h264'
                 })
               });
               if (!resp.ok) continue;
@@ -2876,7 +2880,7 @@
             await onMediaLinkResolved(
               lastResolvedMediaUrl,
               lastResolvedFilename,
-              dlQual === 'audio' ? 'MP3 Аудио' : `${dlQual}p MP4`
+              dlQual === 'audio' ? 'MP3 Аудио' : (dlQual === 'max' ? 'Макс MP4' : `${dlQual}p MP4`)
             );
           } else {
             const plat = detectPlatform(url);
@@ -2884,13 +2888,13 @@
               ? `https://clipr.xyz/?url=${encodeURIComponent(url)}`
               : `https://cobalt.tools/#${encodeURIComponent(url)}`;
             $('#dlResTitle').textContent = 'Площадка ограничила прямой поток';
-            $('#dlResBadge').textContent = 'ШЛЮЗ';
-            $('#dlResText').textContent = 'Нажми «Скачать через шлюз» — ссылка уже передана. Скачай MP4 и открой его в редакторе rez.';
+            $('#dlResBadge').textContent = 'СЕРВИС';
+            $('#dlResText').textContent = 'Нажми «Открыть и скачать» — ссылка уже передана. Сохрани MP4 в максимальном качестве и выбери его в редакторе rez.';
             $('#dlDirectHref').href = fallbackUrl;
-            $('#dlDirectHref').textContent = 'Скачать через шлюз';
+            $('#dlDirectHref').textContent = 'Открыть и скачать';
             $('#dlToEditorBtn').style.display = 'none';
             $('#dlResBox').classList.add('on');
-            toast('Открой скачивание через шлюз ниже');
+            toast('Открой скачивание по кнопке ниже');
           }
         } finally {
           btn.disabled = false;
@@ -2901,7 +2905,7 @@
       async function onMediaLinkResolved(mediaUrl, filename, badgeText) {
         $('#dlResTitle').textContent = filename;
         $('#dlResBadge').textContent = badgeText;
-        $('#dlResText').textContent = 'Видеопоток получен. Можешь сохранить файл на устройство или сразу открыть в студии rez.';
+        $('#dlResText').textContent = 'Видеопоток в высоком качестве получен. Можешь сохранить файл на устройство или сразу открыть в студии rez.';
         $('#dlDirectHref').href = mediaUrl;
         $('#dlDirectHref').textContent = 'Скачать файл';
         $('#dlToEditorBtn').style.display = dlQual === 'audio' ? 'none' : 'block';
@@ -3104,7 +3108,7 @@
         sliceTo: 0,
         partLabel: 'none',
         partLabelPos: 'top',
-        q: 'hi',
+        q: 'max',
         fps: 'auto',
         saveBanner: true
       };
@@ -3138,7 +3142,7 @@
             el.style.color = '#86efac';
             clearTimeout(persistSettings._t);
             persistSettings._t = setTimeout(() => {
-              el.textContent = 'Локальная обработка без загрузки на сервер';
+              el.textContent = 'Локальная обработка без сжатия и серверов';
               el.style.color = '';
             }, 1300);
           }
@@ -3240,7 +3244,8 @@
 
       let actx = null, asrc = null, again = null, adest = null;
 
-      const BR = { max: 16_000_000, hi: 9_000_000, mid: 4_500_000, lo: 2_400_000 };
+      // Повышенные битрейты для кристальной чёткости без сжатия
+      const BR = { max: 28_000_000, hi: 16_000_000, mid: 8_000_000, lo: 4_000_000 };
       const CAP = { max: 3840, hi: 1920, mid: 1280, lo: 960 };
 
       const D = () => (v.duration && isFinite(v.duration) ? v.duration : 0);
@@ -3260,13 +3265,15 @@
       function setPreviewRes() {
         if (!v.videoWidth || !v.videoHeight) return;
         if (S.aspect === 'v_crop' || S.aspect === 'v_blur') {
-          cv.width = 608;
-          cv.height = 1080;
+          cv.width = 720;
+          cv.height = 1280;
         } else {
-          const k = Math.min(1, 1080 / Math.max(v.videoWidth, v.videoHeight));
+          const k = Math.min(1, 1440 / Math.max(v.videoWidth, v.videoHeight));
           cv.width = Math.max(2, Math.round(v.videoWidth * k) & ~1);
           cv.height = Math.max(2, Math.round(v.videoHeight * k) & ~1);
         }
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
       }
 
       function computeOutputRes(srcW, srcH) {
@@ -3276,7 +3283,7 @@
           if (S.q === 'max' && Math.max(srcW, srcH) >= 2160) return { w: 1440, h: 2560 };
           return { w: 1080, h: 1920 };
         }
-        const cap = CAP[S.q] || 1920;
+        const cap = CAP[S.q] || 3840;
         const k = Math.min(1, cap / Math.max(srcW, srcH));
         return {
           w: Math.max(2, Math.round(srcW * k) & ~1),
@@ -3488,6 +3495,9 @@
 
         $$('#zoneSw button').forEach(b => b.classList.toggle('on', b.dataset.z === S.safeZone));
 
+        const mbps = Math.round((BR[S.q] || 28_000_000) / 1_000_000);
+        $('#bitrateBadge').textContent = `${mbps} Мбит/с · H.264 + AAC`;
+
         const modeShortTxt = S.mode === 'stop' ? 'Видео замирает' : 'Видео идёт дальше';
         const modeHintTxt = S.mode === 'over'
           ? 'Баннер накладывается по ходу ролика — видео не останавливается.'
@@ -3496,7 +3506,7 @@
         const ckHintTxt = S.ckMode === 'screen'
           ? '«Без чёрного» убирает чёрную подложку (режим Screen) — подходит для дроп-баннеров.'
           : S.ckMode === 'chroma'
-            ? 'Хромакей вырезает выбранный цвет (зелёный, синий, белый и др.). Удобно наводить пипеткой.'
+            ? 'Хромакей вырезает выбранный цвет (зелёный, синий, белый и др.) в полном разрешении.'
             : 'Баннер отображается как есть (прозрачные PNG и WebM поддерживаются автоматически).';
         const posTxt = `X:${Math.round(S.x * 100)}% Y:${Math.round(S.y * 100)}%`;
 
@@ -3564,9 +3574,9 @@
         if (S.sliceOn) {
           if (d && plan.selected.length > 0) {
             const totalClipSec = plan.selected.reduce((a, c) => a + c.dur + (S.mode === 'stop' && img ? HD() : 0), 0);
-            const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 9e6) + 128000)) / 8 / 1048576));
-            const ramWarn = estMb > 600
-              ? `<br><span style="color:#fde047">Большой архив (~${estMb} МБ) — на телефоне лучше резать по 10–12 частей или выбрать 720p.</span>`
+            const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 28e6) + 192000)) / 8 / 1048576));
+            const ramWarn = estMb > 750
+              ? `<br><span style="color:#fde047">Крупный архив (~${estMb} МБ) — на телефоне можно резать партиями по 10 частей или выбрать 1080p HD.</span>`
               : '';
             $('#sliceSummary').innerHTML = `<b>${plan.selected.length} из ${plan.totalParts} клипов</b> по ~${S.sliceSec}с • Режим: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Около <b>~${estMb} МБ</b> в ZIP.${ramWarn}`;
             slicePill.style.display = 'inline-block';
@@ -3692,16 +3702,19 @@
       }
 
       /* =====================================================================
-       * 10. ХРОМАКЕЙ И ОТРИСОВКА КАДРА
+       * 10. ХРОМАКЕЙ И ОТРИСОВКА КАДРА В ПОЛНОМ РАЗРЕШЕНИИ
        * ===================================================================== */
       const kc = document.createElement('canvas');
       const kx = kc.getContext('2d', { willReadFrequently: true });
 
       function applyChromaToSource(source, srcW, srcH) {
-        const k = Math.min(1, 520 / Math.max(1, srcW));
+        // Обрабатываем в полном разрешении исходника (до 1920px) без потери чёткости краёв
+        const k = Math.min(1, 1920 / Math.max(1, srcW));
         const w = Math.max(2, Math.round(srcW * k));
         const h = Math.max(2, Math.round(srcH * k));
         if (kc.width !== w || kc.height !== h) { kc.width = w; kc.height = h; }
+        kx.imageSmoothingEnabled = true;
+        kx.imageSmoothingQuality = 'high';
         kx.clearRect(0, 0, w, h);
         kx.drawImage(source, 0, 0, w, h);
 
@@ -3761,6 +3774,8 @@
         const sh = src.videoHeight || src.naturalHeight || src.height || H;
 
         targetCtx.save();
+        targetCtx.imageSmoothingEnabled = true;
+        targetCtx.imageSmoothingQuality = 'high';
         if (isFrozen && S.stopBlur > 0) {
           targetCtx.filter = `blur(${S.stopBlur}px)`;
         }
@@ -3837,6 +3852,8 @@
         } = opts;
 
         targetCtx.save();
+        targetCtx.imageSmoothingEnabled = true;
+        targetCtx.imageSmoothingQuality = 'high';
         targetCtx.fillStyle = '#000';
         targetCtx.fillRect(0, 0, W, H);
 
@@ -4447,7 +4464,7 @@
       async function prepareOfflinePipeline() {
         await loadMediabunny();
 
-        const bitrate = BR[S.q] || 9_000_000;
+        const bitrate = BR[S.q] || 28_000_000;
         const mainInput = new MB.Input({
           formats: MB.ALL_FORMATS,
           source: new MB.BlobSource(vfile)
@@ -4480,7 +4497,7 @@
         const mainATrack = await mainInput.getPrimaryAudioTrack().catch(() => null);
         if (mainATrack && MB.AudioBufferSink && (await mainATrack.canDecode().catch(() => false))) {
           mainAudioSink = new MB.AudioBufferSink(mainATrack);
-        } else if (S.vvol > 0 && vfile.size < 140 * 1024 * 1024) {
+        } else if (S.vvol > 0 && vfile.size < 160 * 1024 * 1024) {
           fallbackMainBuf = await decodeFullAudio(vfile, mainInput, 48000);
         }
 
@@ -4515,11 +4532,15 @@
         renderCanvas.width = outW;
         renderCanvas.height = outH;
         const rCtx = renderCanvas.getContext('2d', { alpha: false });
+        rCtx.imageSmoothingEnabled = true;
+        rCtx.imageSmoothingQuality = 'high';
 
         const freezeCanvas = document.createElement('canvas');
         freezeCanvas.width = outW;
         freezeCanvas.height = outH;
         const fCtx = freezeCanvas.getContext('2d', { alpha: false });
+        fCtx.imageSmoothingEnabled = true;
+        fCtx.imageSmoothingQuality = 'high';
 
         const bestAudioCodec = MB.getFirstEncodableAudioCodec
           ? await MB.getFirstEncodableAudioCodec(['aac', 'opus']).catch(() => 'aac')
@@ -4641,8 +4662,8 @@
           let audioSource = null;
           if (mixedAudio && bestAudioCodec) {
             const audioConfig = MB.Quality
-              ? { codec: bestAudioCodec, quality: new MB.Quality({ bitrate: 128000 }) }
-              : { codec: bestAudioCodec, bitrate: 128000 };
+              ? { codec: bestAudioCodec, quality: new MB.Quality({ bitrate: 192000 }) }
+              : { codec: bestAudioCodec, bitrate: 192000 };
             audioSource = new MB.AudioBufferSource(audioConfig);
             output.addAudioTrack(audioSource);
           }
@@ -4875,6 +4896,8 @@
         const { w, h } = computeOutputRes(v.videoWidth, v.videoHeight);
         cv.width = w;
         cv.height = h;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         const targetFps = S.fps === '60' ? 60 : 30;
         const stream = cv.captureStream(targetFps);
@@ -4888,7 +4911,7 @@
         ].find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
 
         const chunks = [];
-        const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: BR[S.q] || 8_000_000 });
+        const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: BR[S.q] || 16_000_000 });
         rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
         const donePromise = new Promise(res => { rec.onstop = res; });
 
