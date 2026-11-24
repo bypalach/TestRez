@@ -1,0 +1,3876 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Оффлайн-вставка видео-баннеров и авто-нарезка роликов в ZIP для YouTube Shorts, Instagram Reels и TikTok" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%236d28d9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2258%22>🎬</text></svg>" />
+  <title>Баннер в видео — Оффлайн-рендер</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08080b;
+      --panel: #121217;
+      --card: #191920;
+      --soft: #21212b;
+      --line: #2b2b36;
+      --ink: #f4f4f8;
+      --mute: #9296a8;
+      --acc: #7c5cff;
+      --acc2: #c026d3;
+      --ok: #10b981;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      overscroll-behavior-y: none;
+    }
+
+    button, input, label {
+      font: inherit;
+      touch-action: manipulation;
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--acc);
+      width: 19px;
+      height: 19px;
+      cursor: pointer;
+    }
+
+    /* ==================== ШАПКА ==================== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(8, 8, 11, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+    }
+
+    .head-in {
+      max-width: 1380px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex: 0 0 auto;
+      box-shadow: 0 4px 16px rgba(124, 92, 255, 0.35);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.16);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.32);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .sub {
+      font-size: 11px;
+      color: var(--mute);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-sm {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .btn-sm:active { transform: scale(0.96); }
+    .btn-sm.pri {
+      border: 0;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(124, 92, 255, 0.35);
+    }
+    .btn-sm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ==================== СЕТКА ПРИЛОЖЕНИЯ ==================== */
+    .app {
+      max-width: 1380px;
+      margin: auto;
+      padding: 14px 16px 40px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 430px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* ==================== СЦЕНА / ПРЕВЬЮ ==================== */
+    .stage {
+      background: #040406;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: sticky;
+      top: 70px;
+    }
+
+    .stage-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 2px;
+    }
+
+    .stage-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: #d4d6e3;
+      white-space: nowrap;
+    }
+
+    .pill.acc {
+      background: rgba(124, 92, 255, 0.18);
+      border-color: rgba(124, 92, 255, 0.4);
+      color: #c4b5fd;
+    }
+
+    .pill.warn {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fcd34d;
+    }
+
+    .pill.slice-on {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
+    }
+
+    .zone-sw {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 2px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .zone-sw button {
+      border: 0;
+      background: transparent;
+      color: var(--mute);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .zone-sw button.on {
+      background: var(--acc);
+      color: #fff;
+    }
+
+    .drop {
+      min-height: 360px;
+      border: 2px dashed #323240;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--mute);
+      padding: 24px 16px;
+      transition: 0.15s;
+      background: radial-gradient(circle at 50% 30%, rgba(124, 92, 255, 0.08), transparent 65%);
+    }
+
+    .drop.over {
+      border-color: var(--acc);
+      background: rgba(124, 92, 255, 0.12);
+    }
+
+    .drop b {
+      display: block;
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .drop .pick {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.35);
+    }
+
+    .cvw {
+      display: none;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .cvw canvas {
+      max-width: 100%;
+      max-height: 64vh;
+      max-height: 64dvh;
+      display: block;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .pick-banner-tip {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(245, 158, 11, 0.94);
+      color: #09090b;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 99px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      white-space: nowrap;
+      display: none;
+    }
+
+    body.eyedrop .pick-banner-tip { display: block; }
+    body.eyedrop .cvw canvas { cursor: crosshair !important; }
+
+    .bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar button {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .bar button.play-btn {
+      background: var(--ink);
+      color: #09090b;
+      border-color: var(--ink);
+      min-width: 74px;
+    }
+
+    .track {
+      position: relative;
+      flex: 1;
+      height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .track-bg {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--soft);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .track #sliceTicks {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .track #sliceTicks i {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1.5px;
+      background: rgba(16, 185, 129, 0.55);
+    }
+
+    .track #mark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--acc), var(--acc2));
+      min-width: 6px;
+    }
+
+    .track #progFill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .track input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    #tm {
+      font-size: 12px;
+      color: #cfd3e6;
+      white-space: nowrap;
+    }
+
+    .has .drop { display: none; }
+    .has .cvw { display: flex; }
+    .has .bar { display: flex; }
+
+    /* Карточки выбора файлов */
+    .media-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mcard {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: 0.15s;
+      min-width: 0;
+    }
+
+    .mcard:hover { border-color: #444457; }
+    .mcard:active { transform: scale(0.985); }
+
+    .mthumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      background: var(--soft);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .mthumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .mmeta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .mmeta b {
+      display: block;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mmeta small {
+      display: block;
+      font-size: 11px;
+      color: var(--mute);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .clear-x {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--mute);
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      place-items: center;
+    }
+
+    .clear-x:hover { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+
+    /* ==================== ПАНЕЛЬ НАСТРОЕК ==================== */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+
+    .tabs button {
+      border: 0;
+      background: transparent;
+      color: var(--mute);
+      padding: 9px 2px;
+      border-radius: 9px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      white-space: nowrap;
+    }
+
+    .tabs button.on {
+      background: var(--acc);
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(124, 92, 255, 0.35);
+    }
+
+    .tab-pane { display: none; flex-direction: column; gap: 12px; }
+    .tab-pane.on { display: flex; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-h {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-h h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .card-h span {
+      font-size: 11px;
+      color: var(--mute);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .seg {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 4px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 11px;
+      border: 1px solid var(--line);
+    }
+
+    .seg button {
+      border: 0;
+      background: transparent;
+      padding: 9px 4px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--mute);
+      cursor: pointer;
+      transition: 0.12s;
+    }
+
+    .seg button.on {
+      background: var(--ink);
+      color: #09090b;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .row > span {
+      flex: 0 0 112px;
+      font-size: 12px;
+      color: #c7cad8;
+      font-weight: 600;
+    }
+
+    .row input[type="range"] {
+      flex: 1;
+      accent-color: var(--acc);
+      cursor: pointer;
+      height: 26px;
+    }
+
+    .row output {
+      flex: 0 0 48px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 700;
+      color: #c4b5fd;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .row input[type="color"] {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: none;
+      cursor: pointer;
+    }
+
+    .chk {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .chk small {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--mute);
+    }
+
+    .ghost {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.12s;
+    }
+
+    .ghost:active { transform: scale(0.985); }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--mute);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .slot-btn {
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: #d4d6e3;
+      border-radius: 10px;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .slot-btn.on {
+      border-color: var(--acc);
+      background: rgba(124, 92, 255, 0.2);
+      color: #fff;
+    }
+
+    .divline {
+      height: 1px;
+      background: var(--line);
+      margin: 2px 0;
+    }
+
+    /* Кнопка экспорта и прогресс */
+    .export-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .go {
+      width: 100%;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      color: #fff;
+      border: 0;
+      border-radius: 13px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+      transition: 0.15s;
+    }
+
+    .go:active { transform: scale(0.985); }
+    .go:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .go.cancel { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); }
+
+    .pbox {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pbox.on { display: flex; }
+
+    .pmeta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      gap: 8px;
+    }
+
+    .pmeta b { color: #c4b5fd; font-variant-numeric: tabular-nums; }
+
+    .pbar {
+      width: 100%;
+      height: 10px;
+      border-radius: 99px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .pbar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--acc), var(--acc2));
+      transition: width 0.12s linear;
+    }
+
+    .res {
+      display: none;
+      background: var(--card);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 14px;
+      padding: 12px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .res.on { display: flex; }
+
+    .res video {
+      width: 100%;
+      max-height: 260px;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    .res a.dl {
+      display: block;
+      text-align: center;
+      background: var(--ink);
+      color: #09090b;
+      text-decoration: none;
+      font-weight: 800;
+      padding: 12px;
+      border-radius: 11px;
+    }
+
+    /* Авто-нарезка в ZIP */
+    .slice-info {
+      background: rgba(124, 92, 255, 0.12);
+      border: 1px solid rgba(124, 92, 255, 0.35);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #e4e4f4;
+    }
+
+    .slice-info b { color: #c4b5fd; }
+
+    .num-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .num-row > span {
+      flex: 0 0 112px;
+      font-size: 12px;
+      color: #c7cad8;
+      font-weight: 600;
+    }
+
+    .num-in {
+      width: 68px;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 7px 8px;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clip-list {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .clip-list.on { display: flex; }
+
+    .clip-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    .clip-item small {
+      color: var(--mute);
+      display: block;
+      font-size: 11px;
+    }
+
+    .clip-item a {
+      background: var(--soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* Условное отображение */
+    [data-for], [data-vo], [data-chroma-box], [data-slice-box], [data-plabel-box], [data-slice-custom] { display: none; }
+    body[data-mode="over"] [data-for="over"],
+    body[data-mode="stop"] [data-for="stop"] { display: flex; }
+    body[data-bv="1"] [data-vo] { display: flex; }
+    body[data-ckmode="chroma"] [data-chroma-box] { display: flex; }
+    body[data-slice="1"] [data-slice-box] { display: flex; }
+    body[data-plabel="1"] [data-plabel-box] { display: flex; }
+    body[data-slicewhen="custom"] [data-slice-custom] { display: flex; }
+    input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Блокировка настроек во время рендера */
+    body.exp .panel :is(.tabs, .tab-pane),
+    body.exp .media-cards {
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    /* Полноэкранный режим */
+    body.fs { overflow: hidden; }
+    body.fs header, body.fs .panel, body.fs .media-cards { display: none; }
+    body.fs .app { padding: 0; display: block; }
+    body.fs .stage {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      border: 0;
+      border-radius: 0;
+      background: #000;
+      justify-content: center;
+      padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+    }
+    body.fs .cvw canvas { max-height: calc(100dvh - 110px); }
+
+    /* Тосты */
+    #toastBox {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 99;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: min(92vw, 380px);
+    }
+
+    .toast {
+      background: rgba(24, 24, 33, 0.96);
+      border: 1px solid #3c3c4f;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .toast.ok { border-color: rgba(16, 185, 129, 0.55); color: #a7f3d0; }
+    .toast.err { border-color: rgba(239, 68, 68, 0.6); color: #fecaca; }
+
+    /* ==================== МОБИЛЬНАЯ АДАПТАЦИЯ ==================== */
+    @media (hover: none) { .dd { display: none; } }
+
+    @media (max-width: 900px) {
+      header { padding: max(8px, env(safe-area-inset-top)) 12px 8px; }
+      .brand h1 { font-size: 15px; }
+      .app {
+        grid-template-columns: 1fr;
+        padding: 0 0 max(26px, env(safe-area-inset-bottom));
+        gap: 10px;
+      }
+      .stage {
+        position: static;
+        border-radius: 0 0 18px 18px;
+        border-top: 0;
+        border-left: 0;
+        border-right: 0;
+        padding: 8px 10px 10px;
+      }
+      .drop { min-height: 210px; }
+      .cvw canvas { max-height: 50vh; max-height: 50dvh; }
+      .panel {
+        margin: 0 8px;
+        padding: 10px;
+        border-radius: 16px;
+      }
+      .row > span, .num-row > span { flex: 0 0 98px; }
+      .go { padding: 15px; }
+    }
+  </style>
+</head>
+<body data-mode="over" data-ckmode="none" data-bv="0" data-slice="0" data-plabel="0" data-slicewhen="middle">
+
+  <!-- ШАПКА -->
+  <header>
+    <div class="head-in">
+      <div class="brand">
+        <div class="logo">🎬</div>
+        <div style="min-width:0">
+          <h1>Баннер в видео <span class="badge" id="engineBadge">Оффлайн MP4</span></h1>
+          <div class="sub" id="saveHint">Настройки и баннер сохраняются автоматически</div>
+        </div>
+      </div>
+      <div class="head-actions">
+        <button class="btn-sm" id="resetBtn" type="button" title="Сбросить настройки">Сброс</button>
+        <button class="btn-sm pri" id="topExportBtn" type="button" disabled>Экспорт</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app" id="app">
+    <!-- СЦЕНА / ПРЕВЬЮ -->
+    <section class="stage">
+      <div class="stage-top">
+        <div class="stage-pills">
+          <span class="pill acc" id="modePill">Поверх</span>
+          <span class="pill" id="resPill">Нет видео</span>
+          <span class="pill slice-on" id="slicePill" style="display:none">✂️ ZIP</span>
+          <span class="pill warn" id="freezePill" style="display:none">⏸ СТОП-КАДР</span>
+        </div>
+
+        <div class="zone-sw" id="zoneSw">
+          <button type="button" data-z="none">Чисто</button>
+          <button type="button" data-z="reels">Reels</button>
+          <button type="button" data-z="shorts">Shorts</button>
+        </div>
+      </div>
+
+      <!-- Дроп-зона -->
+      <div class="drop" id="drop">
+        <div>
+          <b class="dd">Перетащи видео сюда</b>
+          <span class="dd">или выбери файл с телефона / ПК</span>
+          <div>
+            <label class="pick">
+              <span>📁 Выбрать видео</span>
+              <input id="vf" type="file" accept="video/*" hidden />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Канвас -->
+      <div class="cvw">
+        <canvas id="cv"></canvas>
+        <div class="pick-banner-tip">👆 Ткни по цвету фона на баннере</div>
+      </div>
+
+      <!-- Плеер и таймлайн -->
+      <div class="bar">
+        <button id="pp" class="play-btn" type="button">Пуск</button>
+        <div class="track">
+          <div class="track-bg">
+            <div id="sliceTicks"></div>
+            <div id="mark"></div>
+            <div id="progFill"></div>
+          </div>
+          <input id="seek" type="range" min="0" max="1000" value="0" />
+        </div>
+        <span id="tm">0:00 / 0:00</span>
+        <button id="fs" type="button">Экран</button>
+      </div>
+
+      <!-- Быстрый выбор видео и баннера -->
+      <div class="media-cards">
+        <label class="mcard" for="vf">
+          <div class="mthumb">🎥</div>
+          <div class="mmeta">
+            <b id="vName">Основное видео</b>
+            <small id="vMeta">Нажми, чтобы выбрать</small>
+          </div>
+        </label>
+
+        <div class="mcard" id="bCard">
+          <label for="bf" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer">
+            <div class="mthumb">
+              <span id="bIcon">🔥</span>
+              <img id="thumb" alt="" />
+            </div>
+            <div class="mmeta">
+              <b id="bn">Видео-баннер</b>
+              <small id="bMeta">MP4, MOV, WebM, PNG</small>
+            </div>
+          </label>
+          <input id="bf" type="file" accept="image/*,video/*" hidden />
+          <button type="button" class="clear-x" id="clearBannerBtn" title="Удалить баннер из памяти">✕</button>
+        </div>
+      </div>
+
+      <video id="v" playsinline webkit-playsinline preload="auto" hidden></video>
+    </section>
+
+    <!-- ПАНЕЛЬ НАСТРОЕК -->
+    <aside class="panel">
+      <div class="tabs" id="tabs">
+        <button type="button" data-tab="main" class="on">Режим</button>
+        <button type="button" data-tab="view">Вид</button>
+        <button type="button" data-tab="fx">Фон</button>
+        <button type="button" data-tab="slice">Нарезка</button>
+        <button type="button" data-tab="export">Экспорт</button>
+      </div>
+
+      <!-- ВКЛАДКА 1: РЕЖИМ И ВРЕМЯ -->
+      <div class="tab-pane on" id="pane-main">
+        <div class="card">
+          <div class="card-h">
+            <h3>Режим вставки</h3>
+            <span data-txt="modeShortHint">Видео идёт дальше</span>
+          </div>
+          <div class="seg" data-k="mode">
+            <button type="button" data-v="over">Поверх</button>
+            <button type="button" data-v="stop">Стоп</button>
+          </div>
+          <p class="hint" data-txt="modeHint"></p>
+
+          <div class="row" data-for="stop">
+            <span>Пауза (сек)</span>
+            <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
+            <output data-out="hold">3 с</output>
+          </div>
+          <div class="row" data-for="stop">
+            <span>Затемнение</span>
+            <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
+            <output data-out="stopDim">25%</output>
+          </div>
+          <div class="row" data-for="stop">
+            <span>Размытие фона</span>
+            <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
+            <output data-out="stopBlur">0 px</output>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Когда показать</h3>
+            <span id="t0Label">Старт: 0.0с</span>
+          </div>
+          <div class="seg" data-k="when">
+            <button type="button" data-v="start">Начало</button>
+            <button type="button" data-v="middle">Середина</button>
+            <button type="button" data-v="end">Конец</button>
+          </div>
+
+          <div class="btn-row">
+            <button class="ghost" type="button" id="now">📍 На текущий момент</button>
+            <button class="ghost" type="button" id="try">▶ Проверить момент</button>
+          </div>
+
+          <label class="chk" data-vo>
+            <span>Длина по ролику баннера<small>Показывает баннер от начала до конца</small></span>
+            <input type="checkbox" data-bind-chk="auto" checked />
+          </label>
+
+          <div class="row" data-for="over">
+            <span>Показывать</span>
+            <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
+            <output data-out="show">4 с</output>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Пресеты настроек</h3>
+            <span>Быстрое переключение</span>
+          </div>
+          <div class="slots" id="presetSlots">
+            <button type="button" class="slot-btn on" data-slot="1">Слот 1</button>
+            <button type="button" class="slot-btn" data-slot="2">Слот 2</button>
+            <button type="button" class="slot-btn" data-slot="3">Слот 3</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 2: РАЗМЕЩЕНИЕ И ВИД -->
+      <div class="tab-pane" id="pane-view">
+        <div class="card">
+          <div class="card-h">
+            <h3>Формат кадра (Shorts / Reels)</h3>
+            <span data-txt="aspectHint">Как в видео</span>
+          </div>
+          <div class="seg" data-k="aspect">
+            <button type="button" data-v="orig">Исходник</button>
+            <button type="button" data-v="v_crop">9:16 Кроп</button>
+            <button type="button" data-v="v_blur">9:16 Блюр</button>
+          </div>
+          <p class="hint">Превращает горизонтальное 16:9 видео с YouTube в вертикальный 1080×1920 для Shorts и Reels.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Размещение в кадре</h3>
+            <span data-txt="posCoords">X:50% Y:82%</span>
+          </div>
+          <div class="seg" data-k="pos">
+            <button type="button" data-v="top">Сверху</button>
+            <button type="button" data-v="center">По центру</button>
+            <button type="button" data-v="bottom">Снизу</button>
+          </div>
+          <p class="hint">Тяни баннер пальцем прямо по видео (есть магнит к центру), а за фиолетовую точку в углу меняй размер.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Размеры и стиль</h3>
+          </div>
+          <div class="row">
+            <span>Размер</span>
+            <input type="range" data-bind="scale" min="15" max="100" value="78" />
+            <output data-out="scale">78%</output>
+          </div>
+          <div class="row">
+            <span>Прозрачность</span>
+            <input type="range" data-bind="op" min="20" max="100" value="100" />
+            <output data-out="op">100%</output>
+          </div>
+          <div class="row">
+            <span>Скругление</span>
+            <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
+            <output data-out="rad">14 px</output>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Появление баннера</h3>
+          </div>
+          <div class="seg" data-k="anim">
+            <button type="button" data-v="fade">Плавно</button>
+            <button type="button" data-v="pop">Хлопок</button>
+            <button type="button" data-v="slide">Въезд</button>
+            <button type="button" data-v="none">Нет</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 3: ФОН / ХРОМАКЕЙ И ЗВУК -->
+      <div class="tab-pane" id="pane-fx">
+        <div class="card">
+          <div class="card-h">
+            <h3>Удаление фона баннера</h3>
+          </div>
+          <div class="seg" data-k="ckMode">
+            <button type="button" data-v="none">Обычный</button>
+            <button type="button" data-v="screen">Без чёрного</button>
+            <button type="button" data-v="chroma">Хромакей</button>
+          </div>
+          <p class="hint" data-txt="ckHint">«Без чёрного» идеально убирает чёрный фон у дроп-баннеров без потери свечения.</p>
+
+          <div class="row" data-chroma-box>
+            <span>Цвет + сила</span>
+            <input type="color" data-bind-color="kcol" value="#00ff00" />
+            <input type="range" data-bind="kt" min="5" max="100" value="40" />
+            <output data-out="kt">40</output>
+          </div>
+          <button class="ghost eye-btn" type="button" data-chroma-box>🎯 Пипетка: ткнуть цвет на экране</button>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Звук</h3>
+          </div>
+          <div class="row">
+            <span>Звук видео</span>
+            <input type="range" data-bind="vvol" min="0" max="100" step="5" value="100" />
+            <output data-out="vvol">100%</output>
+          </div>
+          <div class="row" data-vo>
+            <span>Звук баннера</span>
+            <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
+            <output data-out="bvol">100%</output>
+          </div>
+          <label class="chk" data-vo>
+            <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость ролика до 25%</small></span>
+            <input type="checkbox" data-bind-chk="duck" checked />
+          </label>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 4: АВТО-НАРЕЗКА В ZIP (ПОЛНЫЙ ФУНКЦИОНАЛ БАННЕРА) -->
+      <div class="tab-pane" id="pane-slice">
+        <div class="card">
+          <label class="chk">
+            <span>✂️ Авто-нарезка на клипы (ZIP)<small>Режет длинный ролик по минутам и вставляет баннер в каждый клип</small></span>
+            <input type="checkbox" id="sliceOn" />
+          </label>
+          <div class="slice-info" id="sliceSummary">
+            Включи авто-нарезку, чтобы загрузить длинное видео (например, 23 мин с YouTube) и получить готовые клипы с баннером в одном ZIP-архиве.
+          </div>
+        </div>
+
+        <!-- ПОЛНЫЕ НАСТРОЙКИ БАННЕРА ДЛЯ КАЖДОГО КЛИПА -->
+        <div class="card" data-slice-box>
+          <div class="card-h">
+            <h3>🔥 Как вставлять баннер в каждый клип</h3>
+            <span data-txt="modeShortHint">Видео идёт дальше</span>
+          </div>
+          <div class="seg" data-k="mode">
+            <button type="button" data-v="over">Поверх (по ходу)</button>
+            <button type="button" data-v="stop">Стоп (пауза)</button>
+          </div>
+          <p class="hint" data-txt="modeHint"></p>
+
+          <label class="chk" data-vo>
+            <span>Длина по ролику баннера<small>Показывает весь видео-баннер целиком</small></span>
+            <input type="checkbox" data-bind-chk="auto" checked />
+          </label>
+
+          <div class="row" data-for="over">
+            <span>Показывать</span>
+            <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
+            <output data-out="show">4 с</output>
+          </div>
+
+          <div class="row" data-for="stop">
+            <span>Пауза (сек)</span>
+            <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
+            <output data-out="hold">3 с</output>
+          </div>
+          <div class="row" data-for="stop">
+            <span>Затемнение</span>
+            <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
+            <output data-out="stopDim">25%</output>
+          </div>
+          <div class="row" data-for="stop">
+            <span>Размытие фона</span>
+            <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
+            <output data-out="stopBlur">0 px</output>
+          </div>
+
+          <div class="divline"></div>
+
+          <div class="card-h">
+            <h3>Когда внутри клипа</h3>
+            <span id="sliceWhenInfo">Середина клипа</span>
+          </div>
+          <div class="seg" data-k="sliceWhen">
+            <button type="button" data-v="start">Начало</button>
+            <button type="button" data-v="middle">Середина</button>
+            <button type="button" data-v="end">Конец</button>
+            <button type="button" data-v="custom">Своя сек</button>
+          </div>
+
+          <div class="row" data-slice-custom>
+            <span>На секунде</span>
+            <input id="sliceCustomSec" type="range" min="0" max="60" step="1" value="30" />
+            <output id="sliceCustomSecO">30 с</output>
+          </div>
+
+          <button class="ghost" type="button" id="trySlice">▶ Проверить клип с баннером в плеере</button>
+
+          <div class="divline"></div>
+
+          <div class="card-h">
+            <h3>Размещение и стиль</h3>
+            <span data-txt="posCoords">X:50% Y:82%</span>
+          </div>
+          <div class="seg" data-k="pos">
+            <button type="button" data-v="top">Сверху</button>
+            <button type="button" data-v="center">По центру</button>
+            <button type="button" data-v="bottom">Снизу</button>
+          </div>
+          <div class="row">
+            <span>Размер</span>
+            <input type="range" data-bind="scale" min="15" max="100" value="78" />
+            <output data-out="scale">78%</output>
+          </div>
+          <div class="row">
+            <span>Прозрачность</span>
+            <input type="range" data-bind="op" min="20" max="100" value="100" />
+            <output data-out="op">100%</output>
+          </div>
+          <div class="row">
+            <span>Скругление</span>
+            <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
+            <output data-out="rad">14 px</output>
+          </div>
+          <div class="seg" data-k="anim">
+            <button type="button" data-v="fade">Плавно</button>
+            <button type="button" data-v="pop">Хлопок</button>
+            <button type="button" data-v="slide">Въезд</button>
+            <button type="button" data-v="none">Нет</button>
+          </div>
+
+          <div class="divline"></div>
+
+          <div class="card-h">
+            <h3>Фон и звук баннера</h3>
+          </div>
+          <div class="seg" data-k="ckMode">
+            <button type="button" data-v="none">Обычный</button>
+            <button type="button" data-v="screen">Без чёрного</button>
+            <button type="button" data-v="chroma">Хромакей</button>
+          </div>
+          <div class="row" data-chroma-box>
+            <span>Цвет + сила</span>
+            <input type="color" data-bind-color="kcol" value="#00ff00" />
+            <input type="range" data-bind="kt" min="5" max="100" value="40" />
+            <output data-out="kt">40</output>
+          </div>
+          <button class="ghost eye-btn" type="button" data-chroma-box>🎯 Пипетка: ткнуть цвет на экране</button>
+          <div class="row" data-vo>
+            <span>Звук баннера</span>
+            <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
+            <output data-out="bvol">100%</output>
+          </div>
+          <label class="chk" data-vo>
+            <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость до 25%</small></span>
+            <input type="checkbox" data-bind-chk="duck" checked />
+          </label>
+        </div>
+
+        <!-- НАСТРОЙКИ САМОЙ НАРЕЗКИ -->
+        <div class="card" data-slice-box>
+          <div class="card-h">
+            <h3>Длина каждого клипа</h3>
+            <span id="sliceSecBadge">1 мин</span>
+          </div>
+          <div class="seg" data-k="sliceSecPreset">
+            <button type="button" data-v="30">30с</button>
+            <button type="button" data-v="45">45с</button>
+            <button type="button" data-v="60">1 мин</button>
+            <button type="button" data-v="90">1.5м</button>
+            <button type="button" data-v="180">3 мин</button>
+          </div>
+          <div class="row">
+            <span>Точно (сек)</span>
+            <input id="sliceSec" type="range" min="10" max="180" step="5" value="60" />
+            <output id="sliceSecO">60 с</output>
+          </div>
+          <div class="row">
+            <span>Пропуск интро</span>
+            <input id="sliceIntro" type="range" min="0" max="60" step="1" value="0" />
+            <output id="sliceIntroO">0 с</output>
+          </div>
+
+          <div class="divline"></div>
+
+          <div class="card-h">
+            <h3>Хвост и диапазон частей</h3>
+          </div>
+          <div class="seg" data-k="sliceTail">
+            <button type="button" data-v="merge">Склеить хвост</button>
+            <button type="button" data-v="keep">Отдельно</button>
+            <button type="button" data-v="drop">Убрать &lt;15с</button>
+          </div>
+          <p class="hint">«Склеить хвост» добавит короткий остаток (&lt;15с) к последнему ролику, чтобы не терять концовку.</p>
+
+          <div class="num-row">
+            <span>Части (от — до)</span>
+            <input id="sliceFrom" class="num-in" type="number" min="1" value="1" />
+            <span style="flex:0 0 auto;color:var(--mute)">—</span>
+            <input id="sliceTo" class="num-in" type="number" min="0" value="0" placeholder="Все" />
+            <button type="button" class="btn-sm" id="sliceAllBtn">Все</button>
+          </div>
+          <p class="hint">0 в поле «до» = все части до конца. Если видео на час — можно резать партиями по 15 штук.</p>
+        </div>
+
+        <!-- ФОРМАТ И ПОДПИСЬ ЧАСТЕЙ -->
+        <div class="card" data-slice-box>
+          <div class="card-h">
+            <h3>Формат 9:16 и подпись «Часть 1»</h3>
+          </div>
+          <div class="seg" data-k="aspect">
+            <button type="button" data-v="orig">Исходник</button>
+            <button type="button" data-v="v_crop">9:16 Кроп</button>
+            <button type="button" data-v="v_blur">9:16 Блюр</button>
+          </div>
+          <div class="seg" data-k="partLabel">
+            <button type="button" data-v="none">Без текста</button>
+            <button type="button" data-v="short">Часть 1</button>
+            <button type="button" data-v="total">Часть 1/23</button>
+          </div>
+          <div class="seg" data-k="partLabelPos" data-plabel-box>
+            <button type="button" data-v="top">Подпись сверху</button>
+            <button type="button" data-v="bottom">Подпись снизу</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 5: ПАРАМЕТРЫ ЭКСПОРТА -->
+      <div class="tab-pane" id="pane-export">
+        <div class="card">
+          <div class="card-h">
+            <h3>Качество и FPS</h3>
+            <span>MP4 (H.264 + AAC)</span>
+          </div>
+          <div class="seg" data-k="q">
+            <button type="button" data-v="max">Макс</button>
+            <button type="button" data-v="hi">1080p</button>
+            <button type="button" data-v="mid">720p</button>
+            <button type="button" data-v="lo">Лёгкое</button>
+          </div>
+          <div class="seg" data-k="fps">
+            <button type="button" data-v="auto">Как в видео</button>
+            <button type="button" data-v="30">30 FPS</button>
+            <button type="button" data-v="60">60 FPS</button>
+          </div>
+          <p class="hint">Оффлайн-рендер собирает MP4 покадрово на устройстве без записи экрана — подходит для YouTube Shorts, Instagram Reels и TikTok.</p>
+        </div>
+
+        <div class="card">
+          <label class="chk">
+            <span>Запоминать файл баннера<small>При открытии сайта баннер подгрузится сам</small></span>
+            <input type="checkbox" id="saveBanner" checked />
+          </label>
+        </div>
+      </div>
+
+      <!-- БЛОК ЗАПУСКА РЕНДЕРА -->
+      <div class="export-wrap">
+        <button class="go" id="go" type="button" disabled>🚀 Собрать MP4 (оффлайн-рендер)</button>
+
+        <div class="pbox" id="pbox">
+          <div class="pmeta">
+            <span id="pStatus">Подготовка оффлайн-рендера...</span>
+            <b id="pPct">0%</b>
+          </div>
+          <div class="pbar"><div class="pbar-fill" id="pFill"></div></div>
+          <div class="pmeta" style="color:var(--mute);font-size:11px">
+            <span id="pDetail">Кадры: 0 / 0</span>
+            <span id="pSpeed">—</span>
+          </div>
+        </div>
+
+        <div class="res" id="res">
+          <div class="card-h">
+            <h3 id="resTitle" style="color:#6ee7b7">✅ Видео готово</h3>
+            <span id="resMeta"></span>
+          </div>
+          <video id="outPreview" controls playsinline webkit-playsinline></video>
+          <a id="dl" class="dl" href="#">Скачать .mp4</a>
+          <div class="clip-list" id="clipList"></div>
+          <div class="btn-row">
+            <button class="ghost" type="button" id="sh" hidden>📤 Поделиться</button>
+            <button class="ghost" type="button" id="nextVidBtn">🎥 Следующий ролик</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toastBox"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+      const v = $('#v');
+      const cv = $('#cv');
+      const ctx = cv.getContext('2d', { alpha: false });
+
+      /* =====================================================================
+       * 1. НАСТРОЙКИ, СЛОТЫ ПРЕСЕТОВ И ПАМЯТЬ (localStorage + IndexedDB)
+       * ===================================================================== */
+      const STORE_PREFIX = 'bannerdrop_pro_slot_';
+      const ACTIVE_SLOT_KEY = 'bannerdrop_pro_active_slot';
+      const DB_NAME = 'BannerDropProDB';
+      const DB_STORE = 'banners';
+      const BANNER_DB_KEY = 'current_banner';
+
+      const DEFAULT_S = {
+        mode: 'over',
+        pos: 'bottom',
+        when: 'middle',
+        x: 0.5,
+        y: 0.78,
+        t0: 0,
+        show: 4,
+        hold: 3,
+        stopDim: 0.25,
+        stopBlur: 0,
+        scale: 0.78,
+        op: 1,
+        rad: 14,
+        anim: 'pop',
+        ckMode: 'none',
+        kcol: '#00ff00',
+        kt: 40,
+        auto: true,
+        vvol: 1,
+        bvol: 1,
+        duck: true,
+        safeZone: 'none',
+        aspect: 'orig',
+        sliceOn: false,
+        sliceSec: 60,
+        sliceWhen: 'middle',
+        sliceCustomSec: 30,
+        sliceTail: 'merge',
+        sliceIntro: 0,
+        sliceFrom: 1,
+        sliceTo: 0,
+        partLabel: 'none',
+        partLabelPos: 'top',
+        q: 'hi',
+        fps: 'auto',
+        saveBanner: true
+      };
+
+      let activeSlot = localStorage.getItem(ACTIVE_SLOT_KEY) || '1';
+      let S = { ...DEFAULT_S };
+
+      function loadSlot(slot) {
+        activeSlot = String(slot);
+        try {
+          localStorage.setItem(ACTIVE_SLOT_KEY, activeSlot);
+          const raw = localStorage.getItem(STORE_PREFIX + activeSlot);
+          S = raw ? { ...DEFAULT_S, ...JSON.parse(raw) } : { ...DEFAULT_S };
+          if (S.when === 'custom') S.when = 'middle';
+        } catch (e) {
+          S = { ...DEFAULT_S };
+        }
+        $$('#presetSlots button').forEach(b => b.classList.toggle('on', b.dataset.slot === activeSlot));
+        syncInputs();
+        if (D()) { timing(); place(); }
+        ui(false);
+      }
+
+      function persistSettings(flash = true) {
+        try {
+          localStorage.setItem(STORE_PREFIX + activeSlot, JSON.stringify(S));
+          if (flash) {
+            const el = $('#saveHint');
+            if (!el) return;
+            el.textContent = `✓ Слот ${activeSlot} сохранён`;
+            el.style.color = '#6ee7b7';
+            clearTimeout(persistSettings._t);
+            persistSettings._t = setTimeout(() => {
+              el.textContent = 'Настройки и баннер сохраняются автоматически';
+              el.style.color = '';
+            }, 1300);
+          }
+        } catch (_) {}
+      }
+
+      function openDB() {
+        return new Promise((res, rej) => {
+          if (!window.indexedDB) return rej(new Error('No IDB'));
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            if (!req.result.objectStoreNames.contains(DB_STORE)) {
+              req.result.createObjectStore(DB_STORE);
+            }
+          };
+          req.onsuccess = () => res(req.result);
+          req.onerror = () => rej(req.error);
+        });
+      }
+
+      async function saveBannerToDB(file) {
+        if (!S.saveBanner || !file) return;
+        try {
+          const db = await openDB();
+          await new Promise((res, rej) => {
+            const tx = db.transaction(DB_STORE, 'readwrite');
+            tx.objectStore(DB_STORE).put({ blob: file, name: file.name, type: file.type }, BANNER_DB_KEY);
+            tx.oncomplete = res;
+            tx.onerror = () => rej(tx.error);
+          });
+        } catch (_) {}
+      }
+
+      async function loadBannerFromDB() {
+        try {
+          const db = await openDB();
+          return await new Promise((res, rej) => {
+            const tx = db.transaction(DB_STORE, 'readonly');
+            const r = tx.objectStore(DB_STORE).get(BANNER_DB_KEY);
+            r.onsuccess = () => res(r.result || null);
+            r.onerror = () => rej(r.error);
+          });
+        } catch (_) {
+          return null;
+        }
+      }
+
+      async function deleteBannerFromDB() {
+        try {
+          const db = await openDB();
+          await new Promise((res) => {
+            const tx = db.transaction(DB_STORE, 'readwrite');
+            tx.objectStore(DB_STORE).delete(BANNER_DB_KEY);
+            tx.oncomplete = res;
+            tx.onerror = res;
+          });
+        } catch (_) {}
+      }
+
+      /* =====================================================================
+       * 2. ТОСТ-УВЕДОМЛЕНИЯ
+       * ===================================================================== */
+      function toast(msg, kind = '') {
+        const box = $('#toastBox');
+        const el = document.createElement('div');
+        el.className = 'toast ' + kind;
+        el.textContent = msg;
+        box.innerHTML = '';
+        box.appendChild(el);
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.25s';
+          setTimeout(() => el.remove(), 260);
+        }, 2700);
+      }
+
+      /* =====================================================================
+       * 3. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
+       * ===================================================================== */
+      let vfile = null;
+      let bfile = null;
+      let img = null;
+      let burl = null;
+      let bwas = false;
+
+      let hold = null;
+      let heldKey = null;
+      let exporting = false;
+      let cancelled = false;
+      let wakeLock = null;
+      let outObjectUrl = null;
+      let clipUrls = [];
+
+      let drag = null;
+      let snapX = false;
+      let snapY = false;
+      let eyedropActive = false;
+
+      let actx = null, asrc = null, again = null, adest = null;
+
+      const BR = { max: 16_000_000, hi: 9_000_000, mid: 4_500_000, lo: 2_400_000 };
+      const CAP = { max: 3840, hi: 1920, mid: 1280, lo: 960 };
+
+      const D = () => (v.duration && isFinite(v.duration) ? v.duration : 0);
+      const isV = () => img instanceof HTMLVideoElement;
+      const dims = () => {
+        if (!img) return [16, 9];
+        return isV() ? [img.videoWidth || 16, img.videoHeight || 9] : [img.naturalWidth || 16, img.naturalHeight || 9];
+      };
+      const okDur = () => S.auto && isV() && isFinite(img.duration) && img.duration > 0.1;
+      const SH = () => (okDur() ? img.duration : S.show);
+      const HD = () => (okDur() ? img.duration : S.hold);
+      const fmt = (t) => {
+        t = Math.max(0, t || 0);
+        return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+      };
+
+      function setPreviewRes() {
+        if (!v.videoWidth || !v.videoHeight) return;
+        if (S.aspect === 'v_crop' || S.aspect === 'v_blur') {
+          cv.width = 608;
+          cv.height = 1080;
+        } else {
+          const k = Math.min(1, 1080 / Math.max(v.videoWidth, v.videoHeight));
+          cv.width = Math.max(2, Math.round(v.videoWidth * k) & ~1);
+          cv.height = Math.max(2, Math.round(v.videoHeight * k) & ~1);
+        }
+      }
+
+      function computeOutputRes(srcW, srcH) {
+        if (S.aspect === 'v_crop' || S.aspect === 'v_blur') {
+          if (S.q === 'lo') return { w: 540, h: 960 };
+          if (S.q === 'mid') return { w: 720, h: 1280 };
+          if (S.q === 'max' && Math.max(srcW, srcH) >= 2160) return { w: 1440, h: 2560 };
+          return { w: 1080, h: 1920 };
+        }
+        const cap = CAP[S.q] || 1920;
+        const k = Math.min(1, cap / Math.max(srcW, srcH));
+        return {
+          w: Math.max(2, Math.round(srcW * k) & ~1),
+          h: Math.max(2, Math.round(srcH * k) & ~1)
+        };
+      }
+
+      function computeSlicePlan(totalDur) {
+        if (!totalDur || totalDur <= 0.5) return { all: [], selected: [], totalParts: 0 };
+        const intro = Math.min(Math.max(0, Number(S.sliceIntro) || 0), Math.max(0, totalDur - 2));
+        const step = Math.max(10, Number(S.sliceSec) || 60);
+        const all = [];
+        let cur = intro;
+
+        while (cur < totalDur - 0.3) {
+          const rem = totalDur - cur;
+          if (all.length > 0 && rem < 15) {
+            if (S.sliceTail === 'merge') {
+              all[all.length - 1].end = totalDur;
+              all[all.length - 1].dur = totalDur - all[all.length - 1].start;
+              break;
+            } else if (S.sliceTail === 'drop') {
+              break;
+            }
+          }
+          const end = Math.min(totalDur, cur + step);
+          all.push({ index: all.length + 1, start: cur, end, dur: end - cur });
+          cur = end;
+        }
+
+        const totalParts = all.length;
+        all.forEach(item => { item.total = totalParts; });
+
+        const from = Math.max(1, Math.min(totalParts || 1, parseInt(S.sliceFrom, 10) || 1));
+        const rawTo = parseInt(S.sliceTo, 10) || 0;
+        const to = rawTo > 0 ? Math.max(from, Math.min(totalParts, rawTo)) : totalParts;
+        const selected = all.filter(c => c.index >= from && c.index <= to);
+        return { all, selected, totalParts, from, to };
+      }
+
+      function computeClipBannerT0(segDur) {
+        const bDur = img ? Math.min(S.mode === 'stop' ? HD() : SH(), S.mode === 'stop' ? 60 : segDur) : 0;
+        if (S.sliceWhen === 'start') return 0;
+        if (S.sliceWhen === 'end') {
+          return S.mode === 'stop' ? Math.max(0, segDur - 0.15) : Math.max(0, segDur - bDur);
+        }
+        if (S.sliceWhen === 'custom') {
+          const raw = Math.max(0, Number(S.sliceCustomSec) || 0);
+          return S.mode === 'stop'
+            ? Math.min(raw, Math.max(0, segDur - 0.15))
+            : Math.min(raw, Math.max(0, segDur - Math.min(bDur, segDur)));
+        }
+        return S.mode === 'stop' ? segDur / 2 : Math.max(0, (segDur - bDur) / 2);
+      }
+
+      function formatPartBadgeText(index, total) {
+        if (S.partLabel === 'none') return '';
+        if (S.partLabel === 'total') return `ЧАСТЬ ${index} / ${total}`;
+        return `ЧАСТЬ ${index}`;
+      }
+
+      function getPreviewClipContext(ct, totalDur) {
+        if (!S.sliceOn || !totalDur) {
+          return { key: 'single', triggerT: S.t0, segDur: totalDur || 1, partText: '' };
+        }
+        const plan = computeSlicePlan(totalDur);
+        if (!plan.all.length) {
+          return { key: 'single', triggerT: S.t0, segDur: totalDur, partText: formatPartBadgeText(1, 1) };
+        }
+        const seg = plan.all.find(c => ct >= c.start && ct < c.end) || (ct < plan.all[0].start ? plan.all[0] : plan.all[plan.all.length - 1]);
+        const localT0 = computeClipBannerT0(seg.dur);
+        return {
+          key: 'clip_' + seg.index,
+          seg,
+          triggerT: seg.start + localT0,
+          segDur: seg.dur,
+          partText: formatPartBadgeText(seg.index, plan.totalParts)
+        };
+      }
+
+      /* =====================================================================
+       * 4. АУДИО ПРЕВЬЮ
+       * ===================================================================== */
+      function ensurePreviewAudio() {
+        try {
+          if (!actx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            actx = new AC();
+            asrc = actx.createMediaElementSource(v);
+            again = actx.createGain();
+            adest = actx.createMediaStreamDestination();
+            asrc.connect(again);
+            again.connect(actx.destination);
+            again.connect(adest);
+          }
+          if (isV() && !img._src) {
+            img._src = actx.createMediaElementSource(img);
+            img._gain = actx.createGain();
+            img._src.connect(img._gain);
+            img._gain.connect(actx.destination);
+            img._gain.connect(adest);
+          }
+          if (actx.state === 'suspended') actx.resume().catch(() => {});
+        } catch (_) {}
+      }
+
+      function applyPreviewVolumes(bannerLive) {
+        const duckFactor = (S.mode === 'over' && bannerLive && S.duck && isV() && S.bvol > 0) ? 0.25 : 1;
+        const mv = Math.max(0, Math.min(1, S.vvol * duckFactor));
+        const bv = Math.max(0, Math.min(1, S.bvol));
+        if (actx && again) {
+          again.gain.setTargetAtTime(mv, actx.currentTime, 0.02);
+          if (isV() && img._gain) img._gain.gain.setTargetAtTime(bv, actx.currentTime, 0.02);
+        } else {
+          v.volume = mv;
+          if (isV()) img.volume = bv;
+        }
+      }
+
+      /* =====================================================================
+       * 5. ПОЛОЖЕНИЕ, ТАЙМИНГ И СИНХРОНИЗАЦИЯ UI
+       * ===================================================================== */
+      function place() {
+        if (S.pos === 'custom') return;
+        const [bw, bh] = dims();
+        const hf = (img && cv.height) ? Math.min(0.85, (cv.width * S.scale * bh / Math.max(1, bw)) / cv.height) : 0.14;
+        const margin = 0.05;
+        S.x = 0.5;
+        if (S.pos === 'top') S.y = Math.min(0.5, margin + hf / 2 + 0.08);
+        else if (S.pos === 'bottom') S.y = Math.max(0.5, 1 - margin - hf / 2 - 0.12);
+        else S.y = 0.5;
+      }
+
+      function timing() {
+        const d = D();
+        if (!d) return;
+        if (S.when === 'custom') {
+          S.t0 = Math.min(Math.max(0, S.t0), Math.max(0, d - 0.15));
+          return;
+        }
+        const over = S.mode === 'over';
+        const dur = over ? SH() : HD();
+        if (S.when === 'start') S.t0 = 0;
+        else if (S.when === 'middle') S.t0 = Math.max(0, over ? (d - dur) / 2 : d / 2);
+        else S.t0 = Math.max(0, over ? d - dur : d - 0.15);
+      }
+
+      const BIND_SCALE = { stopDim: 100, scale: 100, op: 100, vvol: 100, bvol: 100 };
+
+      function syncInputs() {
+        $$('input[data-bind]').forEach(el => {
+          const k = el.dataset.bind;
+          const mult = BIND_SCALE[k] || 1;
+          el.value = mult === 1 ? S[k] : Math.round(S[k] * mult);
+        });
+        $$('input[data-bind-chk]').forEach(el => { el.checked = !!S[el.dataset.bindChk]; });
+        $$('input[data-bind-color]').forEach(el => { el.value = S[el.dataset.bindColor]; });
+        $('#saveBanner').checked = !!S.saveBanner;
+        $('#sliceOn').checked = !!S.sliceOn;
+        $('#sliceSec').value = S.sliceSec;
+        $('#sliceIntro').value = S.sliceIntro;
+        $('#sliceFrom').value = S.sliceFrom || 1;
+        $('#sliceTo').value = S.sliceTo || 0;
+        const scEl = $('#sliceCustomSec');
+        scEl.max = String(Math.max(10, S.sliceSec));
+        if (S.sliceCustomSec > S.sliceSec) S.sliceCustomSec = Math.floor(S.sliceSec / 2);
+        scEl.value = S.sliceCustomSec;
+      }
+
+      function updateTimelineDecor() {
+        const d = D();
+        const ticks = $('#sliceTicks');
+        const m = $('#mark');
+        if (!d) {
+          ticks.innerHTML = '';
+          m.style.width = '0%';
+          return;
+        }
+        if (S.sliceOn) {
+          const plan = computeSlicePlan(d);
+          ticks.innerHTML = plan.all
+            .slice(0, 60)
+            .map(c => `<i style="left:${Math.min(100, (c.start / d) * 100).toFixed(2)}%"></i>`)
+            .join('');
+          const curCtx = getPreviewClipContext(v.currentTime || 0, d);
+          m.style.left = Math.min(100, (curCtx.triggerT / d) * 100) + '%';
+          m.style.width = S.mode === 'over' ? Math.min(100, (Math.min(SH(), curCtx.segDur) / d) * 100) + '%' : '6px';
+        } else {
+          ticks.innerHTML = '';
+          m.style.left = Math.min(100, (S.t0 / d) * 100) + '%';
+          m.style.width = S.mode === 'over' ? Math.min(100, (SH() / d) * 100) + '%' : '6px';
+        }
+      }
+
+      function ui(save = true) {
+        document.body.dataset.mode = S.mode;
+        document.body.dataset.ckmode = S.ckMode;
+        document.body.dataset.slice = S.sliceOn ? '1' : '0';
+        document.body.dataset.plabel = S.partLabel !== 'none' ? '1' : '0';
+        document.body.dataset.slicewhen = S.sliceWhen;
+
+        $$('.seg').forEach(g => {
+          const k = g.dataset.k;
+          const val = k === 'sliceSecPreset' ? String(S.sliceSec) : String(S[k]);
+          $$('button', g).forEach(b => b.classList.toggle('on', val === b.dataset.v));
+        });
+
+        $$('#zoneSw button').forEach(b => b.classList.toggle('on', b.dataset.z === S.safeZone));
+
+        const modeShortTxt = S.mode === 'stop' ? 'Видео замирает' : 'Видео идёт дальше';
+        const modeHintTxt = S.mode === 'over'
+          ? 'Баннер накладывается по ходу ролика — видео не останавливается.'
+          : 'Видео ставится на паузу на текущем кадре, пока полностью не пройдёт баннер.';
+        const aspectTxt = S.aspect === 'orig' ? 'Как в видео' : (S.aspect === 'v_crop' ? '9:16 Обрезка' : '9:16 Блюр-фон');
+        const ckHintTxt = S.ckMode === 'screen'
+          ? '«Без чёрного» убирает чёрную подложку (режим Screen) — идеально для дроп-баннеров с неоном.'
+          : S.ckMode === 'chroma'
+            ? 'Хромакей вырезает выбранный цвет (зелёный, синий, белый и др.). Удобно наводить пипеткой.'
+            : 'Баннер отображается как есть (прозрачные PNG и WebM поддерживаются автоматически).';
+        const posTxt = `X:${Math.round(S.x * 100)}% Y:${Math.round(S.y * 100)}%`;
+
+        $('#modePill').textContent = S.mode === 'stop' ? 'Стоп-кадр' : 'Поверх';
+        $$('[data-txt="modeShortHint"]').forEach(e => e.textContent = modeShortTxt);
+        $$('[data-txt="modeHint"]').forEach(e => e.textContent = modeHintTxt);
+        $$('[data-txt="aspectHint"]').forEach(e => e.textContent = aspectTxt);
+        $$('[data-txt="ckHint"]').forEach(e => e.textContent = ckHintTxt);
+        $$('[data-txt="posCoords"]').forEach(e => e.textContent = posTxt);
+
+        const outMap = {
+          hold: +HD().toFixed(1) + ' с',
+          show: +SH().toFixed(1) + ' с',
+          stopDim: Math.round(S.stopDim * 100) + '%',
+          stopBlur: S.stopBlur + ' px',
+          scale: Math.round(S.scale * 100) + '%',
+          op: Math.round(S.op * 100) + '%',
+          rad: S.rad + ' px',
+          kt: String(S.kt),
+          vvol: Math.round(S.vvol * 100) + '%',
+          bvol: Math.round(S.bvol * 100) + '%'
+        };
+        $$('output[data-out]').forEach(o => {
+          if (outMap[o.dataset.out] !== undefined) o.textContent = outMap[o.dataset.out];
+        });
+
+        $('#t0Label').textContent = `Старт: ${S.t0.toFixed(1)}с`;
+        $('#sliceSecO').textContent = S.sliceSec + ' с';
+        $('#sliceSecBadge').textContent = S.sliceSec >= 60 && S.sliceSec % 60 === 0 ? `${S.sliceSec / 60} мин` : `${S.sliceSec} сек`;
+        $('#sliceIntroO').textContent = S.sliceIntro + ' с';
+
+        const scEl = $('#sliceCustomSec');
+        scEl.max = String(Math.max(10, S.sliceSec));
+        if (S.sliceCustomSec > S.sliceSec) {
+          S.sliceCustomSec = Math.floor(S.sliceSec / 2);
+          scEl.value = S.sliceCustomSec;
+        }
+        $('#sliceCustomSecO').textContent = S.sliceCustomSec + ' с';
+        $('#sliceWhenInfo').textContent = S.sliceWhen === 'start'
+          ? 'В начале клипа (0с)'
+          : S.sliceWhen === 'end'
+            ? 'В конце клипа'
+            : S.sliceWhen === 'custom'
+              ? `На ${S.sliceCustomSec}-й сек`
+              : 'В середине клипа';
+
+        const locked = okDur();
+        $$('input[data-bind="show"], input[data-bind="hold"]').forEach(el => { el.disabled = locked; });
+
+        updateTimelineDecor();
+
+        const d = D();
+        const plan = computeSlicePlan(d);
+        const slicePill = $('#slicePill');
+        const modeWord = S.mode === 'stop' ? `Стоп-пауза (${+HD().toFixed(1)}с)` : `Поверх (${+SH().toFixed(1)}с)`;
+        const posWord = S.pos === 'top' ? 'сверху' : S.pos === 'center' ? 'по центру' : S.pos === 'bottom' ? 'снизу' : 'своя позиция';
+        const whenTxt = S.sliceWhen === 'start'
+          ? 'в начале'
+          : S.sliceWhen === 'end'
+            ? 'в конце'
+            : S.sliceWhen === 'custom'
+              ? `на ${S.sliceCustomSec}с`
+              : 'в середине';
+
+        if (S.sliceOn) {
+          if (d && plan.selected.length > 0) {
+            const totalClipSec = plan.selected.reduce((a, c) => a + c.dur + (S.mode === 'stop' && img ? HD() : 0), 0);
+            const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 9e6) + 128000)) / 8 / 1048576));
+            const ramWarn = estMb > 600
+              ? `<br><span style="color:#fcd34d">⚠️ Большой архив (~${estMb} МБ) — на телефоне лучше резать по 10–12 частей или выбрать 720p.</span>`
+              : '';
+            $('#sliceSummary').innerHTML = `<b>${plan.selected.length} из ${plan.totalParts} клипов</b> по ~${S.sliceSec}с • Режим: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Около <b>~${estMb} МБ</b> в ZIP.${ramWarn}`;
+            slicePill.style.display = 'inline-block';
+            slicePill.textContent = `✂️ ${plan.selected.length} кл. ZIP`;
+            if (!exporting) {
+              $('#go').textContent = `📦 Нарезать ${plan.selected.length} клипов в ZIP`;
+              $('#topExportBtn').textContent = `ZIP (${plan.selected.length})`;
+            }
+          } else {
+            $('#sliceSummary').innerHTML = `Режим нарезки активен: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Загрузи длинное видео — здесь сразу появится точное число клипов.`;
+            slicePill.style.display = 'inline-block';
+            slicePill.textContent = '✂️ Режим ZIP';
+            if (!exporting) {
+              $('#go').textContent = '📦 Нарезать в ZIP';
+              $('#topExportBtn').textContent = 'ZIP';
+            }
+          }
+        } else {
+          $('#sliceSummary').textContent = 'Включи авто-нарезку, чтобы загрузить длинное видео (например, 23 мин с YouTube) и получить готовые клипы с баннером в одном ZIP-архиве.';
+          slicePill.style.display = 'none';
+          if (!exporting) {
+            $('#go').textContent = '🚀 Собрать MP4 (оффлайн-рендер)';
+            $('#topExportBtn').textContent = 'Экспорт';
+          }
+        }
+
+        if (save) persistSettings(true);
+      }
+
+      /* =====================================================================
+       * 6. ЗАГРУЗКА ФАЙЛОВ
+       * ===================================================================== */
+      const pf = () => {
+        if (isV() && isFinite(img.duration) && img.duration > 0) {
+          img.currentTime = Math.min(0.5, img.duration * 0.35);
+        }
+      };
+
+      function loadVideo(f) {
+        if (!f || exporting) return;
+        if (!f.type.startsWith('video/') && !/\.(mp4|mov|webm|mkv|m4v)$/i.test(f.name)) {
+          toast('Выбери видеофайл (MP4, MOV, WebM)', 'err');
+          return;
+        }
+        if (v.src && v.src.startsWith('blob:')) URL.revokeObjectURL(v.src);
+        vfile = f;
+        v.src = URL.createObjectURL(f);
+        v.load();
+        $('#vName').textContent = f.name;
+        $('#vMeta').textContent = `${(f.size / 1048576).toFixed(1)} МБ`;
+      }
+
+      v.addEventListener('loadedmetadata', () => {
+        setPreviewRes();
+        $('#app').classList.add('has');
+        $('#go').disabled = false;
+        $('#topExportBtn').disabled = false;
+        $('#resPill').textContent = `${v.videoWidth}×${v.videoHeight}`;
+        $('#vMeta').textContent = `${fmt(v.duration)} • ${(vfile.size / 1048576).toFixed(1)} МБ`;
+        heldKey = null;
+        hold = null;
+        timing();
+        place();
+        ui(false);
+        toast('Видео загружено', 'ok');
+      });
+
+      function loadBanner(f, fromDB = false) {
+        if (!f || exporting) return;
+        const isVid = (f.type || '').startsWith('video/') || /\.(mp4|mov|webm|m4v)$/i.test(f.name || '');
+        const url = URL.createObjectURL(f);
+        const el = isVid ? document.createElement('video') : new Image();
+
+        const ready = () => {
+          if (isV()) { img.pause(); img.remove(); }
+          if (burl) URL.revokeObjectURL(burl);
+          burl = url;
+          img = el;
+          bfile = f;
+          bwas = false;
+
+          if (isVid) {
+            el.playsInline = true;
+            el.setAttribute('webkit-playsinline', '');
+            el.muted = false;
+            el.hidden = true;
+            document.body.appendChild(el);
+            pf();
+            $('#thumb').style.display = 'none';
+            $('#bIcon').style.display = 'block';
+            $('#bIcon').textContent = '🎞️';
+            $('#bMeta').textContent = `${(el.duration || 0).toFixed(1)}с • видео-баннер`;
+          } else {
+            $('#thumb').src = url;
+            $('#thumb').style.display = 'block';
+            $('#bIcon').style.display = 'none';
+            $('#bMeta').textContent = `${el.naturalWidth}×${el.naturalHeight} • картинка`;
+          }
+
+          $('#bn').textContent = f.name || 'Сохранённый баннер';
+          $('#clearBannerBtn').style.display = 'grid';
+          document.body.dataset.bv = isVid ? '1' : '0';
+
+          heldKey = null;
+          timing();
+          place();
+          ui(false);
+
+          if (!fromDB) {
+            saveBannerToDB(f);
+            toast(S.saveBanner ? 'Баннер загружен и запомнен' : 'Баннер загружен', 'ok');
+          }
+        };
+
+        el.onerror = () => toast('Не удалось открыть файл баннера', 'err');
+        if (isVid) {
+          el.preload = 'auto';
+          el.onloadeddata = ready;
+        } else {
+          el.onload = ready;
+        }
+        el.src = url;
+      }
+
+      /* =====================================================================
+       * 7. ХРОМАКЕЙ И ОТРИСОВКА КАДРА (ПРЕВЬЮ + ОФФЛАЙН-РЕНДЕР)
+       * ===================================================================== */
+      const kc = document.createElement('canvas');
+      const kx = kc.getContext('2d', { willReadFrequently: true });
+
+      function applyChromaToSource(source, srcW, srcH) {
+        const k = Math.min(1, 520 / Math.max(1, srcW));
+        const w = Math.max(2, Math.round(srcW * k));
+        const h = Math.max(2, Math.round(srcH * k));
+        if (kc.width !== w || kc.height !== h) { kc.width = w; kc.height = h; }
+        kx.clearRect(0, 0, w, h);
+        kx.drawImage(source, 0, 0, w, h);
+
+        const d = kx.getImageData(0, 0, w, h);
+        const p = d.data;
+        const c = parseInt(S.kcol.slice(1), 16);
+        const R = (c >> 16) & 255, G = (c >> 8) & 255, B = c & 255;
+        const t = S.kt * 2.8, feather = 60;
+
+        for (let i = 0; i < p.length; i += 4) {
+          const dr = p[i] - R, dg = p[i + 1] - G, db = p[i + 2] - B;
+          const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+          if (dist < t) p[i + 3] = 0;
+          else if (dist < t + feather) p[i + 3] = Math.round(p[i + 3] * (dist - t) / feather);
+        }
+        kx.putImageData(d, 0, 0);
+        return kc;
+      }
+
+      function roundRectPath(c, x, y, w, h, r) {
+        const rr = Math.min(r, w / 2, h / 2);
+        c.beginPath();
+        c.moveTo(x + rr, y);
+        c.lineTo(x + w - rr, y);
+        c.quadraticCurveTo(x + w, y, x + w, y + rr);
+        c.lineTo(x + w, y + h - rr);
+        c.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+        c.lineTo(x + rr, y + h);
+        c.quadraticCurveTo(x, y + h, x, y + h - rr);
+        c.lineTo(x, y + rr);
+        c.quadraticCurveTo(x, y, x + rr, y);
+        c.closePath();
+      }
+
+      function calcBannerRect(W, H, bw, bh) {
+        let w = W * S.scale;
+        let h = w * (bh / Math.max(1, bw));
+        const maxH = H * 0.88;
+        if (h > maxH) {
+          h = maxH;
+          w = h * (bw / Math.max(1, bh));
+        }
+        const cx = S.x * W;
+        const cy = S.y * H;
+        return { x: cx - w / 2, y: cy - h / 2, w, h, cx, cy };
+      }
+
+      function calcAnimFactor(localT, totalT) {
+        if (S.anim === 'none') return 1;
+        const f = Math.min(0.32, totalT / 3);
+        return Math.max(0, Math.min(1, localT / Math.max(0.01, f), (totalT - localT) / Math.max(0.01, f)));
+      }
+
+      function drawMainLayer(targetCtx, src, W, H, aspect, isFrozen, skipAspect) {
+        if (!src) return;
+        const sw = src.videoWidth || src.naturalWidth || src.width || W;
+        const sh = src.videoHeight || src.naturalHeight || src.height || H;
+
+        targetCtx.save();
+        if (isFrozen && S.stopBlur > 0) {
+          targetCtx.filter = `blur(${S.stopBlur}px)`;
+        }
+
+        if (skipAspect || aspect === 'orig' || Math.abs((sw / sh) - (W / H)) < 0.02) {
+          targetCtx.drawImage(src, 0, 0, W, H);
+          targetCtx.restore();
+          return;
+        }
+
+        if (aspect === 'v_crop') {
+          const sc = Math.max(W / sw, H / sh);
+          const dw = sw * sc;
+          const dh = sh * sc;
+          targetCtx.drawImage(src, (W - dw) / 2, (H - dh) / 2, dw, dh);
+          targetCtx.restore();
+          return;
+        }
+
+        // 9:16 Блюр
+        targetCtx.save();
+        targetCtx.filter = `blur(${Math.max(18, Math.round(W * 0.024))}px) brightness(0.65)`;
+        const bgScale = Math.max(W / sw, H / sh) * 1.12;
+        const bgW = sw * bgScale;
+        const bgH = sh * bgScale;
+        targetCtx.drawImage(src, (W - bgW) / 2, (H - bgH) / 2, bgW, bgH);
+        targetCtx.restore();
+
+        const fgScale = Math.min(W / sw, H / sh);
+        const fw = sw * fgScale;
+        const fh = sh * fgScale;
+        targetCtx.drawImage(src, (W - fw) / 2, (H - fh) / 2, fw, fh);
+        targetCtx.restore();
+      }
+
+      function drawPartBadge(targetCtx, W, H, text) {
+        if (!text) return;
+        targetCtx.save();
+        const fontSize = Math.max(18, Math.round(W * 0.042));
+        targetCtx.font = `800 ${fontSize}px system-ui, -apple-system, sans-serif`;
+        const metrics = targetCtx.measureText(text);
+        const padX = fontSize * 0.72;
+        const padY = fontSize * 0.36;
+        const bw = metrics.width + padX * 2;
+        const bh = fontSize + padY * 2;
+        const bx = (W - bw) / 2;
+        const by = S.partLabelPos === 'bottom' ? (H * 0.74 - bh / 2) : (H * 0.165 - bh / 2);
+
+        roundRectPath(targetCtx, bx, by, bw, bh, bh / 2);
+        targetCtx.fillStyle = 'rgba(10, 10, 16, 0.76)';
+        targetCtx.fill();
+        targetCtx.lineWidth = Math.max(2, W / 360);
+        targetCtx.strokeStyle = 'rgba(124, 92, 255, 0.85)';
+        targetCtx.stroke();
+
+        targetCtx.fillStyle = '#ffffff';
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+        targetCtx.fillText(text, W / 2, by + bh / 2 + 1);
+        targetCtx.restore();
+      }
+
+      function compositeFrame(targetCtx, W, H, opts) {
+        const {
+          mainSource,
+          bannerSource,
+          bannerW,
+          bannerH,
+          isFrozen,
+          bannerActive,
+          animK,
+          isEditPreview,
+          skipAspect = false,
+          partText = ''
+        } = opts;
+
+        targetCtx.save();
+        targetCtx.fillStyle = '#000';
+        targetCtx.fillRect(0, 0, W, H);
+
+        drawMainLayer(targetCtx, mainSource, W, H, S.aspect, isFrozen, skipAspect);
+
+        if (isFrozen && S.stopDim > 0) {
+          targetCtx.fillStyle = `rgba(0,0,0,${S.stopDim})`;
+          targetCtx.fillRect(0, 0, W, H);
+        }
+
+        if (partText) {
+          drawPartBadge(targetCtx, W, H, partText);
+        }
+
+        const showBanner = bannerSource && (bannerActive || isEditPreview);
+        if (showBanner) {
+          const g = calcBannerRect(W, H, bannerW, bannerH);
+          const k = bannerActive ? animK : 1;
+
+          let al = 1, sc = 1, dy = 0;
+          if (bannerActive) {
+            if (S.anim === 'fade') {
+              al = k;
+            } else if (S.anim === 'pop') {
+              al = Math.min(1, k * 2.8);
+              sc = 1 + 2.70158 * Math.pow(k - 1, 3) + 1.70158 * Math.pow(k - 1, 2);
+            } else if (S.anim === 'slide') {
+              const e = (1 - k) * (1 - k);
+              dy = e * (S.y < 0.5 ? -(g.y + g.h) : (H - g.y));
+              al = Math.min(1, k * 2);
+            }
+          }
+
+          targetCtx.save();
+          targetCtx.globalAlpha = Math.max(0, Math.min(1, al * S.op));
+
+          if (S.ckMode === 'screen') {
+            targetCtx.globalCompositeOperation = 'screen';
+          }
+
+          targetCtx.translate(g.cx, g.cy + dy);
+          targetCtx.scale(sc, sc);
+
+          const scaledRad = (S.rad * W) / 1080;
+          if (scaledRad > 0 && S.ckMode === 'none') {
+            roundRectPath(targetCtx, -g.w / 2, -g.h / 2, g.w, g.h, scaledRad);
+            targetCtx.clip();
+          }
+
+          const drawSrc = S.ckMode === 'chroma'
+            ? applyChromaToSource(bannerSource, bannerW, bannerH)
+            : bannerSource;
+
+          targetCtx.drawImage(drawSrc, -g.w / 2, -g.h / 2, g.w, g.h);
+          targetCtx.restore();
+
+          if (isEditPreview && !eyedropActive) {
+            targetCtx.save();
+
+            if (drag && drag.type === 'move') {
+              targetCtx.strokeStyle = '#22d3ee';
+              targetCtx.lineWidth = Math.max(1.5, W / 360);
+              targetCtx.setLineDash([7, 6]);
+              if (snapX) {
+                targetCtx.beginPath(); targetCtx.moveTo(W / 2, 0); targetCtx.lineTo(W / 2, H); targetCtx.stroke();
+              }
+              if (snapY) {
+                targetCtx.beginPath(); targetCtx.moveTo(0, H / 2); targetCtx.lineTo(W, H / 2); targetCtx.stroke();
+              }
+              targetCtx.setLineDash([]);
+            }
+
+            targetCtx.strokeStyle = drag ? '#c084fc' : 'rgba(255,255,255,0.75)';
+            targetCtx.lineWidth = Math.max(2, W / 350);
+            targetCtx.setLineDash([10, 7]);
+            roundRectPath(targetCtx, g.x, g.y, g.w, g.h, Math.min(scaledRad, 14));
+            targetCtx.stroke();
+            targetCtx.setLineDash([]);
+
+            const hr = Math.max(11, W * 0.025);
+            const hx = g.x + g.w;
+            const hy = g.y + g.h;
+            targetCtx.fillStyle = '#7c5cff';
+            targetCtx.strokeStyle = '#fff';
+            targetCtx.lineWidth = Math.max(2, W / 360);
+            targetCtx.beginPath();
+            targetCtx.arc(hx, hy, hr, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.stroke();
+            targetCtx.restore();
+          }
+        }
+
+        if (isEditPreview && S.safeZone !== 'none') {
+          drawSafeZones(targetCtx, W, H, S.safeZone);
+        }
+
+        targetCtx.restore();
+      }
+
+      function drawSafeZones(c, W, H, kind) {
+        c.save();
+        const isReels = kind === 'reels';
+        const topH = H * (isReels ? 0.13 : 0.11);
+        const botH = H * (isReels ? 0.22 : 0.23);
+        const rightW = W * (isReels ? 0.16 : 0.17);
+        const rightTop = H * 0.46;
+
+        c.fillStyle = 'rgba(239, 68, 68, 0.25)';
+        c.strokeStyle = 'rgba(248, 113, 113, 0.8)';
+        c.lineWidth = Math.max(1.5, W / 420);
+        c.setLineDash([8, 6]);
+
+        c.fillRect(0, 0, W, topH);
+        c.beginPath(); c.moveTo(0, topH); c.lineTo(W, topH); c.stroke();
+
+        c.fillRect(0, H - botH, W, botH);
+        c.beginPath(); c.moveTo(0, H - botH); c.lineTo(W, H - botH); c.stroke();
+
+        c.fillRect(W - rightW, rightTop, rightW, H - botH - rightTop);
+        c.strokeRect(W - rightW, rightTop, rightW, H - botH - rightTop);
+
+        c.setLineDash([]);
+        c.fillStyle = 'rgba(255,255,255,0.9)';
+        c.font = `700 ${Math.round(W * 0.028)}px system-ui, sans-serif`;
+        c.textAlign = 'center';
+        c.fillText(isReels ? 'Верх интерфейса Reels' : 'Верх интерфейса Shorts', W / 2, topH * 0.6);
+        c.fillText(isReels ? 'Описание и звук Reels' : 'Описание Shorts', W / 2, H - botH * 0.5);
+        c.restore();
+      }
+
+      /* =====================================================================
+       * 8. ЖИВОЙ ЦИКЛ ПРЕДПРОСМОТРА
+       * ===================================================================== */
+      function syncPreviewBanner(live, triggerT) {
+        if (!isV()) return;
+        const bDur = Math.max(0.1, img.duration || 4);
+        if (live && !bwas) {
+          const targetT = S.mode === 'over' ? Math.max(0, v.currentTime - triggerT) % bDur : 0;
+          if (Math.abs(img.currentTime - targetT) > 0.15) img.currentTime = targetT;
+        }
+        bwas = live;
+        if (live && (!v.paused || hold)) {
+          if (img.ended) img.currentTime = 0;
+          if (img.paused) img.play().catch(() => {});
+        } else if (!img.paused) {
+          img.pause();
+        }
+      }
+
+      const playPreview = async () => {
+        ensurePreviewAudio();
+        if (isV() && !bwas && img.currentTime > 0.05) {
+          await new Promise(r => {
+            img.addEventListener('seeked', r, { once: true });
+            img.currentTime = 0;
+            setTimeout(r, 300);
+          });
+        }
+        v.play().catch(() => {});
+      };
+
+      let lastPreviewClipKey = '';
+
+      function previewLoop() {
+        if (!exporting && v.readyState >= 2) {
+          const d = D();
+          const ct = v.currentTime;
+          const pctx = getPreviewClipContext(ct, d);
+
+          if (S.sliceOn && pctx.key !== lastPreviewClipKey) {
+            lastPreviewClipKey = pctx.key;
+            updateTimelineDecor();
+          }
+
+          if (S.mode === 'stop' && img && !v.paused && !hold && heldKey !== pctx.key && ct >= pctx.triggerT && ct < pctx.triggerT + 0.45) {
+            v.pause();
+            hold = { s: performance.now(), key: pctx.key };
+            heldKey = pctx.key;
+          }
+          if (hold && (performance.now() - hold.s) / 1000 >= HD()) {
+            hold = null;
+            if (!v.ended) playPreview();
+          }
+
+          const isEdit = v.paused && !hold;
+          let live = false;
+          let animK = 1;
+          const activeShowDur = Math.min(SH(), pctx.segDur);
+
+          if (S.mode === 'over') {
+            live = ct >= pctx.triggerT && ct < pctx.triggerT + activeShowDur;
+            if (live) animK = calcAnimFactor(ct - pctx.triggerT, activeShowDur);
+          } else if (hold) {
+            live = true;
+            animK = calcAnimFactor((performance.now() - hold.s) / 1000, HD());
+          }
+
+          syncPreviewBanner(live, pctx.triggerT);
+          applyPreviewVolumes(live);
+
+          const [bw, bh] = dims();
+          const bReady = img && (!isV() || img.readyState >= 2);
+
+          compositeFrame(ctx, cv.width, cv.height, {
+            mainSource: v,
+            bannerSource: bReady ? img : null,
+            bannerW: bw,
+            bannerH: bh,
+            isFrozen: !!hold,
+            bannerActive: live,
+            animK,
+            isEditPreview: isEdit,
+            partText: pctx.partText
+          });
+
+          $('#freezePill').style.display = hold ? 'inline-block' : 'none';
+          const frac = d ? Math.min(1, ct / d) : 0;
+          $('#seek').value = Math.round(frac * 1000);
+          $('#progFill').style.width = (frac * 100) + '%';
+          $('#tm').textContent = `${fmt(ct)} / ${fmt(d)}`;
+          $('#pp').textContent = (v.paused && !hold) ? 'Пуск' : 'Пауза';
+        }
+        requestAnimationFrame(previewLoop);
+      }
+
+      /* =====================================================================
+       * 9. ПЕРЕТАСКИВАНИЕ, РЕСАЙЗ И ПИПЕТКА ПО ЭКРАНУ
+       * ===================================================================== */
+      function getCanvasPt(e) {
+        const r = cv.getBoundingClientRect();
+        return {
+          x: ((e.clientX - r.left) / Math.max(1, r.width)) * cv.width,
+          y: ((e.clientY - r.top) / Math.max(1, r.height)) * cv.height
+        };
+      }
+
+      function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+      }
+
+      cv.addEventListener('pointerdown', (e) => {
+        if (exporting || !v.src) return;
+        const p = getCanvasPt(e);
+
+        if (eyedropActive) {
+          e.preventDefault();
+          const px = ctx.getImageData(
+            Math.max(0, Math.min(cv.width - 1, Math.round(p.x))),
+            Math.max(0, Math.min(cv.height - 1, Math.round(p.y))),
+            1, 1
+          ).data;
+          S.kcol = rgbToHex(px[0], px[1], px[2]);
+          S.ckMode = 'chroma';
+          eyedropActive = false;
+          document.body.classList.remove('eyedrop');
+          syncInputs();
+          ui(true);
+          toast(`Цвет фона выбран: ${S.kcol}`, 'ok');
+          return;
+        }
+
+        if (!v.paused || hold || !img) return;
+        const [bw, bh] = dims();
+        const g = calcBannerRect(cv.width, cv.height, bw, bh);
+
+        const hr = Math.max(28, cv.width * 0.075);
+        if (Math.hypot(p.x - (g.x + g.w), p.y - (g.y + g.h)) <= hr) {
+          e.preventDefault();
+          drag = {
+            type: 'resize',
+            startDist: Math.max(20, Math.hypot(p.x - g.cx, p.y - g.cy)),
+            startScale: S.scale
+          };
+          cv.setPointerCapture(e.pointerId);
+          return;
+        }
+
+        const pad = 16;
+        if (p.x >= g.x - pad && p.x <= g.x + g.w + pad && p.y >= g.y - pad && p.y <= g.y + g.h + pad) {
+          e.preventDefault();
+          drag = { type: 'move', dx: p.x - g.cx, dy: p.y - g.cy };
+          cv.setPointerCapture(e.pointerId);
+          cv.style.cursor = 'grabbing';
+        }
+      });
+
+      cv.addEventListener('pointermove', (e) => {
+        if (!img || exporting) return;
+        const p = getCanvasPt(e);
+        if (!drag) {
+          if (v.paused && !hold && !eyedropActive) {
+            const [bw, bh] = dims();
+            const g = calcBannerRect(cv.width, cv.height, bw, bh);
+            const inside = p.x >= g.x - 12 && p.x <= g.x + g.w + 12 && p.y >= g.y - 12 && p.y <= g.y + g.h + 12;
+            cv.style.cursor = inside ? 'grab' : 'default';
+          }
+          return;
+        }
+
+        e.preventDefault();
+        if (drag.type === 'move') {
+          let nx = (p.x - drag.dx) / cv.width;
+          let ny = (p.y - drag.dy) / cv.height;
+
+          const snap = 0.025;
+          if (Math.abs(nx - 0.5) < snap) { nx = 0.5; snapX = true; } else snapX = false;
+          if (Math.abs(ny - 0.5) < snap) { ny = 0.5; snapY = true; } else snapY = false;
+
+          S.x = Math.max(0.04, Math.min(0.96, nx));
+          S.y = Math.max(0.04, Math.min(0.96, ny));
+          S.pos = 'custom';
+          ui(false);
+        } else if (drag.type === 'resize') {
+          const [bw, bh] = dims();
+          const g = calcBannerRect(cv.width, cv.height, bw, bh);
+          const dist = Math.max(15, Math.hypot(p.x - g.cx, p.y - g.cy));
+          S.scale = Math.max(0.15, Math.min(1.0, drag.startScale * (dist / drag.startDist)));
+          syncInputs();
+          ui(false);
+        }
+      });
+
+      ['pointerup', 'pointercancel'].forEach(ev => {
+        cv.addEventListener(ev, () => {
+          if (!drag) return;
+          drag = null;
+          snapX = false;
+          snapY = false;
+          cv.style.cursor = 'default';
+          persistSettings(true);
+        });
+      });
+
+      /* =====================================================================
+       * 10. ОФФЛАЙН-РЕНДЕР (MEDIABUNNY CanvasSink + CanvasSource) И ZIP
+       * ===================================================================== */
+      let MB = null;
+      let aacRegistered = false;
+
+      const CRC_TABLE = (() => {
+        const t = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+          let c = n;
+          for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+          t[n] = c >>> 0;
+        }
+        return t;
+      })();
+
+      function calcCrc32(bytes) {
+        let c = 0xffffffff;
+        for (let i = 0; i < bytes.length; i++) {
+          c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+        }
+        return (c ^ 0xffffffff) >>> 0;
+      }
+
+      function buildStoreZipBlob(entries) {
+        const enc = new TextEncoder();
+        const now = new Date();
+        const dosTime = ((now.getHours() & 31) << 11) | ((now.getMinutes() & 63) << 5) | ((now.getSeconds() >> 1) & 31);
+        const dosDate = (((Math.max(1980, now.getFullYear()) - 1980) & 127) << 9) | (((now.getMonth() + 1) & 15) << 5) | (now.getDate() & 31);
+
+        const dataParts = [];
+        const cdParts = [];
+        let offset = 0;
+
+        for (const item of entries) {
+          const nameBytes = enc.encode(item.name);
+          const lh = new Uint8Array(30 + nameBytes.length);
+          const lv = new DataView(lh.buffer);
+          lv.setUint32(0, 0x04034b50, true);
+          lv.setUint16(4, 20, true);
+          lv.setUint16(6, 0x0800, true);
+          lv.setUint16(8, 0, true);
+          lv.setUint16(10, dosTime, true);
+          lv.setUint16(12, dosDate, true);
+          lv.setUint32(14, item.crc >>> 0, true);
+          lv.setUint32(18, item.size >>> 0, true);
+          lv.setUint32(22, item.size >>> 0, true);
+          lv.setUint16(26, nameBytes.length, true);
+          lv.setUint16(28, 0, true);
+          lh.set(nameBytes, 30);
+
+          dataParts.push(lh, item.blob);
+
+          const ch = new Uint8Array(46 + nameBytes.length);
+          const cvw = new DataView(ch.buffer);
+          cvw.setUint32(0, 0x02014b50, true);
+          cvw.setUint16(4, 20, true);
+          cvw.setUint16(6, 20, true);
+          cvw.setUint16(8, 0x0800, true);
+          cvw.setUint16(10, 0, true);
+          cvw.setUint16(12, dosTime, true);
+          cvw.setUint16(14, dosDate, true);
+          cvw.setUint32(16, item.crc >>> 0, true);
+          cvw.setUint32(20, item.size >>> 0, true);
+          cvw.setUint32(24, item.size >>> 0, true);
+          cvw.setUint16(28, nameBytes.length, true);
+          cvw.setUint16(30, 0, true);
+          cvw.setUint16(32, 0, true);
+          cvw.setUint16(34, 0, true);
+          cvw.setUint16(36, 0, true);
+          cvw.setUint32(38, 0, true);
+          cvw.setUint32(42, offset >>> 0, true);
+          ch.set(nameBytes, 46);
+
+          cdParts.push(ch);
+          offset += lh.length + item.size;
+        }
+
+        const cdSize = cdParts.reduce((s, a) => s + a.length, 0);
+        const eocd = new Uint8Array(22);
+        const ev = new DataView(eocd.buffer);
+        ev.setUint32(0, 0x06054b50, true);
+        ev.setUint16(4, 0, true);
+        ev.setUint16(6, 0, true);
+        ev.setUint16(8, entries.length, true);
+        ev.setUint16(10, entries.length, true);
+        ev.setUint32(12, cdSize >>> 0, true);
+        ev.setUint32(16, offset >>> 0, true);
+        ev.setUint16(20, 0, true);
+
+        return new Blob([...dataParts, ...cdParts, eocd], { type: 'application/zip' });
+      }
+
+      async function loadMediabunny() {
+        if (!MB) {
+          setProgress(0, 'Загрузка кодека (1 раз)...', '', '');
+          MB = await import('https://cdn.jsdelivr.net/npm/mediabunny@1/+esm');
+        }
+        if (!aacRegistered && MB.canEncodeAudio) {
+          const nativeAac = await MB.canEncodeAudio('aac').catch(() => false);
+          if (!nativeAac) {
+            try {
+              setProgress(0, 'Подключение AAC-кодека...', '', '');
+              const aacMod = await import('https://cdn.jsdelivr.net/npm/@mediabunny/aac-encoder@1/+esm');
+              if (aacMod.registerAacEncoder) aacMod.registerAacEncoder();
+              aacRegistered = true;
+            } catch (e) {
+              console.warn('AAC extension fallback:', e);
+            }
+          } else {
+            aacRegistered = true;
+          }
+        }
+        return MB;
+      }
+
+      function setProgress(pct, status, detail, speed) {
+        const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+        $('#pPct').textContent = clamped + '%';
+        $('#pFill').style.width = clamped + '%';
+        if (status !== undefined) $('#pStatus').textContent = status;
+        if (detail !== undefined) $('#pDetail').textContent = detail;
+        if (speed !== undefined) $('#pSpeed').textContent = speed;
+        document.title = `${clamped}% · Рендер`;
+      }
+
+      async function decodeFullAudio(file, mbInput, targetSR) {
+        if (!file) return null;
+        try {
+          const tempCtx = new OfflineAudioContext(2, targetSR, targetSR);
+          const buf = await tempCtx.decodeAudioData(await file.arrayBuffer());
+          if (buf && buf.length > 0) return buf;
+        } catch (_) {}
+
+        if (mbInput && MB && MB.AudioBufferSink) {
+          try {
+            const aTrack = await mbInput.getPrimaryAudioTrack();
+            if (!aTrack || !(await aTrack.canDecode())) return null;
+            const dur = (await aTrack.computeDuration()) || 0;
+            if (!dur) return null;
+            const oc = new OfflineAudioContext(2, Math.max(1, Math.ceil(dur * targetSR)), targetSR);
+            const sink = new MB.AudioBufferSink(aTrack);
+            let has = false;
+            for await (const item of sink.buffers(0, dur)) {
+              if (!item.buffer || !item.buffer.length) continue;
+              const s = oc.createBufferSource();
+              s.buffer = item.buffer;
+              s.connect(oc.destination);
+              s.start(Math.max(0, item.timestamp));
+              has = true;
+            }
+            return has ? await oc.startRendering() : null;
+          } catch (_) {}
+        }
+        return null;
+      }
+
+      async function renderSegmentAudio({ segStart, segEnd, localT0, bDur, mainAudioSink, fallbackMainBuf, banBuf }) {
+        const SR = 48000;
+        const segDur = Math.max(0.05, segEnd - segStart);
+        const totalDur = S.mode === 'stop' ? (segDur + bDur) : Math.max(segDur, bDur > 0 ? localT0 + bDur : segDur);
+        const useBan = !!(banBuf && bDur > 0 && S.bvol > 0);
+        const useMain = S.vvol > 0 && (mainAudioSink || fallbackMainBuf);
+
+        if (!useMain && !useBan) return null;
+
+        const oc = new OfflineAudioContext(2, Math.max(1, Math.ceil(totalDur * SR)), SR);
+        let hasAnyAudio = false;
+
+        if (useMain) {
+          const mGain = oc.createGain();
+          mGain.gain.setValueAtTime(S.vvol, 0);
+          mGain.connect(oc.destination);
+
+          const scheduleMainPiece = (buf, segPos, bufOffset, dur) => {
+            if (dur <= 0.001) return;
+            if (S.mode === 'stop' && bDur > 0) {
+              if (segPos + dur <= localT0) {
+                const s = oc.createBufferSource();
+                s.buffer = buf; s.connect(mGain);
+                s.start(segPos, bufOffset, dur);
+              } else if (segPos >= localT0) {
+                const s = oc.createBufferSource();
+                s.buffer = buf; s.connect(mGain);
+                s.start(segPos + bDur, bufOffset, dur);
+              } else {
+                const durA = localT0 - segPos;
+                const durB = dur - durA;
+                if (durA > 0.001) {
+                  const sA = oc.createBufferSource();
+                  sA.buffer = buf; sA.connect(mGain);
+                  sA.start(segPos, bufOffset, durA);
+                }
+                if (durB > 0.001) {
+                  const sB = oc.createBufferSource();
+                  sB.buffer = buf; sB.connect(mGain);
+                  sB.start(localT0 + bDur, bufOffset + durA, durB);
+                }
+              }
+            } else {
+              const s = oc.createBufferSource();
+              s.buffer = buf; s.connect(mGain);
+              s.start(segPos, bufOffset, dur);
+            }
+            hasAnyAudio = true;
+          };
+
+          if (mainAudioSink) {
+            try {
+              for await (const item of mainAudioSink.buffers(segStart, segEnd)) {
+                if (cancelled) return null;
+                const buf = item.buffer;
+                if (!buf || !buf.length) continue;
+                const segPos = Math.max(0, item.timestamp - segStart);
+                const bufOffset = Math.max(0, segStart - item.timestamp);
+                const dur = Math.min(buf.duration - bufOffset, segDur - segPos);
+                scheduleMainPiece(buf, segPos, bufOffset, dur);
+              }
+            } catch (e) {
+              console.warn('AudioBufferSink segment fallback:', e);
+              if (fallbackMainBuf) {
+                scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(segDur, Math.max(0, fallbackMainBuf.duration - segStart)));
+              }
+            }
+          } else if (fallbackMainBuf) {
+            scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(segDur, Math.max(0, fallbackMainBuf.duration - segStart)));
+          }
+
+          if (hasAnyAudio && S.mode === 'over' && S.duck && useBan) {
+            const low = S.vvol * 0.25;
+            const fade = 0.08;
+            if (localT0 > fade) {
+              mGain.gain.setValueAtTime(S.vvol, Math.max(0, localT0 - fade));
+              mGain.gain.linearRampToValueAtTime(low, localT0 + fade);
+            } else {
+              mGain.gain.setValueAtTime(low, 0);
+            }
+            const tEnd = Math.min(totalDur, localT0 + bDur);
+            mGain.gain.setValueAtTime(low, Math.max(0, tEnd - fade));
+            mGain.gain.linearRampToValueAtTime(S.vvol, Math.min(totalDur, tEnd + fade));
+          }
+        }
+
+        if (useBan) {
+          const bGain = oc.createGain();
+          bGain.gain.setValueAtTime(S.bvol, 0);
+          bGain.connect(oc.destination);
+
+          let filled = 0;
+          const unit = Math.max(0.05, banBuf.duration);
+          while (filled < bDur - 0.01) {
+            const playChunk = Math.min(unit, bDur - filled);
+            const bs = oc.createBufferSource();
+            bs.buffer = banBuf;
+            bs.connect(bGain);
+            bs.start(localT0 + filled, 0, playChunk);
+            filled += playChunk;
+          }
+          hasAnyAudio = true;
+        }
+
+        if (!hasAnyAudio || cancelled) return null;
+        return await oc.startRendering();
+      }
+
+      function sliceAudioBuffer(buf, startFrame, frameCount) {
+        const ch = buf.numberOfChannels;
+        const out = new AudioBuffer({ length: frameCount, numberOfChannels: ch, sampleRate: buf.sampleRate });
+        for (let c = 0; c < ch; c++) {
+          out.getChannelData(c).set(buf.getChannelData(c).subarray(startFrame, startFrame + frameCount));
+        }
+        return out;
+      }
+
+      async function prepareOfflinePipeline() {
+        await loadMediabunny();
+
+        const bitrate = BR[S.q] || 9_000_000;
+        const mainInput = new MB.Input({
+          formats: MB.ALL_FORMATS,
+          source: new MB.BlobSource(vfile)
+        });
+
+        const mainVTrack = await mainInput.getPrimaryVideoTrack();
+        if (!mainVTrack) throw new Error('В файле не найдена видеодорожка');
+
+        const canDecodeMain = await mainVTrack.canDecode();
+        if (!canDecodeMain) throw new Error('Браузер не поддерживает декодирование этого видеофайла.');
+
+        const dispW = (await mainVTrack.getDisplayWidth()) || v.videoWidth;
+        const dispH = (await mainVTrack.getDisplayHeight()) || v.videoHeight;
+        const vDur = (await mainInput.computeDuration()) || D();
+        const { w: outW, h: outH } = computeOutputRes(dispW, dispH);
+
+        let srcFps = 30;
+        try {
+          const fm = await mainVTrack.computeFrameRateMetrics();
+          if (fm && fm.bestGuessFrameRate && isFinite(fm.bestGuessFrameRate)) {
+            srcFps = Math.max(15, Math.min(60, Math.round(fm.bestGuessFrameRate)));
+          }
+        } catch (_) {}
+
+        const fps = S.fps === 'auto' ? srcFps : (Number(S.fps) || 30);
+
+        const mainSink = new MB.CanvasSink(mainVTrack, { poolSize: 2 });
+
+        let mainAudioSink = null;
+        let fallbackMainBuf = null;
+        const mainATrack = await mainInput.getPrimaryAudioTrack().catch(() => null);
+        if (mainATrack && MB.AudioBufferSink && (await mainATrack.canDecode().catch(() => false))) {
+          mainAudioSink = new MB.AudioBufferSink(mainATrack);
+        } else if (S.vvol > 0 && vfile.size < 140 * 1024 * 1024) {
+          fallbackMainBuf = await decodeFullAudio(vfile, mainInput, 48000);
+        }
+
+        const hasBanner = !!img;
+        const bannerIsVid = hasBanner && isV() && !!bfile;
+        const [rawBW, rawBH] = dims();
+        let bannerInput = null;
+        let bannerSink = null;
+        let bannerAudioBuf = null;
+        let bannerDispW = rawBW;
+        let bannerDispH = rawBH;
+        let bannerNatDur = 4;
+
+        if (bannerIsVid) {
+          bannerInput = new MB.Input({
+            formats: MB.ALL_FORMATS,
+            source: new MB.BlobSource(bfile)
+          });
+          const bTrack = await bannerInput.getPrimaryVideoTrack();
+          if (bTrack && (await bTrack.canDecode())) {
+            bannerDispW = (await bTrack.getDisplayWidth()) || rawBW;
+            bannerDispH = (await bTrack.getDisplayHeight()) || rawBH;
+            bannerNatDur = (await bannerInput.computeDuration()) || img.duration || 4;
+            bannerSink = new MB.CanvasSink(bTrack, { poolSize: 2 });
+          }
+          if (S.bvol > 0) {
+            bannerAudioBuf = await decodeFullAudio(bfile, bannerInput, 48000);
+          }
+        }
+
+        const renderCanvas = document.createElement('canvas');
+        renderCanvas.width = outW;
+        renderCanvas.height = outH;
+        const rCtx = renderCanvas.getContext('2d', { alpha: false });
+
+        const freezeCanvas = document.createElement('canvas');
+        freezeCanvas.width = outW;
+        freezeCanvas.height = outH;
+        const fCtx = freezeCanvas.getContext('2d', { alpha: false });
+
+        const bestAudioCodec = MB.getFirstEncodableAudioCodec
+          ? await MB.getFirstEncodableAudioCodec(['aac', 'opus']).catch(() => 'aac')
+          : 'aac';
+
+        return {
+          fps, bitrate, outW, outH, vDur,
+          mainInput, mainSink, mainAudioSink, fallbackMainBuf,
+          hasBanner, bannerIsVid, bannerInput, bannerSink, bannerAudioBuf,
+          bannerDispW, bannerDispH, bannerNatDur,
+          renderCanvas, rCtx, freezeCanvas, fCtx, bestAudioCodec,
+          dispose() {
+            try { if (mainInput && mainInput.dispose) mainInput.dispose(); } catch (_) {}
+            try { if (bannerInput && bannerInput.dispose) bannerInput.dispose(); } catch (_) {}
+          }
+        };
+      }
+
+      async function renderSingleSegment(pipe, opts) {
+        const { segStart, segEnd, localT0, partText, onFrameProgress } = opts;
+        const {
+          fps, bitrate, outW, outH, vDur,
+          mainSink, mainAudioSink, fallbackMainBuf,
+          hasBanner, bannerIsVid, bannerSink, bannerAudioBuf,
+          bannerDispW, bannerDispH, bannerNatDur,
+          renderCanvas, rCtx, freezeCanvas, fCtx, bestAudioCodec
+        } = pipe;
+
+        const dt = 1 / fps;
+        const segDur = Math.max(0.2, segEnd - segStart);
+        const bDur = hasBanner ? Math.min(S.mode === 'stop' ? HD() : SH(), S.mode === 'stop' ? 60 : segDur) : 0;
+        const clampedT0 = Math.min(Math.max(0, localT0), Math.max(0, segDur - 0.05));
+        const maxSrcT = Math.max(0, vDur - 0.002);
+        const banDurSafe = Math.max(0.05, bannerNatDur);
+
+        const mainTimestamps = [];
+        const bannerTimestamps = [];
+        const framePlan = [];
+
+        if (S.mode === 'stop' && hasBanner && bDur > 0) {
+          const preCount = Math.max(0, Math.round(clampedT0 * fps));
+          const pauseCount = Math.max(1, Math.round(bDur * fps));
+          const postCount = Math.max(0, Math.round(Math.max(0, segDur - clampedT0) * fps));
+
+          for (let i = 0; i < preCount; i++) {
+            const relT = i * dt;
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
+            framePlan.push({ outTs: relT, needMain: true, captureFreeze: false, isFreeze: false, bannerActive: false, localT: 0 });
+          }
+
+          mainTimestamps.push(Math.min(maxSrcT, segStart + clampedT0));
+          for (let j = 0; j < pauseCount; j++) {
+            const localT = j * dt;
+            if (bannerIsVid && bannerSink) bannerTimestamps.push(localT % banDurSafe);
+            framePlan.push({
+              outTs: (preCount + j) * dt,
+              needMain: j === 0,
+              captureFreeze: j === 0,
+              isFreeze: true,
+              bannerActive: true,
+              localT
+            });
+          }
+
+          for (let k = 0; k < postCount; k++) {
+            const relT = clampedT0 + k * dt;
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
+            framePlan.push({
+              outTs: (preCount + pauseCount + k) * dt,
+              needMain: true,
+              captureFreeze: false,
+              isFreeze: false,
+              bannerActive: false,
+              localT: 0
+            });
+          }
+        } else {
+          const totalCount = Math.max(1, Math.round(segDur * fps));
+          for (let i = 0; i < totalCount; i++) {
+            const relT = i * dt;
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
+            const bannerActive = hasBanner && bDur > 0 && relT >= clampedT0 && relT < clampedT0 + bDur;
+            const localT = bannerActive ? (relT - clampedT0) : 0;
+            if (bannerActive && bannerIsVid && bannerSink) bannerTimestamps.push(localT % banDurSafe);
+            framePlan.push({
+              outTs: relT,
+              needMain: true,
+              captureFreeze: false,
+              isFreeze: false,
+              bannerActive,
+              localT
+            });
+          }
+        }
+
+        const totalFrames = framePlan.length;
+        let mainIter = null;
+        let bannerIter = null;
+
+        try {
+          const mixedAudio = await renderSegmentAudio({
+            segStart, segEnd, localT0: clampedT0, bDur,
+            mainAudioSink, fallbackMainBuf, banBuf: bannerAudioBuf
+          });
+          if (cancelled) return null;
+
+          const output = new MB.Output({
+            format: new MB.Mp4OutputFormat({ fastStart: 'in-memory' }),
+            target: new MB.BufferTarget()
+          });
+
+          const videoConfig = MB.Quality
+            ? { codec: 'avc', quality: new MB.Quality({ bitrate }) }
+            : { codec: 'avc', bitrate };
+
+          const videoSource = new MB.CanvasSource(renderCanvas, videoConfig);
+          output.addVideoTrack(videoSource);
+
+          let audioSource = null;
+          if (mixedAudio && bestAudioCodec) {
+            const audioConfig = MB.Quality
+              ? { codec: bestAudioCodec, quality: new MB.Quality({ bitrate: 128000 }) }
+              : { codec: bestAudioCodec, bitrate: 128000 };
+            audioSource = new MB.AudioBufferSource(audioConfig);
+            output.addAudioTrack(audioSource);
+          }
+
+          await output.start();
+
+          mainIter = mainSink.canvasesAtTimestamps(mainTimestamps)[Symbol.asyncIterator]();
+          if (bannerIsVid && bannerSink && bannerTimestamps.length) {
+            bannerIter = bannerSink.canvasesAtTimestamps(bannerTimestamps)[Symbol.asyncIterator]();
+          }
+
+          let lastMainCanvas = null;
+          let lastBannerCanvas = null;
+
+          for (let i = 0; i < totalFrames; i++) {
+            if (cancelled) break;
+            const step = framePlan[i];
+
+            if (step.needMain) {
+              const r = await mainIter.next();
+              if (!r.done && r.value && r.value.canvas) {
+                lastMainCanvas = r.value.canvas;
+              }
+              if (step.captureFreeze && lastMainCanvas) {
+                fCtx.fillStyle = '#000';
+                fCtx.fillRect(0, 0, outW, outH);
+                drawMainLayer(fCtx, lastMainCanvas, outW, outH, S.aspect, false, false);
+              }
+            }
+
+            let bSource = null;
+            if (step.bannerActive && hasBanner) {
+              if (bannerIsVid && bannerIter) {
+                const br = await bannerIter.next();
+                if (!br.done && br.value && br.value.canvas) lastBannerCanvas = br.value.canvas;
+                bSource = lastBannerCanvas;
+              } else if (!bannerIsVid) {
+                bSource = img;
+              }
+            }
+
+            compositeFrame(rCtx, outW, outH, {
+              mainSource: step.isFreeze ? freezeCanvas : lastMainCanvas,
+              bannerSource: bSource,
+              bannerW: bannerDispW,
+              bannerH: bannerDispH,
+              isFrozen: step.isFreeze,
+              bannerActive: step.bannerActive,
+              animK: step.bannerActive ? calcAnimFactor(step.localT, bDur) : 1,
+              isEditPreview: false,
+              skipAspect: step.isFreeze,
+              partText
+            });
+
+            await videoSource.add(step.outTs, dt);
+
+            if ((i + 1) % 4 === 0 || i + 1 === totalFrames) {
+              if (onFrameProgress) onFrameProgress(i + 1, totalFrames);
+            }
+          }
+
+          if (cancelled) return null;
+          videoSource.close();
+
+          if (audioSource && mixedAudio) {
+            const chunkLen = mixedAudio.sampleRate * 2;
+            for (let pos = 0; pos < mixedAudio.length; pos += chunkLen) {
+              if (cancelled) return null;
+              const len = Math.min(chunkLen, mixedAudio.length - pos);
+              await audioSource.add(sliceAudioBuffer(mixedAudio, pos, len));
+            }
+            audioSource.close();
+          }
+
+          await output.finalize();
+          return { buffer: output.target.buffer, encodedFrames: totalFrames };
+        } finally {
+          try { if (mainIter) await mainIter.return(); } catch (_) {}
+          try { if (bannerIter) await bannerIter.return(); } catch (_) {}
+        }
+      }
+
+      async function runOfflineExport() {
+        setProgress(1, 'Подготовка оффлайн-рендера...', 'Анализ видео', '');
+        const startPerf = performance.now();
+        const pipe = await prepareOfflinePipeline();
+
+        try {
+          const segRes = await renderSingleSegment(pipe, {
+            segStart: 0,
+            segEnd: pipe.vDur,
+            localT0: S.t0,
+            partText: '',
+            onFrameProgress: (done, total) => {
+              const sec = Math.max(0.05, (performance.now() - startPerf) / 1000);
+              const curFps = done / sec;
+              const speedX = (done / pipe.fps) / sec;
+              const rem = Math.max(0, Math.round((total - done) / Math.max(1, curFps)));
+              setProgress(
+                4 + (done / Math.max(1, total)) * 93,
+                `Рендер MP4 (${pipe.outW}×${pipe.outH})`,
+                `Кадр ${done} / ${total}`,
+                `⚡ ${speedX.toFixed(1)}x • ~${rem}с`
+              );
+            }
+          });
+          if (!segRes || cancelled) return null;
+
+          const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
+          const file = new File(
+            [segRes.buffer],
+            `bannerdrop_${Date.now().toString().slice(-5)}.mp4`,
+            { type: 'video/mp4' }
+          );
+          return { kind: 'single', file, outW: pipe.outW, outH: pipe.outH, elapsedTotal };
+        } finally {
+          pipe.dispose();
+        }
+      }
+
+      async function runBatchSliceExport() {
+        if (typeof VideoEncoder === 'undefined') {
+          throw new Error('Авто-нарезка в ZIP требует современный браузер с WebCodecs (Chrome, Edge или Safari 16.4+).');
+        }
+
+        setProgress(1, 'Подготовка авто-нарезки...', 'Потоковое чтение видео', '');
+        const pipe = await prepareOfflinePipeline();
+        const plan = computeSlicePlan(pipe.vDur);
+        if (!plan.selected.length) {
+          pipe.dispose();
+          throw new Error('Не удалось сформировать клипы — проверь диапазон частей.');
+        }
+
+        const startPerf = performance.now();
+        const clips = [];
+        let totalDoneFrames = 0;
+        const estTotalFrames = plan.selected.reduce((sum, seg) => {
+          const bDur = pipe.hasBanner && S.mode === 'stop' ? HD() : 0;
+          return sum + Math.max(1, Math.round((seg.dur + bDur) * pipe.fps));
+        }, 0);
+
+        const padLen = String(plan.totalParts).length < 2 ? 2 : String(plan.totalParts).length;
+        const baseName = (vfile.name || 'video').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]+/g, '_').slice(0, 28) || 'video';
+
+        try {
+          for (let ci = 0; ci < plan.selected.length; ci++) {
+            if (cancelled) break;
+            const seg = plan.selected[ci];
+            const clipNum = seg.index;
+            const localT0 = computeClipBannerT0(seg.dur);
+            const partText = formatPartBadgeText(clipNum, plan.totalParts);
+            const clipBaseDone = totalDoneFrames;
+
+            setProgress(
+              Math.max(2, (clipBaseDone / estTotalFrames) * 96),
+              `Клип ${ci + 1}/${plan.selected.length} (Часть ${clipNum})`,
+              `Отрезок ${fmt(seg.start)}–${fmt(seg.end)} • Готово: ${clips.length}`,
+              ''
+            );
+
+            const segRes = await renderSingleSegment(pipe, {
+              segStart: seg.start,
+              segEnd: seg.end,
+              localT0,
+              partText,
+              onFrameProgress: (done, total) => {
+                const overallDone = clipBaseDone + done;
+                const sec = Math.max(0.1, (performance.now() - startPerf) / 1000);
+                const curFps = overallDone / sec;
+                const speedX = (overallDone / pipe.fps) / sec;
+                const remSec = Math.max(0, Math.round((estTotalFrames - overallDone) / Math.max(1, curFps)));
+                const remStr = remSec >= 60 ? `${Math.floor(remSec / 60)}м ${remSec % 60}с` : `${remSec}с`;
+                setProgress(
+                  2 + (overallDone / Math.max(overallDone, estTotalFrames)) * 95,
+                  `Клип ${ci + 1}/${plan.selected.length} (Часть ${clipNum})`,
+                  `Кадр ${done}/${total} • Готово: ${clips.length}`,
+                  `⚡ ${speedX.toFixed(1)}x • ~${remStr}`
+                );
+              }
+            });
+
+            if (!segRes || cancelled) break;
+            totalDoneFrames += segRes.encodedFrames;
+
+            const u8 = new Uint8Array(segRes.buffer);
+            const crc = calcCrc32(u8);
+            const size = u8.byteLength;
+            const blob = new Blob([u8], { type: 'video/mp4' });
+            const fname = `part_${String(clipNum).padStart(padLen, '0')}_of_${plan.totalParts}.mp4`;
+
+            clips.push({
+              name: fname,
+              blob,
+              size,
+              crc,
+              index: clipNum,
+              rangeText: `${fmt(seg.start)}–${fmt(seg.end)}`
+            });
+          }
+
+          if (!clips.length) return null;
+
+          setProgress(98, `Упаковка ${clips.length} видео в ZIP...`, 'Без потери качества (STORE)', '');
+          const zipBlob = buildStoreZipBlob(clips);
+          const zipName = `${baseName}_${clips.length}clips.zip`;
+          const zipFile = new File([zipBlob], zipName, { type: 'application/zip' });
+          const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
+
+          return {
+            kind: 'zip',
+            file: zipFile,
+            clips,
+            partial: cancelled && clips.length < plan.selected.length,
+            outW: pipe.outW,
+            outH: pipe.outH,
+            elapsedTotal
+          };
+        } finally {
+          pipe.dispose();
+        }
+      }
+
+      async function runLegacyFallbackExport() {
+        if (!window.MediaRecorder || !cv.captureStream) {
+          throw new Error('Браузер не поддерживает экспорт видео. Открой в Chrome или Safari.');
+        }
+        toast('Браузер без WebCodecs — запущен совместимый режим', '');
+        ensurePreviewAudio();
+
+        const { w, h } = computeOutputRes(v.videoWidth, v.videoHeight);
+        cv.width = w;
+        cv.height = h;
+
+        const targetFps = S.fps === '60' ? 60 : 30;
+        const stream = cv.captureStream(targetFps);
+        if (adest) adest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+
+        const mime = [
+          'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+          'video/mp4',
+          'video/webm;codecs=vp9,opus',
+          'video/webm'
+        ].find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+        const chunks = [];
+        const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: BR[S.q] || 8_000_000 });
+        rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+        const donePromise = new Promise(res => { rec.onstop = res; });
+
+        v.pause();
+        v.currentTime = 0;
+        await new Promise(r => v.addEventListener('seeked', r, { once: true }));
+        if (isV()) { img.pause(); img.currentTime = 0; }
+
+        const t0 = S.t0;
+        const bDur = img ? (S.mode === 'stop' ? HD() : SH()) : 0;
+        const totalDur = S.mode === 'stop' ? D() + bDur : Math.max(D(), t0 + bDur);
+        const startPerf = performance.now();
+        let frozenAt = null;
+        let stopDone = false;
+
+        rec.start(300);
+        v.play().catch(() => {});
+
+        await new Promise(resolve => {
+          const timer = setInterval(() => {
+            if (cancelled) { clearInterval(timer); return resolve(); }
+            const elapsed = (performance.now() - startPerf) / 1000;
+            if (S.mode === 'stop' && img && !stopDone && !frozenAt && v.currentTime >= t0) {
+              v.pause();
+              frozenAt = performance.now();
+              if (isV()) { img.currentTime = 0; img.play().catch(() => {}); }
+            }
+            if (frozenAt && (performance.now() - frozenAt) / 1000 >= bDur) {
+              frozenAt = null;
+              stopDone = true;
+              if (isV()) img.pause();
+              if (!v.ended) v.play().catch(() => {});
+            }
+
+            let live = false, animK = 1;
+            if (S.mode === 'over') {
+              live = v.currentTime >= t0 && v.currentTime < t0 + bDur;
+              if (live) animK = calcAnimFactor(v.currentTime - t0, bDur);
+            } else if (frozenAt) {
+              live = true;
+              animK = calcAnimFactor((performance.now() - frozenAt) / 1000, bDur);
+            }
+            syncPreviewBanner(live, t0);
+            applyPreviewVolumes(live);
+
+            const [bw, bh] = dims();
+            compositeFrame(ctx, w, h, {
+              mainSource: v,
+              bannerSource: img && (!isV() || img.readyState >= 2) ? img : null,
+              bannerW: bw,
+              bannerH: bh,
+              isFrozen: !!frozenAt,
+              bannerActive: live,
+              animK,
+              isEditPreview: false
+            });
+
+            setProgress(Math.min(99, (elapsed / Math.max(0.1, totalDur)) * 100), 'Совместимый экспорт...', '', '');
+            if (v.ended && !frozenAt && elapsed >= totalDur - 0.1) { clearInterval(timer); return resolve(); }
+          }, Math.round(1000 / targetFps));
+        });
+
+        v.pause();
+        if (isV()) img.pause();
+        if (rec.state !== 'inactive') rec.stop();
+        await donePromise;
+        setPreviewRes();
+
+        if (cancelled) return null;
+        const isMp4 = mime.startsWith('video/mp4');
+        const ext = isMp4 ? 'mp4' : 'webm';
+        return {
+          kind: 'single',
+          file: new File(chunks, `bannerdrop_${Date.now().toString().slice(-5)}.${ext}`, { type: mime.split(';')[0] }),
+          outW: w,
+          outH: h,
+          elapsedTotal: ((performance.now() - startPerf) / 1000).toFixed(1)
+        };
+      }
+
+      async function startExport() {
+        if (!vfile) {
+          toast('Сначала выбери основное видео', 'err');
+          return;
+        }
+        if (exporting) {
+          cancelled = true;
+          $('#pStatus').textContent = 'Отмена...';
+          return;
+        }
+
+        exporting = true;
+        cancelled = false;
+        hold = null;
+        heldKey = null;
+        v.pause();
+        if (isV()) img.pause();
+
+        document.body.classList.add('exp');
+        $('#res').classList.remove('on');
+        $('#pbox').classList.add('on');
+        $('#go').textContent = S.sliceOn ? '⏹ Остановить и упаковать готовые' : '✖ Отменить рендер';
+        $('#go').classList.add('cancel');
+        $('#topExportBtn').disabled = true;
+
+        try {
+          if (navigator.wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen').catch(() => null);
+          }
+
+          let result = null;
+          if (S.sliceOn) {
+            result = await runBatchSliceExport();
+          } else if (typeof VideoEncoder !== 'undefined') {
+            try {
+              result = await runOfflineExport();
+            } catch (err) {
+              if (!cancelled) {
+                console.warn('WebCodecs failed, trying legacy fallback:', err);
+                toast('Переключаюсь на резервный рендер...', '');
+                result = await runLegacyFallbackExport();
+              }
+            }
+          } else {
+            result = await runLegacyFallbackExport();
+          }
+
+          if (result && result.file) {
+            setProgress(100, 'Готово!', '', `${result.elapsedTotal}с`);
+            if (outObjectUrl) URL.revokeObjectURL(outObjectUrl);
+            clipUrls.forEach(u => URL.revokeObjectURL(u));
+            clipUrls = [];
+
+            outObjectUrl = URL.createObjectURL(result.file);
+            const dl = $('#dl');
+            dl.href = outObjectUrl;
+            dl.download = result.file.name;
+
+            const mb = (result.file.size / 1048576).toFixed(2);
+            const clipList = $('#clipList');
+            clipList.innerHTML = '';
+
+            if (result.kind === 'zip') {
+              $('#resTitle').textContent = result.partial
+                ? `📦 Сохранено ${result.clips.length} клипов (остановлено)`
+                : `📦 ZIP готов (${result.clips.length} клипов)`;
+              $('#resMeta').textContent = `${result.outW}×${result.outH} • ${mb} МБ • за ${result.elapsedTotal}с`;
+              dl.textContent = `⬇ Скачать ZIP (${result.clips.length} видео • ${mb} МБ)`;
+
+              const firstUrl = URL.createObjectURL(result.clips[0].blob);
+              clipUrls.push(firstUrl);
+              $('#outPreview').src = firstUrl;
+              $('#outPreview').style.display = 'block';
+
+              result.clips.forEach((c, idx) => {
+                const u = idx === 0 ? firstUrl : URL.createObjectURL(c.blob);
+                if (idx > 0) clipUrls.push(u);
+                const row = document.createElement('div');
+                row.className = 'clip-item';
+                row.innerHTML = `<div><b>${c.name}</b><small>${c.rangeText} • ${(c.size / 1048576).toFixed(1)} МБ</small></div><a href="${u}" download="${c.name}">⬇ MP4</a>`;
+                clipList.appendChild(row);
+              });
+              clipList.classList.add('on');
+              toast(`ZIP с ${result.clips.length} видео готов за ${result.elapsedTotal}с!`, 'ok');
+            } else {
+              $('#resTitle').textContent = '✅ Видео готово';
+              $('#resMeta').textContent = `${result.outW}×${result.outH} • ${mb} МБ • за ${result.elapsedTotal}с`;
+              dl.textContent = `⬇ Скачать ${result.file.name}`;
+              $('#outPreview').src = outObjectUrl;
+              $('#outPreview').style.display = 'block';
+              clipList.classList.remove('on');
+              toast(`Готово за ${result.elapsedTotal}с!`, 'ok');
+            }
+
+            const sh = $('#sh');
+            const canShare = !!(navigator.canShare && navigator.canShare({ files: [result.file] }));
+            sh.hidden = !canShare;
+            sh.onclick = () => navigator.share({ files: [result.file], title: result.file.name }).catch(() => {});
+
+            $('#res').classList.add('on');
+            document.title = '✅ Готово · Баннер в видео';
+          } else if (cancelled) {
+            document.title = 'Баннер в видео';
+            toast('Рендер отменён');
+          }
+        } catch (err) {
+          console.error(err);
+          document.title = 'Баннер в видео';
+          toast('Ошибка рендера: ' + (err.message || err), 'err');
+        } finally {
+          exporting = false;
+          document.body.classList.remove('exp');
+          $('#pbox').classList.remove('on');
+          $('#go').classList.remove('cancel');
+          $('#topExportBtn').disabled = !vfile;
+          ui(false);
+          try { if (wakeLock) await wakeLock.release(); wakeLock = null; } catch (_) {}
+        }
+      }
+
+      /* =====================================================================
+       * 11. СОБЫТИЯ ИНТЕРФЕЙСА
+       * ===================================================================== */
+      $$('#tabs button').forEach(b => {
+        b.onclick = () => {
+          $$('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+          $$('.tab-pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.tab));
+        };
+      });
+
+      $$('.seg').forEach(g => {
+        g.onclick = (e) => {
+          const b = e.target.closest('button');
+          if (!b) return;
+          const k = g.dataset.k;
+          if (k === 'sliceSecPreset') {
+            S.sliceSec = +b.dataset.v;
+            $('#sliceSec').value = S.sliceSec;
+          } else {
+            S[k] = b.dataset.v;
+          }
+          if (k === 'aspect') {
+            setPreviewRes();
+            place();
+          }
+          if (k === 'pos') place();
+          if (k === 'mode' || k === 'when' || k === 'sliceWhen') {
+            heldKey = null;
+            hold = null;
+            timing();
+            if (k === 'mode' && S.pos !== 'custom') place();
+          }
+          ui(true);
+        };
+      });
+
+      $$('input[data-bind]').forEach(el => {
+        const k = el.dataset.bind;
+        const mult = BIND_SCALE[k] || 1;
+        el.oninput = () => {
+          S[k] = mult === 1 ? +el.value : +el.value / mult;
+          $$(`input[data-bind="${k}"]`).forEach(other => {
+            if (other !== el) other.value = el.value;
+          });
+          if (k === 'show') timing();
+          if (k === 'scale') place();
+          ui(false);
+        };
+        el.onchange = () => persistSettings(true);
+      });
+
+      $$('input[data-bind-chk]').forEach(el => {
+        const k = el.dataset.bindChk;
+        el.onchange = () => {
+          S[k] = el.checked;
+          $$(`input[data-bind-chk="${k}"]`).forEach(other => {
+            if (other !== el) other.checked = el.checked;
+          });
+          if (k === 'auto') { heldKey = null; timing(); }
+          ui(true);
+        };
+      });
+
+      $$('input[data-bind-color]').forEach(el => {
+        const k = el.dataset.bindColor;
+        el.oninput = () => {
+          S[k] = el.value;
+          $$(`input[data-bind-color="${k}"]`).forEach(other => {
+            if (other !== el) other.value = el.value;
+          });
+          ui(false);
+        };
+        el.onchange = () => persistSettings(true);
+      });
+
+      $$('#zoneSw button').forEach(b => {
+        b.onclick = () => { S.safeZone = b.dataset.z; ui(true); };
+      });
+
+      $$('#presetSlots button').forEach(b => {
+        b.onclick = () => { loadSlot(b.dataset.slot); toast(`Выбран Слот ${b.dataset.slot}`); };
+      });
+
+      $('#vf').onchange = (e) => { if (e.target.files[0]) loadVideo(e.target.files[0]); e.target.value = ''; };
+      $('#bf').onchange = (e) => { if (e.target.files[0]) loadBanner(e.target.files[0], false); e.target.value = ''; };
+
+      const drop = $('#drop');
+      ['dragover', 'dragenter'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); drop.classList.add('over'); }));
+      ['dragleave', 'drop'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); drop.classList.remove('over'); }));
+      document.addEventListener('drop', e => {
+        const f = e.dataTransfer && e.dataTransfer.files[0];
+        if (f) loadVideo(f);
+      });
+
+      $('#clearBannerBtn').onclick = async (e) => {
+        e.stopPropagation();
+        await deleteBannerFromDB();
+        if (isV()) { img.pause(); img.remove(); }
+        if (burl) URL.revokeObjectURL(burl);
+        img = null;
+        bfile = null;
+        burl = null;
+        document.body.dataset.bv = '0';
+        $('#bn').textContent = 'Видео-баннер';
+        $('#bMeta').textContent = 'MP4, MOV, WebM, PNG';
+        $('#thumb').style.display = 'none';
+        $('#bIcon').style.display = 'block';
+        $('#bIcon').textContent = '🔥';
+        $('#clearBannerBtn').style.display = 'none';
+        toast('Баннер удалён из памяти');
+      };
+
+      $('#pp').onclick = () => {
+        if (exporting || !v.src) return;
+        ensurePreviewAudio();
+        if (hold) { hold = null; playPreview(); return; }
+        v.paused ? playPreview() : v.pause();
+      };
+
+      $('#seek').oninput = (e) => {
+        if (exporting || !D()) return;
+        hold = null;
+        v.currentTime = (Number(e.target.value) / 1000) * D();
+      };
+
+      v.addEventListener('seeking', () => {
+        const pctx = getPreviewClipContext(v.currentTime, D());
+        if (v.currentTime < pctx.triggerT - 0.05 || heldKey !== pctx.key) heldKey = null;
+        if (v.paused && !hold) pf();
+        if (S.sliceOn) updateTimelineDecor();
+      });
+      v.addEventListener('ended', () => { heldKey = null; });
+
+      $('#now').onclick = () => {
+        if (!v.src) return;
+        S.when = 'custom';
+        S.t0 = v.currentTime;
+        heldKey = null;
+        ui(true);
+        toast(`Баннер поставлен на ${S.t0.toFixed(1)}с`, 'ok');
+      };
+
+      $('#try').onclick = () => {
+        if (exporting || !v.src) return;
+        hold = null;
+        heldKey = null;
+        v.currentTime = Math.max(0, S.t0 - 1.2);
+        playPreview();
+      };
+
+      $('#trySlice').onclick = () => {
+        if (exporting || !v.src) { toast('Сначала загрузи видео', 'err'); return; }
+        const plan = computeSlicePlan(D());
+        if (!plan.selected.length) return;
+        const ct = v.currentTime || 0;
+        const seg = plan.selected.find(c => ct >= c.start && ct < c.end) || plan.selected[0];
+        const triggerT = seg.start + computeClipBannerT0(seg.dur);
+        hold = null;
+        heldKey = null;
+        v.currentTime = Math.max(seg.start, triggerT - 1.5);
+        playPreview();
+        toast(`Проверка Части ${seg.index} (баннер на ${fmt(triggerT)})`, 'ok');
+      };
+
+      $('#saveBanner').onchange = e => {
+        S.saveBanner = e.target.checked;
+        persistSettings(true);
+        if (S.saveBanner && bfile) saveBannerToDB(bfile);
+        else if (!S.saveBanner) deleteBannerFromDB();
+      };
+
+      $('#sliceOn').onchange = e => {
+        S.sliceOn = e.target.checked;
+        heldKey = null;
+        hold = null;
+        ui(true);
+        if (S.sliceOn) toast('Режим авто-нарезки в ZIP включён', 'ok');
+      };
+      $('#sliceSec').oninput = e => { S.sliceSec = +e.target.value; ui(false); };
+      $('#sliceSec').onchange = () => persistSettings(true);
+      $('#sliceCustomSec').oninput = e => { S.sliceCustomSec = +e.target.value; heldKey = null; ui(false); };
+      $('#sliceCustomSec').onchange = () => persistSettings(true);
+      $('#sliceIntro').oninput = e => { S.sliceIntro = +e.target.value; ui(false); };
+      $('#sliceIntro').onchange = () => persistSettings(true);
+      $('#sliceFrom').onchange = e => { S.sliceFrom = Math.max(1, parseInt(e.target.value, 10) || 1); ui(true); };
+      $('#sliceTo').onchange = e => { S.sliceTo = Math.max(0, parseInt(e.target.value, 10) || 0); ui(true); };
+      $('#sliceAllBtn').onclick = () => {
+        S.sliceFrom = 1;
+        S.sliceTo = 0;
+        $('#sliceFrom').value = 1;
+        $('#sliceTo').value = 0;
+        ui(true);
+        toast('Выбраны все части до конца');
+      };
+
+      async function runEyedropper() {
+        if (!v.src || !img) { toast('Сначала загрузи видео и баннер'); return; }
+        v.pause();
+        hold = null;
+
+        if (window.EyeDropper) {
+          const prev = S.ckMode;
+          S.ckMode = 'none';
+          await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+          try {
+            const pick = await new EyeDropper().open();
+            S.kcol = pick.sRGBHex;
+            S.ckMode = 'chroma';
+            toast(`Цвет выбран: ${S.kcol}`, 'ok');
+          } catch (_) {
+            S.ckMode = prev;
+          }
+          syncInputs();
+          ui(true);
+        } else {
+          S.ckMode = 'none';
+          eyedropActive = true;
+          document.body.classList.add('eyedrop');
+          ui(false);
+          toast('Ткни пальцем по фону баннера на видео');
+        }
+      }
+      $$('.eye-btn').forEach(btn => { btn.onclick = runEyedropper; });
+
+      $('#go').onclick = startExport;
+      $('#topExportBtn').onclick = startExport;
+      $('#nextVidBtn').onclick = () => {
+        $('#outPreview').pause();
+        $('#res').classList.remove('on');
+        $('#vf').click();
+      };
+
+      $('#resetBtn').onclick = () => {
+        S = { ...DEFAULT_S };
+        syncInputs();
+        setPreviewRes();
+        if (D()) { timing(); place(); }
+        ui(true);
+        toast(`Слот ${activeSlot} сброшен`);
+      };
+
+      let nativeFS = false;
+      function setFS(on) {
+        document.body.classList.toggle('fs', on);
+        $('#fs').textContent = on ? 'Закрыть' : 'Экран';
+        if (on) {
+          nativeFS = !!document.documentElement.requestFullscreen;
+          if (nativeFS) document.documentElement.requestFullscreen().catch(() => { nativeFS = false; });
+        } else if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+      $('#fs').onclick = () => setFS(!document.body.classList.contains('fs'));
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && nativeFS && document.body.classList.contains('fs')) setFS(false);
+      });
+
+      $('#seek').onpointerup = e => e.target.blur();
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape') {
+          if (eyedropActive) { eyedropActive = false; document.body.classList.remove('eyedrop'); return; }
+          if (document.body.classList.contains('fs')) { setFS(false); return; }
+        }
+        if (!v.src || exporting || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+        if (e.code === 'Space') { e.preventDefault(); $('#pp').click(); }
+        else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+          e.preventDefault();
+          hold = null;
+          v.currentTime = Math.min(D(), Math.max(0, v.currentTime + (e.code === 'ArrowLeft' ? -1 : 1)));
+        }
+      });
+
+      /* =====================================================================
+       * 12. ИНИЦИАЛИЗАЦИЯ
+       * ===================================================================== */
+      async function init() {
+        const hasWebCodecs = typeof VideoEncoder !== 'undefined';
+        $('#engineBadge').textContent = hasWebCodecs ? 'Оффлайн MP4' : 'Совм. режим';
+
+        loadSlot(activeSlot);
+        previewLoop();
+
+        if (S.saveBanner) {
+          const saved = await loadBannerFromDB();
+          if (saved && saved.blob) {
+            const restored = new File([saved.blob], saved.name || 'banner.mp4', { type: saved.type || 'video/mp4' });
+            loadBanner(restored, true);
+          }
+        }
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
