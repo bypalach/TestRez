@@ -7,9 +7,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="description" content="rez — локальная студия вставки баннеров и нарезки видео в ZIP без потери качества" />
+  <meta name="description" content="rez — локальная студия вставки баннеров, нарезки видео в ZIP и загрузки роликов по ссылке" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2216%22 fill=%22%23f2efe9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%23101010%22>rez</text></svg>" />
-  <title>rez — видео-баннеры и нарезка</title>
+  <title>rez — видео-баннеры, нарезка и загрузчик</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -157,7 +157,7 @@
       border: 0;
       background: transparent;
       color: var(--ink-dim);
-      padding: 6px 13px;
+      padding: 6px 12px;
       border-radius: 5px;
       font-size: 12.5px;
       font-weight: 600;
@@ -428,7 +428,6 @@
       color: var(--bg);
     }
 
-    /* Жестко зафиксированная высота монитора — не скачет до и после загрузки */
     .viewport-box {
       position: relative;
       width: 100%;
@@ -1068,6 +1067,85 @@
       flex-shrink: 0;
     }
 
+    /* ==================== ЗАГРУЗЧИК ПО ССЫЛКЕ (YOUTUBE, TWITCH, TIKTOK, REELS) ==================== */
+    .dl-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .plat-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .plat-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 4px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink-dim);
+    }
+
+    .plat-chip.detected {
+      border-color: var(--acc);
+      background: var(--acc-soft);
+      color: #ff8e64;
+    }
+
+    .url-bar {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .url-bar input {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 11px 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .url-bar input:focus { border-color: var(--acc); }
+
+    .dl-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .dl-box-res {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 14px;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .dl-box-res.on { display: flex; }
+
+    .gateways-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
     /* ==================== СТАТИСТИКА, ТИКЕТ-ПОДДЕРЖКА И FAQ ==================== */
     .container-narrow {
       max-width: 1080px;
@@ -1145,7 +1223,6 @@
       color: var(--ink-mute);
     }
 
-    /* Форма тикетов */
     .ticket-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
@@ -1589,12 +1666,13 @@
 
     @media (hover: none) { .dd { display: none; } }
 
-    @media (max-width: 1080px) {
+    @media (max-width: 1120px) {
       .app { grid-template-columns: minmax(0, 1fr) 390px; gap: 14px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .gateways-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .head-nav { display: none; }
       .app {
         grid-template-columns: 1fr;
@@ -1611,13 +1689,14 @@
       }
       .viewport-box { height: clamp(250px, 44dvh, 380px); }
       .panel { margin: 0 10px; }
-      .faq-list, .ticket-grid { grid-template-columns: 1fr; }
+      .faq-list, .ticket-grid, .dl-settings-grid { grid-template-columns: 1fr; }
       .row > span, .num-row > span { flex: 0 0 98px; }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 520px) {
       .brand .sub { display: none; }
-      .stats-grid { grid-template-columns: 1fr; }
+      .stats-grid, .gateways-grid { grid-template-columns: 1fr; }
+      .url-bar { flex-direction: column; }
       .footer-btns { width: 100%; }
       .tg-btn, .donate-cta { flex: 1; justify-content: center; }
     }
@@ -1649,12 +1728,19 @@
         </div>
         <span class="drawer-kbd">02</span>
       </button>
+      <button type="button" class="drawer-item" data-nav="downloader">
+        <div>
+          <div>Скачать по ссылке</div>
+          <small>YouTube, Twitch, TikTok, Reels</small>
+        </div>
+        <span class="drawer-kbd">03</span>
+      </button>
       <button type="button" class="drawer-item" data-nav="stats">
         <div>
           <div>Статистика</div>
           <small>Онлайн, пользователи и рендеры</small>
         </div>
-        <span class="drawer-kbd">03</span>
+        <span class="drawer-kbd">04</span>
       </button>
     </div>
 
@@ -1674,7 +1760,7 @@
         </div>
         <span class="drawer-kbd">FAQ</span>
       </button>
-      <a class="drawer-item" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2FREZ_support&text=rez%20%E2%80%94%20%D0%BE%D1%84%D1%84%D0%BB%D0%B0%D0%B9%D0%BD-%D1%80%D0%B5%D0%B4%D0%B0%D0%BA%D1%82%D0%BE%D1%80%20%D0%B4%D0%BB%D1%8F%20%D0%B2%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%B1%D0%B0%D0%BD%D0%BD%D0%B5%D1%80%D0%BE%D0%B2%20%D0%B8%20%D0%BD%D0%B0%D1%80%D0%B5%D0%B7%D0%BA%D0%B8%20Shorts%2FReels" target="_blank" rel="noopener">
+      <a class="drawer-item" id="drawerShareLink" href="https://t.me/share/url" target="_blank" rel="noopener">
         <div>
           <div>Переслать в Telegram</div>
           <small>Отправить ссылку в чат или ТГК</small>
@@ -1713,6 +1799,7 @@
       <nav class="head-nav" aria-label="Разделы">
         <button type="button" class="on" data-nav="editor">Баннер в видео</button>
         <button type="button" data-nav="slicer">Нарезка в ZIP</button>
+        <button type="button" data-nav="downloader">Скачать по ссылке</button>
         <button type="button" data-nav="stats">Статистика</button>
         <button type="button" data-nav="tickets">Тикеты</button>
       </nav>
@@ -1749,10 +1836,13 @@
           <div class="drop" id="drop">
             <b class="dd">Перетащи видеофайл в окно</b>
             <span class="dd">или открой с диска / галереи</span>
-            <label class="pick">
-              <span>Выбрать основное видео</span>
-              <input id="vf" type="file" accept="video/*" hidden />
-            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px">
+              <label class="pick" style="margin-top:0">
+                <span>Выбрать основное видео</span>
+                <input id="vf" type="file" accept="video/*" hidden />
+              </label>
+              <button type="button" class="btn-sm" style="padding:10px 14px" data-nav="downloader">Скачать по ссылке</button>
+            </div>
           </div>
 
           <!-- Канвас -->
@@ -2004,7 +2094,6 @@
             </div>
           </div>
 
-          <!-- КАК ВСТАВЛЯТЬ БАННЕР В КАЖДЫЙ КЛИП -->
           <div class="card">
             <div class="card-h">
               <h3>Как вставлять баннер в клип</h3>
@@ -2125,7 +2214,6 @@
             </label>
           </div>
 
-          <!-- ПАРАМЕТРЫ ДЛИНЫ ЧАСТЕЙ -->
           <div class="card">
             <div class="card-h">
               <h3>Длина каждого клипа</h3>
@@ -2169,7 +2257,6 @@
             </div>
           </div>
 
-          <!-- ФОРМАТ И НУМЕРАЦИЯ ЧАСТЕЙ -->
           <div class="card">
             <div class="card-h">
               <h3>Формат 9:16 и подпись «Часть 1»</h3>
@@ -2254,7 +2341,83 @@
     </main>
   </section>
 
-  <!-- ==================== СТРАНИЦА 2: СТАТИСТИКА СЕРВИСА ==================== -->
+  <!-- ==================== СТРАНИЦА 2: СКАЧАТЬ ВИДЕО ПО ССЫЛКЕ ==================== -->
+  <section class="page-view" id="view-downloader">
+    <div class="container-narrow">
+      <div class="section-head">
+        <div>
+          <h2>Скачать видео по ссылке</h2>
+          <p class="hint" style="margin-top:4px">Загружай исходники с YouTube, Shorts, Twitch, TikTok, Instagram Reels или VK Видео и сразу отправляй в редактор rez.</p>
+        </div>
+        <button type="button" class="btn-sm pri" data-nav="editor">Вернуться в редактор</button>
+      </div>
+
+      <div class="dl-panel">
+        <div class="plat-list" id="platChips">
+          <span class="plat-chip" data-plat="youtube">YouTube / Shorts</span>
+          <span class="plat-chip" data-plat="twitch">Twitch VOD / Clips</span>
+          <span class="plat-chip" data-plat="tiktok">TikTok без вотермарки</span>
+          <span class="plat-chip" data-plat="instagram">Instagram Reels</span>
+          <span class="plat-chip" data-plat="vk">VK Видео</span>
+          <span class="plat-chip" data-plat="direct">Прямой MP4 / WebM</span>
+        </div>
+
+        <div class="url-bar">
+          <input type="url" id="dlUrlInput" placeholder="Вставь ссылку на YouTube, Twitch, TikTok, Reels или MP4..." autocomplete="off" />
+          <button type="button" class="btn-sm" id="dlPasteBtn">Вставить</button>
+          <button type="button" class="btn-sm pri" id="dlStartBtn">Скачать видео</button>
+        </div>
+
+        <div class="dl-settings-grid">
+          <div class="field">
+            <label>Качество / формат</label>
+            <div class="seg" id="dlQualSeg">
+              <button type="button" class="on" data-dlq="1080">1080p MP4</button>
+              <button type="button" data-dlq="720">720p MP4</button>
+              <button type="button" data-dlq="480">480p</button>
+              <button type="button" data-dlq="audio">Только MP3</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Что сделать после получения</label>
+            <div class="seg" id="dlDestSeg">
+              <button type="button" class="on" data-dld="studio">Сразу в редактор rez</button>
+              <button type="button" data-dld="slicer">Сразу в нарезку ZIP</button>
+              <button type="button" data-dld="file">Просто сохранить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dl-box-res" id="dlResBox">
+          <div class="card-h">
+            <h3 id="dlResTitle">Файл готов</h3>
+            <span id="dlResBadge">MP4</span>
+          </div>
+          <p class="hint" id="dlResText"></p>
+          <div class="btn-row">
+            <a class="btn-sm pri" id="dlDirectHref" style="justify-content:center;padding:11px" href="#" target="_blank" rel="noopener">Скачать файл</a>
+            <button type="button" class="ghost" id="dlToEditorBtn">Открыть в редакторе rez</button>
+          </div>
+        </div>
+
+        <div class="divline"></div>
+
+        <div class="card-h">
+          <h3>Запасные шлюзы (если площадка закрыла прямой поток)</h3>
+          <span>Открывают твою ссылку в 1 клик</span>
+        </div>
+        <div class="gateways-grid">
+          <button type="button" class="ghost" data-gw="cobalt">cobalt.tools</button>
+          <button type="button" class="ghost" data-gw="savefrom">SaveFrom</button>
+          <button type="button" class="ghost" data-gw="snaptik">SnapTik (TikTok)</button>
+          <button type="button" class="ghost" data-gw="twitch">Twitch Leecher / Clipr</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== СТРАНИЦА 3: СТАТИСТИКА СЕРВИСА ==================== -->
   <section class="page-view" id="view-stats">
     <div class="container-narrow">
       <div class="section-head">
@@ -2315,7 +2478,7 @@
     </div>
   </section>
 
-  <!-- ==================== СТРАНИЦА 3: СИСТЕМА ТИКЕТОВ ПОДДЕРЖКИ (@REZ_support) ==================== -->
+  <!-- ==================== СТРАНИЦА 4: СИСТЕМА ТИКЕТОВ ПОДДЕРЖКИ (@REZ_support) ==================== -->
   <section class="page-view" id="view-tickets">
     <div class="container-narrow">
       <div class="section-head">
@@ -2345,6 +2508,7 @@
             <label for="tkTopic">Тема проблемы</label>
             <select class="sel-in" id="tkTopic">
               <option value="Ошибка при рендере MP4 / ZIP">Ошибка при рендере MP4 / ZIP</option>
+              <option value="Скачивание видео по ссылке">Скачивание видео по ссылке</option>
               <option value="Проблема со звуком или синхронизацией">Проблема со звуком или синхронизацией</option>
               <option value="Хромакей / удаление фона">Хромакей / удаление фона</option>
               <option value="Предложение по улучшению rez">Предложение по улучшению rez</option>
@@ -2402,6 +2566,11 @@
       <h2>Популярные вопросы (FAQ)</h2>
       <div class="faq-list">
         <details class="faq-item">
+          <summary>Как скачать видео с YouTube, Twitch или TikTok?</summary>
+          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество (1080p / 720p / MP3) и нажми «Скачать видео». При желании ролик сразу загрузится в редактор баннеров или нарезку.</p>
+        </details>
+
+        <details class="faq-item">
           <summary>Чем отличается режим «Поверх» от «Пауза (Стоп)»?</summary>
           <p>В режиме «Поверх» основное видео продолжает проигрываться, а баннер накладывается сверху (с приглушением звука ролика, если нужно). В режиме «Пауза» видео замирает на кадре с затемнением или блюром, пока полностью не пройдёт баннер, а затем продолжается.</p>
         </details>
@@ -2422,11 +2591,6 @@
         </details>
 
         <details class="faq-item">
-          <summary>Как превратить горизонтальное видео 16:9 в вертикальное 9:16?</summary>
-          <p>Во вкладке «Вид» или «Нарезка» выбери «9:16 Кроп» (обрезка по центру) или «9:16 Блюр» (целый кадр по центру с размытым фоном сверху и снизу). Готовый файл сразу будет в формате 1080×1920.</p>
-        </details>
-
-        <details class="faq-item">
           <summary>Куда писать, если нашёл баг или нужна помощь?</summary>
           <p>Открой раздел «Тикеты» в верхнем меню или в боковой панели слева, либо напиши напрямую в поддержку Telegram: @REZ_support.</p>
         </details>
@@ -2438,12 +2602,12 @@
   <footer class="site-footer">
     <div class="footer-in">
       <div class="footer-info">
-        <b>rez — оффлайн-редактор видео-баннеров и нарезки</b>
+        <b>rez — оффлайн-редактор видео-баннеров, нарезки и загрузки</b>
         <span>Поддержка: @REZ_support • Работает локально без водяных знаков.</span>
       </div>
 
       <div class="footer-btns">
-        <a class="tg-btn" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2FREZ_support&text=rez%20%E2%80%94%20%D0%BE%D1%84%D1%84%D0%BB%D0%B0%D0%B9%D0%BD-%D1%80%D0%B5%D0%B4%D0%B0%D0%BA%D1%82%D0%BE%D1%80%20%D0%B4%D0%BB%D1%8F%20%D0%B2%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%B1%D0%B0%D0%BD%D0%BD%D0%B5%D1%80%D0%BE%D0%B2%20%D0%B8%20%D0%BD%D0%B0%D1%80%D0%B5%D0%B7%D0%BA%D0%B8%20Shorts%2FReels" target="_blank" rel="noopener">
+        <a class="tg-btn" id="footerShareLink" href="https://t.me/share/url" target="_blank" rel="noopener">
           <span>Переслать в ТГК</span>
         </a>
 
@@ -2610,7 +2774,162 @@
       }
 
       /* =====================================================================
-       * 2. НАВИГАЦИЯ, БОКОВОЕ МЕНЮ (ТРИ ПОЛОСКИ), СТАТИСТИКА И ТИКЕТЫ
+       * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ (YOUTUBE, TWITCH, TIKTOK, REELS, VK)
+       * ===================================================================== */
+      let dlQual = '1080';
+      let dlDest = 'studio';
+      let lastResolvedMediaUrl = '';
+      let lastResolvedFilename = 'video.mp4';
+
+      function detectPlatform(url) {
+        const u = (url || '').toLowerCase();
+        if (/youtube\.com|youtu\.be/.test(u)) return 'youtube';
+        if (/twitch\.tv/.test(u)) return 'twitch';
+        if (/tiktok\.com/.test(u)) return 'tiktok';
+        if (/instagram\.com/.test(u)) return 'instagram';
+        if (/vk\.com|vkvideo\.ru/.test(u)) return 'vk';
+        if (/\.(mp4|webm|mov|m4v)(\?|$)/.test(u)) return 'direct';
+        return '';
+      }
+
+      function highlightDetectedPlatform(url) {
+        const plat = detectPlatform(url);
+        $$('#platChips .plat-chip').forEach(c => c.classList.toggle('detected', c.dataset.plat === plat));
+      }
+
+      function normalizeInputUrl(raw) {
+        const s = (raw || '').trim();
+        if (!s) return '';
+        return /^https?:\/\//i.test(s) ? s : 'https://' + s;
+      }
+
+      function openGateway(gw) {
+        const url = normalizeInputUrl($('#dlUrlInput').value);
+        if (!url) {
+          toast('Вставь ссылку на видео', 'err');
+          return;
+        }
+        const enc = encodeURIComponent(url);
+        let target = `https://cobalt.tools/#${enc}`;
+        if (gw === 'savefrom') target = `https://ru.savefrom.net/1-youtube-video-downloader-4/?url=${enc}`;
+        else if (gw === 'snaptik') target = `https://snaptik.app/?url=${enc}`;
+        else if (gw === 'twitch') target = `https://clipr.xyz/?url=${enc}`;
+        window.open(target, '_blank', 'noopener');
+      }
+
+      async function fetchVideoByLink() {
+        const url = normalizeInputUrl($('#dlUrlInput').value);
+        if (!url) {
+          toast('Вставь ссылку на YouTube, Twitch, TikTok или Reels', 'err');
+          return;
+        }
+
+        const btn = $('#dlStartBtn');
+        btn.disabled = true;
+        btn.textContent = 'Загрузка...';
+        $('#dlResBox').classList.remove('on');
+
+        try {
+          if (/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)) {
+            lastResolvedMediaUrl = url;
+            lastResolvedFilename = url.split('/').pop().split('?')[0] || 'video.mp4';
+            await onMediaLinkResolved(lastResolvedMediaUrl, lastResolvedFilename, 'Прямой файл');
+            return;
+          }
+
+          const apiEndpoints = [
+            'https://api.cobalt.tools/',
+            'https://co.wuk.sh/api/json'
+          ];
+
+          let found = null;
+          for (const ep of apiEndpoints) {
+            try {
+              const resp = await fetch(ep, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  url,
+                  videoQuality: dlQual === 'audio' ? '720' : dlQual,
+                  downloadMode: dlQual === 'audio' ? 'audio' : 'auto',
+                  filenameStyle: 'basic'
+                })
+              });
+              if (!resp.ok) continue;
+              const data = await resp.json();
+              if (data && (data.url || (data.picker && data.picker[0] && data.picker[0].url))) {
+                found = {
+                  url: data.url || data.picker[0].url,
+                  filename: data.filename || (dlQual === 'audio' ? 'rez_audio.mp3' : 'rez_video.mp4')
+                };
+                break;
+              }
+            } catch (_) {}
+          }
+
+          if (found) {
+            lastResolvedMediaUrl = found.url;
+            lastResolvedFilename = found.filename;
+            await onMediaLinkResolved(
+              lastResolvedMediaUrl,
+              lastResolvedFilename,
+              dlQual === 'audio' ? 'MP3 Аудио' : `${dlQual}p MP4`
+            );
+          } else {
+            const plat = detectPlatform(url);
+            const fallbackUrl = plat === 'twitch'
+              ? `https://clipr.xyz/?url=${encodeURIComponent(url)}`
+              : `https://cobalt.tools/#${encodeURIComponent(url)}`;
+            $('#dlResTitle').textContent = 'Площадка ограничила прямой поток';
+            $('#dlResBadge').textContent = 'ШЛЮЗ';
+            $('#dlResText').textContent = 'Нажми «Скачать через шлюз» — ссылка уже передана. Скачай MP4 и открой его в редакторе rez.';
+            $('#dlDirectHref').href = fallbackUrl;
+            $('#dlDirectHref').textContent = 'Скачать через шлюз';
+            $('#dlToEditorBtn').style.display = 'none';
+            $('#dlResBox').classList.add('on');
+            toast('Открой скачивание через шлюз ниже');
+          }
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Скачать видео';
+        }
+      }
+
+      async function onMediaLinkResolved(mediaUrl, filename, badgeText) {
+        $('#dlResTitle').textContent = filename;
+        $('#dlResBadge').textContent = badgeText;
+        $('#dlResText').textContent = 'Видеопоток получен. Можешь сохранить файл на устройство или сразу открыть в студии rez.';
+        $('#dlDirectHref').href = mediaUrl;
+        $('#dlDirectHref').textContent = 'Скачать файл';
+        $('#dlToEditorBtn').style.display = dlQual === 'audio' ? 'none' : 'block';
+        $('#dlResBox').classList.add('on');
+
+        if ((dlDest === 'studio' || dlDest === 'slicer') && dlQual !== 'audio') {
+          await loadRemoteVideoToStudio(mediaUrl, filename, dlDest === 'slicer');
+        } else {
+          toast('Ссылка на скачивание готова', 'ok');
+        }
+      }
+
+      async function loadRemoteVideoToStudio(mediaUrl, filename, openSlicer = false) {
+        try {
+          toast('Передаю видео в редактор rez...');
+          const res = await fetch(mediaUrl);
+          if (!res.ok) throw new Error('CORS');
+          const blob = await res.blob();
+          const file = new File([blob], filename || 'rez_video.mp4', { type: blob.type || 'video/mp4' });
+          navigateTo(openSlicer ? 'slicer' : 'editor');
+          loadVideo(file);
+        } catch (_) {
+          toast('Нажми «Скачать файл» и выбери скачанный ролик в редакторе');
+        }
+      }
+
+      /* =====================================================================
+       * 3. НАВИГАЦИЯ, БОКОВОЕ МЕНЮ (ТРИ ПОЛОСКИ), СТАТИСТИКА И ТИКЕТЫ
        * ===================================================================== */
       const STATS_KEY = 'rez_user_stats_v1';
       const TICKETS_KEY = 'rez_tickets_history_v1';
@@ -2685,6 +3004,7 @@
 
       function hideAllViews() {
         $('#view-workspace').classList.remove('on');
+        $('#view-downloader').classList.remove('on');
         $('#view-stats').classList.remove('on');
         $('#view-tickets').classList.remove('on');
       }
@@ -2700,6 +3020,13 @@
         }
 
         $$('[data-nav]').forEach(el => el.classList.toggle('on', el.dataset.nav === target));
+
+        if (target === 'downloader') {
+          hideAllViews();
+          $('#view-downloader').classList.add('on');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
 
         if (target === 'stats') {
           updateStatsUI();
@@ -2735,7 +3062,7 @@
       }
 
       /* =====================================================================
-       * 3. НАСТРОЙКИ, СЛОТЫ ПРЕСЕТОВ И ПАМЯТЬ (localStorage + IndexedDB)
+       * 4. НАСТРОЙКИ, СЛОТЫ ПРЕСЕТОВ И ПАМЯТЬ (localStorage + IndexedDB)
        * ===================================================================== */
       const STORE_PREFIX = 'rez_slot_';
       const ACTIVE_SLOT_KEY = 'rez_active_slot';
@@ -2872,7 +3199,7 @@
       }
 
       /* =====================================================================
-       * 4. УВЕДОМЛЕНИЯ (TOAST)
+       * 5. УВЕДОМЛЕНИЯ (TOAST)
        * ===================================================================== */
       function toast(msg, kind = '') {
         const box = $('#toastBox');
@@ -2890,7 +3217,7 @@
       }
 
       /* =====================================================================
-       * 5. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
+       * 6. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
        * ===================================================================== */
       let vfile = null;
       let bfile = null;
@@ -3031,7 +3358,7 @@
       }
 
       /* =====================================================================
-       * 6. АУДИО ПРЕВЬЮ
+       * 7. АУДИО ПРЕВЬЮ
        * ===================================================================== */
       function ensurePreviewAudio() {
         try {
@@ -3071,7 +3398,7 @@
       }
 
       /* =====================================================================
-       * 7. ПОЛОЖЕНИЕ, ТАЙМИНГ И СИНХРОНИЗАЦИЯ UI
+       * 8. ПОЛОЖЕНИЕ, ТАЙМИНГ И СИНХРОНИЗАЦИЯ UI
        * ===================================================================== */
       function place() {
         if (S.pos === 'custom') return;
@@ -3154,6 +3481,7 @@
 
         $$('.seg').forEach(g => {
           const k = g.dataset.k;
+          if (!k) return;
           const val = k === 'sliceSecPreset' ? String(S.sliceSec) : String(S[k]);
           $$('button', g).forEach(b => b.classList.toggle('on', val === b.dataset.v));
         });
@@ -3269,7 +3597,7 @@
       }
 
       /* =====================================================================
-       * 8. ЗАГРУЗКА ФАЙЛОВ
+       * 9. ЗАГРУЗКА ФАЙЛОВ
        * ===================================================================== */
       const pf = () => {
         if (isV() && isFinite(img.duration) && img.duration > 0) {
@@ -3364,7 +3692,7 @@
       }
 
       /* =====================================================================
-       * 9. ХРОМАКЕЙ И ОТРИСОВКА КАДРА
+       * 10. ХРОМАКЕЙ И ОТРИСОВКА КАДРА
        * ===================================================================== */
       const kc = document.createElement('canvas');
       const kx = kc.getContext('2d', { willReadFrequently: true });
@@ -3641,7 +3969,7 @@
       }
 
       /* =====================================================================
-       * 10. ЖИВОЙ ЦИКЛ ПРЕДПРОСМОТРА
+       * 11. ЖИВОЙ ЦИКЛ ПРЕДПРОСМОТРА
        * ===================================================================== */
       function syncPreviewBanner(live, triggerT) {
         if (!isV()) return;
@@ -3736,7 +4064,7 @@
       }
 
       /* =====================================================================
-       * 11. ПЕРЕТАСКИВАНИЕ, РЕСАЙЗ И ПИПЕТКА ПО ЭКРАНУ
+       * 12. ПЕРЕТАСКИВАНИЕ, РЕСАЙЗ И ПИПЕТКА ПО ЭКРАНУ
        * ===================================================================== */
       function getCanvasPt(e) {
         const r = cv.getBoundingClientRect();
@@ -3844,7 +4172,7 @@
       });
 
       /* =====================================================================
-       * 12. ОФФЛАЙН-РЕНДЕР (MEDIABUNNY CanvasSink + CanvasSource) И ZIP
+       * 13. ОФФЛАЙН-РЕНДЕР (MEDIABUNNY CanvasSink + CanvasSource) И ZIP
        * ===================================================================== */
       let MB = null;
       let aacRegistered = false;
@@ -4763,7 +5091,7 @@
       }
 
       /* =====================================================================
-       * 13. СОБЫТИЯ ИНТЕРФЕЙСА И ТИКЕТ-СИСТЕМЫ
+       * 14. СОБЫТИЯ ИНТЕРФЕЙСА, ЗАГРУЗЧИКА И ТИКЕТ-СИСТЕМЫ
        * ===================================================================== */
       $('#openDrawerBtn').onclick = openDrawer;
       $('#closeDrawerBtn').onclick = closeDrawer;
@@ -4773,6 +5101,45 @@
         el.onclick = () => navigateTo(el.dataset.nav);
       });
 
+      // Загрузчик по ссылке
+      $('#dlUrlInput').oninput = (e) => highlightDetectedPlatform(e.target.value);
+      $('#dlPasteBtn').onclick = async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            $('#dlUrlInput').value = text.trim();
+            highlightDetectedPlatform(text);
+            toast('Ссылка вставлена', 'ok');
+          }
+        } catch (_) {
+          $('#dlUrlInput').focus();
+          toast('Вставь ссылку в поле');
+        }
+      };
+
+      $$('#dlQualSeg button').forEach(b => {
+        b.onclick = () => {
+          dlQual = b.dataset.dlq;
+          $$('#dlQualSeg button').forEach(x => x.classList.toggle('on', x === b));
+        };
+      });
+
+      $$('#dlDestSeg button').forEach(b => {
+        b.onclick = () => {
+          dlDest = b.dataset.dld;
+          $$('#dlDestSeg button').forEach(x => x.classList.toggle('on', x === b));
+        };
+      });
+
+      $('#dlStartBtn').onclick = fetchVideoByLink;
+      $('#dlToEditorBtn').onclick = () => {
+        if (lastResolvedMediaUrl) loadRemoteVideoToStudio(lastResolvedMediaUrl, lastResolvedFilename, false);
+      };
+      $$('[data-gw]').forEach(b => {
+        b.onclick = () => openGateway(b.dataset.gw);
+      });
+
+      // Модалка пожертвований
       $$('[data-open-donate]').forEach(btn => {
         btn.onclick = () => {
           closeDrawer();
@@ -4862,7 +5229,6 @@
 
         copyToClipboard(messageText, 'Текст тикета скопирован — открываю @REZ_support');
 
-        // Если на телефоне прикреплён файл, пробуем системную отправку с файлом
         if (ticketAttachedFile && navigator.canShare && navigator.canShare({ files: [ticketAttachedFile] })) {
           try {
             await navigator.share({
@@ -4890,10 +5256,11 @@
       });
 
       $$('.seg').forEach(g => {
+        const k = g.dataset.k;
+        if (!k) return;
         g.onclick = (e) => {
           const b = e.target.closest('button');
           if (!b) return;
-          const k = g.dataset.k;
           if (k === 'sliceSecPreset') {
             S.sliceSec = +b.dataset.v;
             $('#sliceSec').value = S.sliceSec;
@@ -5157,11 +5524,17 @@
       });
 
       /* =====================================================================
-       * 14. ИНИЦИАЛИЗАЦИЯ
+       * 15. ИНИЦИАЛИЗАЦИЯ
        * ===================================================================== */
       async function init() {
         const hasWebCodecs = typeof VideoEncoder !== 'undefined';
         $('#engineBadge').textContent = hasWebCodecs ? 'MP4 Оффлайн' : 'Совм. режим';
+
+        const shareUrl = encodeURIComponent(window.location.href);
+        const shareText = encodeURIComponent('rez — оффлайн-студия для вставки баннеров, нарезки Shorts/Reels и загрузки видео по ссылке');
+        const tgShareHref = `https://t.me/share/url?url=${shareUrl}&text=${shareText}`;
+        $('#drawerShareLink').href = tgShareHref;
+        $('#footerShareLink').href = tgShareHref;
 
         updateStatsUI();
         renderTicketHistory();
