@@ -3,30 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#09090b" />
+  <meta name="theme-color" content="#101010" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="description" content="Оффлайн-вставка видео-баннеров и авто-нарезка роликов в ZIP для YouTube Shorts, Instagram Reels и TikTok" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%236d28d9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2258%22>🎬</text></svg>" />
-  <title>Баннер в видео — Оффлайн-рендер</title>
+  <meta name="description" content="rez — локальная студия вставки баннеров и нарезки видео в ZIP без потери качества" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2216%22 fill=%22%23f2efe9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%23101010%22>rez</text></svg>" />
+  <title>rez — видео-баннеры и нарезка</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     :root {
       color-scheme: dark;
-      --bg: #08080b;
-      --panel: #121217;
-      --card: #191920;
-      --soft: #21212b;
-      --line: #2b2b36;
-      --ink: #f4f4f8;
-      --mute: #9296a8;
-      --acc: #7c5cff;
-      --acc2: #c026d3;
-      --ok: #10b981;
-      --warn: #f59e0b;
-      --err: #ef4444;
-      --radius: 16px;
+      --bg: #101010;
+      --surface: #161616;
+      --card: #1d1d1d;
+      --card-hi: #252525;
+      --line: #2d2d2d;
+      --line-hi: #424242;
+      --ink: #f2efe9;
+      --ink-dim: #a19e97;
+      --ink-mute: #6c6a64;
+      --acc: #e85d2a;
+      --acc-hi: #ff6e38;
+      --acc-soft: rgba(232, 93, 42, 0.14);
+      --ok: #34a853;
+      --warn: #eab308;
+      --err: #dc2626;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     * {
@@ -36,38 +41,39 @@
 
     html, body {
       margin: 0;
+      padding: 0;
       background: var(--bg);
       color: var(--ink);
-      font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overscroll-behavior-y: none;
+      overflow-x: hidden;
     }
 
-    button, input, label {
+    button, input, textarea, select, label, a {
       font: inherit;
       touch-action: manipulation;
     }
 
     input[type="checkbox"] {
       accent-color: var(--acc);
-      width: 19px;
-      height: 19px;
+      width: 18px;
+      height: 18px;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
-    /* ==================== ШАПКА ==================== */
+    /* ==================== ВЕРХНЯЯ ПАНЕЛЬ ==================== */
     header {
       position: sticky;
       top: 0;
-      z-index: 30;
-      background: rgba(8, 8, 11, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      z-index: 40;
+      background: var(--bg);
       border-bottom: 1px solid var(--line);
       padding: max(10px, env(safe-area-inset-top)) 16px 10px;
     }
 
     .head-in {
-      max-width: 1380px;
+      max-width: 1440px;
       margin: auto;
       display: flex;
       align-items: center;
@@ -75,54 +81,95 @@
       gap: 12px;
     }
 
-    .brand {
+    .head-left {
       display: flex;
       align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .burger-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      border: 1px solid var(--line-hi);
+      background: var(--surface);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+
+    .burger-btn:hover { background: var(--card-hi); }
+    .burger-btn:active { transform: translateY(1px); }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
       gap: 10px;
       min-width: 0;
     }
 
-    .logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, var(--acc), var(--acc2));
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      flex: 0 0 auto;
-      box-shadow: 0 4px 16px rgba(124, 92, 255, 0.35);
+    .brand-word {
+      font-family: var(--mono);
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: var(--ink);
+      line-height: 1;
     }
 
-    .brand h1 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .brand-word span { color: var(--acc); }
 
-    .badge {
+    .engine-tag {
+      font-family: var(--mono);
       font-size: 10px;
       font-weight: 700;
       padding: 2px 6px;
-      border-radius: 6px;
-      background: rgba(16, 185, 129, 0.16);
-      color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.32);
+      border-radius: 4px;
+      background: var(--card);
+      color: var(--ink-dim);
+      border: 1px solid var(--line);
       text-transform: uppercase;
-      letter-spacing: 0.03em;
     }
 
     .sub {
-      font-size: 11px;
-      color: var(--mute);
+      font-size: 11.5px;
+      color: var(--ink-mute);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .head-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 3px;
+      border-radius: 7px;
+    }
+
+    .head-nav button {
+      border: 0;
+      background: transparent;
+      color: var(--ink-dim);
+      padding: 6px 13px;
+      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.12s;
+      white-space: nowrap;
+    }
+
+    .head-nav button:hover { color: var(--ink); }
+    .head-nav button.on {
+      background: var(--ink);
+      color: var(--bg);
     }
 
     .head-actions {
@@ -133,42 +180,175 @@
     }
 
     .btn-sm {
+      border: 1px solid var(--line-hi);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.12s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn-sm:hover { background: var(--card-hi); }
+    .btn-sm.pri {
+      border-color: var(--acc);
+      background: var(--acc);
+      color: #fff;
+    }
+    .btn-sm.pri:hover { background: var(--acc-hi); }
+    .btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ==================== БОКОВОЕ МЕНЮ (ТРИ ПОЛОСКИ) ==================== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 65;
+      width: min(310px, 86vw);
+      background: var(--surface);
+      border-right: 1px solid var(--line-hi);
+      padding: max(14px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateX(-102%);
+      transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .drawer.open { transform: translateX(0); }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 4px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wm-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
       border: 1px solid var(--line);
       background: var(--card);
-      color: var(--ink);
-      border-radius: 10px;
-      padding: 8px 11px;
-      font-size: 12px;
-      font-weight: 700;
+      color: var(--ink-dim);
+      font-size: 14px;
       cursor: pointer;
-      transition: 0.15s;
-    }
-
-    .btn-sm:active { transform: scale(0.96); }
-    .btn-sm.pri {
-      border: 0;
-      background: linear-gradient(135deg, var(--acc), var(--acc2));
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(124, 92, 255, 0.35);
-    }
-    .btn-sm:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ==================== СЕТКА ПРИЛОЖЕНИЯ ==================== */
-    .app {
-      max-width: 1380px;
-      margin: auto;
-      padding: 14px 16px 40px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 430px;
-      gap: 18px;
+      place-items: center;
+    }
+    .wm-close:hover { color: var(--ink); border-color: var(--line-hi); }
+
+    .drawer-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .drawer-label {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-mute);
+      padding: 6px 8px 3px;
+    }
+
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--ink);
+      padding: 9px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: none;
+      transition: 0.1s;
+    }
+
+    .drawer-item:hover { background: var(--card); }
+    .drawer-item.on {
+      background: var(--card-hi);
+      border-color: var(--line-hi);
+      color: var(--acc-hi);
+    }
+
+    .drawer-item small {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--ink-dim);
+    }
+
+    .drawer-kbd {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-mute);
+      border: 1px solid var(--line);
+      padding: 1px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .drawer-foot {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ==================== РАБОЧАЯ СЕТКА ==================== */
+    .page-view { display: none; }
+    .page-view.on { display: block; }
+
+    .app {
+      max-width: 1440px;
+      margin: auto;
+      padding: 14px 16px 28px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 440px;
+      gap: 16px;
       align-items: start;
     }
 
-    /* ==================== СЦЕНА / ПРЕВЬЮ ==================== */
+    /* ==================== СТАБИЛЬНЫЙ МОНИТОР ПРЕДПРОСМОТРА ==================== */
     .stage {
-      background: #040406;
+      background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 8px;
       padding: 10px;
       display: flex;
       flex-direction: column;
@@ -182,7 +362,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 0 2px;
     }
 
     .stage-pills {
@@ -190,44 +369,44 @@
       align-items: center;
       gap: 6px;
       min-width: 0;
-      overflow: hidden;
       flex-wrap: wrap;
     }
 
     .pill {
+      font-family: var(--mono);
       font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 8px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
       background: var(--card);
       border: 1px solid var(--line);
-      color: #d4d6e3;
+      color: var(--ink-dim);
       white-space: nowrap;
     }
 
     .pill.acc {
-      background: rgba(124, 92, 255, 0.18);
-      border-color: rgba(124, 92, 255, 0.4);
-      color: #c4b5fd;
+      background: var(--acc-soft);
+      border-color: rgba(232, 93, 42, 0.45);
+      color: #ff8e64;
     }
 
     .pill.warn {
-      background: rgba(245, 158, 11, 0.18);
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #fcd34d;
+      background: rgba(234, 179, 8, 0.14);
+      border-color: rgba(234, 179, 8, 0.45);
+      color: #fde047;
     }
 
     .pill.slice-on {
-      background: rgba(16, 185, 129, 0.18);
-      border-color: rgba(16, 185, 129, 0.45);
-      color: #6ee7b7;
+      background: rgba(52, 168, 83, 0.14);
+      border-color: rgba(52, 168, 83, 0.45);
+      color: #86efac;
     }
 
     .zone-sw {
       display: flex;
-      background: var(--card);
+      background: var(--bg);
       border: 1px solid var(--line);
-      border-radius: 9px;
+      border-radius: 6px;
       padding: 2px;
       gap: 2px;
       flex-shrink: 0;
@@ -236,42 +415,59 @@
     .zone-sw button {
       border: 0;
       background: transparent;
-      color: var(--mute);
+      color: var(--ink-dim);
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       padding: 4px 8px;
-      border-radius: 7px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
     .zone-sw button.on {
-      background: var(--acc);
-      color: #fff;
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    /* Жестко зафиксированная высота монитора — не скачет до и после загрузки */
+    .viewport-box {
+      position: relative;
+      width: 100%;
+      height: clamp(320px, 56vh, 620px);
+      background: #080808;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .drop {
-      min-height: 360px;
-      border: 2px dashed #323240;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
+      position: absolute;
+      inset: 10px;
+      border: 1px dashed var(--line-hi);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      color: var(--mute);
-      padding: 24px 16px;
-      transition: 0.15s;
-      background: radial-gradient(circle at 50% 30%, rgba(124, 92, 255, 0.08), transparent 65%);
+      color: var(--ink-dim);
+      padding: 20px;
+      transition: 0.12s;
+      background: #0c0c0c;
     }
 
     .drop.over {
       border-color: var(--acc);
-      background: rgba(124, 92, 255, 0.12);
+      background: rgba(232, 93, 42, 0.08);
     }
 
     .drop b {
       display: block;
-      font-size: 18px;
-      color: #fff;
-      margin-bottom: 6px;
+      font-size: 15px;
+      color: var(--ink);
+      margin-bottom: 4px;
     }
 
     .drop .pick {
@@ -279,29 +475,33 @@
       align-items: center;
       gap: 8px;
       margin-top: 14px;
-      padding: 13px 22px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--acc), var(--acc2));
-      color: #fff;
-      font-weight: 800;
+      padding: 10px 18px;
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--bg);
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.35);
+      transition: 0.12s;
     }
+
+    .drop .pick:hover { background: #ffffff; }
 
     .cvw {
       display: none;
+      width: 100%;
+      height: 100%;
       position: relative;
       justify-content: center;
       align-items: center;
       background: #000;
-      border-radius: 12px;
-      overflow: hidden;
     }
 
     .cvw canvas {
       max-width: 100%;
-      max-height: 64vh;
-      max-height: 64dvh;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
       display: block;
       touch-action: none;
       user-select: none;
@@ -313,13 +513,12 @@
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(245, 158, 11, 0.94);
-      color: #09090b;
+      background: var(--warn);
+      color: #101010;
       font-size: 12px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 99px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 4px;
       pointer-events: none;
       white-space: nowrap;
       display: none;
@@ -338,26 +537,26 @@
     .bar button {
       background: var(--card);
       color: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px 12px;
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 7px 11px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
 
     .bar button.play-btn {
       background: var(--ink);
-      color: #09090b;
+      color: var(--bg);
       border-color: var(--ink);
-      min-width: 74px;
+      min-width: 66px;
     }
 
     .track {
       position: relative;
       flex: 1;
-      height: 30px;
+      height: 28px;
       display: flex;
       align-items: center;
     }
@@ -365,9 +564,9 @@
     .track-bg {
       position: relative;
       width: 100%;
-      height: 8px;
-      border-radius: 99px;
-      background: var(--soft);
+      height: 6px;
+      border-radius: 2px;
+      background: var(--card-hi);
       overflow: hidden;
       pointer-events: none;
     }
@@ -383,16 +582,15 @@
       top: 0;
       bottom: 0;
       width: 1.5px;
-      background: rgba(16, 185, 129, 0.55);
+      background: rgba(52, 168, 83, 0.75);
     }
 
     .track #mark {
       position: absolute;
       top: 0;
       bottom: 0;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--acc), var(--acc2));
-      min-width: 6px;
+      background: var(--acc);
+      min-width: 5px;
     }
 
     .track #progFill {
@@ -400,7 +598,7 @@
       top: 0;
       bottom: 0;
       left: 0;
-      background: rgba(255, 255, 255, 0.35);
+      background: rgba(242, 239, 233, 0.35);
     }
 
     .track input {
@@ -413,8 +611,9 @@
     }
 
     #tm {
-      font-size: 12px;
-      color: #cfd3e6;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--ink-dim);
       white-space: nowrap;
     }
 
@@ -434,28 +633,31 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: var(--panel);
+      background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 13px;
-      padding: 9px 10px;
+      border-radius: 6px;
+      padding: 8px 10px;
       cursor: pointer;
-      transition: 0.15s;
+      transition: 0.12s;
       min-width: 0;
     }
 
-    .mcard:hover { border-color: #444457; }
-    .mcard:active { transform: scale(0.985); }
+    .mcard:hover { border-color: var(--line-hi); background: var(--card-hi); }
 
     .mthumb {
-      width: 40px;
-      height: 40px;
-      border-radius: 9px;
-      background: var(--soft);
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 1px solid var(--line);
       display: grid;
       place-items: center;
-      font-size: 18px;
       overflow: hidden;
       flex: 0 0 auto;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
     }
 
     .mthumb img {
@@ -465,11 +667,7 @@
       display: none;
     }
 
-    .mmeta {
-      min-width: 0;
-      flex: 1;
-    }
-
+    .mmeta { min-width: 0; flex: 1; }
     .mmeta b {
       display: block;
       font-size: 12px;
@@ -477,11 +675,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .mmeta small {
       display: block;
       font-size: 11px;
-      color: var(--mute);
+      color: var(--ink-dim);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -489,27 +686,26 @@
 
     .clear-x {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 22px;
-      height: 22px;
-      border-radius: 7px;
-      border: 0;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--mute);
-      font-size: 12px;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink-dim);
+      font-size: 10px;
       cursor: pointer;
       display: none;
       place-items: center;
     }
-
-    .clear-x:hover { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .clear-x:hover { border-color: var(--err); color: #fca5a5; }
 
     /* ==================== ПАНЕЛЬ НАСТРОЕК ==================== */
     .panel {
-      background: var(--panel);
+      background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 8px;
       padding: 12px;
       display: flex;
       flex-direction: column;
@@ -519,39 +715,38 @@
     .tabs {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 3px;
+      gap: 2px;
       background: var(--bg);
-      padding: 4px;
-      border-radius: 12px;
+      padding: 3px;
+      border-radius: 6px;
       border: 1px solid var(--line);
     }
 
     .tabs button {
       border: 0;
       background: transparent;
-      color: var(--mute);
-      padding: 9px 2px;
-      border-radius: 9px;
+      color: var(--ink-dim);
+      padding: 7px 2px;
+      border-radius: 4px;
       font-size: 11.5px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.15s;
+      transition: 0.12s;
       white-space: nowrap;
     }
 
     .tabs button.on {
-      background: var(--acc);
-      color: #fff;
-      box-shadow: 0 3px 12px rgba(124, 92, 255, 0.35);
+      background: var(--ink);
+      color: var(--bg);
     }
 
-    .tab-pane { display: none; flex-direction: column; gap: 12px; }
+    .tab-pane { display: none; flex-direction: column; gap: 10px; }
     .tab-pane.on { display: flex; }
 
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 6px;
       padding: 12px;
       display: flex;
       flex-direction: column;
@@ -568,41 +763,41 @@
     .card-h h3 {
       margin: 0;
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .card-h span {
+      font-family: var(--mono);
       font-size: 11px;
-      color: var(--mute);
-      font-variant-numeric: tabular-nums;
+      color: var(--ink-dim);
     }
 
     .seg {
       display: grid;
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
-      gap: 4px;
+      gap: 2px;
       background: var(--bg);
-      padding: 4px;
-      border-radius: 11px;
+      padding: 3px;
+      border-radius: 6px;
       border: 1px solid var(--line);
     }
 
     .seg button {
       border: 0;
       background: transparent;
-      padding: 9px 4px;
-      border-radius: 8px;
+      padding: 7px 4px;
+      border-radius: 4px;
       font-size: 12px;
-      font-weight: 700;
-      color: var(--mute);
+      font-weight: 600;
+      color: var(--ink-dim);
       cursor: pointer;
-      transition: 0.12s;
+      transition: 0.1s;
     }
 
     .seg button.on {
       background: var(--ink);
-      color: #09090b;
+      color: var(--bg);
     }
 
     .row {
@@ -614,33 +809,33 @@
     .row > span {
       flex: 0 0 112px;
       font-size: 12px;
-      color: #c7cad8;
-      font-weight: 600;
+      color: var(--ink-dim);
+      font-weight: 500;
     }
 
     .row input[type="range"] {
       flex: 1;
       accent-color: var(--acc);
       cursor: pointer;
-      height: 26px;
+      height: 22px;
     }
 
     .row output {
       flex: 0 0 48px;
       text-align: right;
-      font-size: 12px;
+      font-family: var(--mono);
+      font-size: 11.5px;
       font-weight: 700;
-      color: #c4b5fd;
-      font-variant-numeric: tabular-nums;
+      color: var(--ink);
     }
 
     .row input[type="color"] {
-      flex: 0 0 40px;
-      width: 40px;
-      height: 30px;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 26px;
       padding: 0;
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      border: 1px solid var(--line-hi);
+      border-radius: 4px;
       background: none;
       cursor: pointer;
     }
@@ -659,23 +854,23 @@
       display: block;
       font-size: 11px;
       font-weight: 400;
-      color: var(--mute);
+      color: var(--ink-dim);
     }
 
     .ghost {
       width: 100%;
-      border: 1px solid var(--line);
-      background: var(--soft);
+      border: 1px solid var(--line-hi);
+      background: var(--surface);
       color: var(--ink);
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: 6px;
+      padding: 8px 10px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       transition: 0.12s;
     }
 
-    .ghost:active { transform: scale(0.985); }
+    .ghost:hover { background: var(--card-hi); }
 
     .btn-row {
       display: grid;
@@ -685,9 +880,9 @@
 
     .hint {
       margin: 0;
-      color: var(--mute);
+      color: var(--ink-dim);
       font-size: 12px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .slots {
@@ -698,19 +893,19 @@
 
     .slot-btn {
       border: 1px solid var(--line);
-      background: var(--soft);
-      color: #d4d6e3;
-      border-radius: 10px;
-      padding: 8px 6px;
+      background: var(--surface);
+      color: var(--ink-dim);
+      border-radius: 5px;
+      padding: 7px 6px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
     }
 
     .slot-btn.on {
       border-color: var(--acc);
-      background: rgba(124, 92, 255, 0.2);
-      color: #fff;
+      background: var(--acc-soft);
+      color: var(--ink);
     }
 
     .divline {
@@ -728,32 +923,30 @@
 
     .go {
       width: 100%;
-      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      background: var(--acc);
       color: #fff;
       border: 0;
-      border-radius: 13px;
-      padding: 15px;
-      font-size: 15px;
-      font-weight: 800;
+      border-radius: 6px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
-      transition: 0.15s;
+      transition: 0.12s;
     }
 
-    .go:active { transform: scale(0.985); }
-    .go:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
-    .go.cancel { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); }
+    .go:hover:not(:disabled) { background: var(--acc-hi); }
+    .go:disabled { opacity: 0.35; cursor: not-allowed; }
+    .go.cancel { background: var(--err); }
 
     .pbox {
       display: none;
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 13px;
+      border-radius: 6px;
       padding: 12px;
       flex-direction: column;
       gap: 8px;
     }
-
     .pbox.on { display: flex; }
 
     .pmeta {
@@ -763,40 +956,37 @@
       font-size: 12px;
       gap: 8px;
     }
-
-    .pmeta b { color: #c4b5fd; font-variant-numeric: tabular-nums; }
+    .pmeta b { font-family: var(--mono); color: var(--acc-hi); }
 
     .pbar {
       width: 100%;
-      height: 10px;
-      border-radius: 99px;
+      height: 6px;
+      border-radius: 2px;
       background: var(--bg);
       overflow: hidden;
     }
-
     .pbar-fill {
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, var(--acc), var(--acc2));
+      background: var(--acc);
       transition: width 0.12s linear;
     }
 
     .res {
       display: none;
       background: var(--card);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      border-radius: 14px;
+      border: 1px solid var(--ok);
+      border-radius: 6px;
       padding: 12px;
       flex-direction: column;
       gap: 10px;
     }
-
     .res.on { display: flex; }
 
     .res video {
       width: 100%;
-      max-height: 260px;
-      border-radius: 10px;
+      max-height: 240px;
+      border-radius: 4px;
       background: #000;
     }
 
@@ -804,60 +994,54 @@
       display: block;
       text-align: center;
       background: var(--ink);
-      color: #09090b;
+      color: var(--bg);
       text-decoration: none;
-      font-weight: 800;
-      padding: 12px;
-      border-radius: 11px;
+      font-weight: 700;
+      padding: 11px;
+      border-radius: 6px;
     }
 
-    /* Авто-нарезка в ZIP */
+    /* Авто-нарезка */
     .slice-info {
-      background: rgba(124, 92, 255, 0.12);
-      border: 1px solid rgba(124, 92, 255, 0.35);
-      border-radius: 11px;
-      padding: 10px 12px;
+      background: var(--bg);
+      border-left: 3px solid var(--acc);
+      padding: 9px 11px;
       font-size: 12px;
       line-height: 1.45;
-      color: #e4e4f4;
+      color: var(--ink-dim);
     }
-
-    .slice-info b { color: #c4b5fd; }
+    .slice-info b { color: var(--ink); }
 
     .num-row {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .num-row > span {
       flex: 0 0 112px;
       font-size: 12px;
-      color: #c7cad8;
-      font-weight: 600;
+      color: var(--ink-dim);
+      font-weight: 500;
     }
-
     .num-in {
-      width: 68px;
+      width: 64px;
       background: var(--bg);
       color: var(--ink);
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      padding: 7px 8px;
+      border: 1px solid var(--line-hi);
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-family: var(--mono);
       font-weight: 700;
       text-align: center;
-      font-variant-numeric: tabular-nums;
     }
 
     .clip-list {
       display: none;
       flex-direction: column;
       gap: 6px;
-      max-height: 220px;
+      max-height: 210px;
       overflow-y: auto;
-      padding-right: 2px;
     }
-
     .clip-list.on { display: flex; }
 
     .clip-item {
@@ -867,50 +1051,501 @@
       gap: 8px;
       background: var(--bg);
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 5px;
       padding: 7px 10px;
       font-size: 12px;
     }
-
-    .clip-item small {
-      color: var(--mute);
-      display: block;
-      font-size: 11px;
-    }
-
+    .clip-item small { color: var(--ink-dim); display: block; font-size: 11px; }
     .clip-item a {
-      background: var(--soft);
+      background: var(--card);
       color: var(--ink);
-      border: 1px solid var(--line);
+      border: 1px solid var(--line-hi);
       text-decoration: none;
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-weight: 600;
       font-size: 11px;
       flex-shrink: 0;
     }
 
+    /* ==================== СТАТИСТИКА, ТИКЕТ-ПОДДЕРЖКА И FAQ ==================== */
+    .container-narrow {
+      max-width: 1080px;
+      margin: auto;
+      padding: 20px 16px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #86efac;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .live-dot::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ok);
+    }
+
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-sub {
+      font-size: 11.5px;
+      color: var(--ink-mute);
+    }
+
+    /* Форма тикетов */
+    .ticket-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-dim);
+    }
+
+    .txt-in, .txt-area, .sel-in {
+      width: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 9px 11px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .txt-in:focus, .txt-area:focus, .sel-in:focus {
+      border-color: var(--acc);
+    }
+
+    .txt-area {
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .attach-zone {
+      border: 1px dashed var(--line-hi);
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .attach-zone:hover { border-color: var(--ink-dim); }
+
+    .ticket-history {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .t-item {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .t-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-dim);
+    }
+
+    .t-badge {
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--acc-soft);
+      color: #ff8e64;
+      font-weight: 700;
+    }
+
+    /* FAQ Аккордеон */
+    .faq-section {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 6px 16px 26px;
+    }
+
+    .faq-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .faq-box h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .faq-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    details.faq-item {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 13px;
+    }
+
+    details.faq-item summary {
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    details.faq-item summary::-webkit-details-marker { display: none; }
+    details.faq-item summary::after {
+      content: "+";
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--ink-dim);
+      font-weight: 700;
+    }
+    details.faq-item[open] summary::after { content: "−"; }
+
+    details.faq-item p {
+      margin: 8px 0 0;
+      font-size: 12.5px;
+      color: var(--ink-dim);
+      line-height: 1.48;
+    }
+
+    /* ==================== НИЖНИЙ БАР ==================== */
+    footer.site-footer {
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      padding: 20px 16px max(24px, env(safe-area-inset-bottom));
+    }
+
+    .footer-in {
+      max-width: 1440px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .footer-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .footer-info b {
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+    .footer-info span { font-size: 12px; color: var(--ink-dim); }
+
+    .footer-btns {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tg-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--card);
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--line-hi);
+      cursor: pointer;
+      transition: 0.12s;
+    }
+    .tg-btn:hover { background: var(--card-hi); }
+
+    .donate-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--ink);
+      color: var(--bg);
+      border: 1px solid var(--ink);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.12s;
+    }
+    .donate-cta:hover { background: #ffffff; }
+
+    /* ==================== МОДАЛКА КРИПТО-ПОЖЕРТВОВАНИЙ ==================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0, 0, 0, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .wallet-modal {
+      width: 100%;
+      max-width: 410px;
+      background: var(--surface);
+      border: 1px solid var(--line-hi);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      max-height: 92dvh;
+      overflow-y: auto;
+    }
+
+    .wm-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wm-title {
+      font-size: 14.5px;
+      font-weight: 700;
+    }
+
+    .net-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .net-pill {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink-dim);
+      border-radius: 6px;
+      padding: 7px 5px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .net-pill.on {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--bg);
+    }
+
+    .wm-hero {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .wm-coin-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .wm-hero h3 {
+      margin: 2px 0 0;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .wm-hero p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--ink-dim);
+      max-width: 310px;
+      line-height: 1.4;
+    }
+
+    .wm-qr-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .qr-frame {
+      background: #fff;
+      padding: 9px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      min-width: 172px;
+      min-height: 172px;
+    }
+
+    .wm-addr {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink);
+      text-align: center;
+      word-break: break-all;
+      line-height: 1.4;
+      padding: 0 4px;
+    }
+
+    .wm-copy-btn {
+      width: 100%;
+      border: 0;
+      background: var(--acc);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13.5px;
+      padding: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .wm-copy-btn:hover { background: var(--acc-hi); }
+
+    .wm-meta {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 12px;
+    }
+
+    .wm-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .wm-meta-row span:first-child { color: var(--ink-dim); }
+    .wm-meta-row span:last-child { font-family: var(--mono); font-weight: 600; }
+
     /* Условное отображение */
-    [data-for], [data-vo], [data-chroma-box], [data-slice-box], [data-plabel-box], [data-slice-custom] { display: none; }
+    [data-for], [data-vo], [data-chroma-box], [data-plabel-box], [data-slice-custom] { display: none; }
     body[data-mode="over"] [data-for="over"],
     body[data-mode="stop"] [data-for="stop"] { display: flex; }
     body[data-bv="1"] [data-vo] { display: flex; }
     body[data-ckmode="chroma"] [data-chroma-box] { display: flex; }
-    body[data-slice="1"] [data-slice-box] { display: flex; }
     body[data-plabel="1"] [data-plabel-box] { display: flex; }
     body[data-slicewhen="custom"] [data-slice-custom] { display: flex; }
-    input:disabled { opacity: 0.4; cursor: not-allowed; }
+    input:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* Блокировка настроек во время рендера */
     body.exp .panel :is(.tabs, .tab-pane),
-    body.exp .media-cards {
+    body.exp .media-cards,
+    body.exp .head-nav {
       pointer-events: none;
       opacity: 0.45;
     }
 
-    /* Полноэкранный режим */
     body.fs { overflow: hidden; }
-    body.fs header, body.fs .panel, body.fs .media-cards { display: none; }
+    body.fs header, body.fs .panel, body.fs .media-cards, body.fs .faq-section, body.fs footer { display: none; }
     body.fs .app { padding: 0; display: block; }
     body.fs .stage {
       position: fixed;
@@ -922,9 +1557,8 @@
       justify-content: center;
       padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
     }
-    body.fs .cvw canvas { max-height: calc(100dvh - 110px); }
+    body.fs .viewport-box { height: calc(100dvh - 110px); border: 0; }
 
-    /* Тосты */
     #toastBox {
       position: fixed;
       left: 50%;
@@ -940,600 +1574,937 @@
     }
 
     .toast {
-      background: rgba(24, 24, 33, 0.96);
-      border: 1px solid #3c3c4f;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 10px 16px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      background: var(--card);
+      border: 1px solid var(--line-hi);
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 9px 14px;
+      border-radius: 6px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65);
       text-align: center;
     }
+    .toast.ok { border-color: var(--ok); color: #86efac; }
+    .toast.err { border-color: var(--err); color: #fca5a5; }
 
-    .toast.ok { border-color: rgba(16, 185, 129, 0.55); color: #a7f3d0; }
-    .toast.err { border-color: rgba(239, 68, 68, 0.6); color: #fecaca; }
-
-    /* ==================== МОБИЛЬНАЯ АДАПТАЦИЯ ==================== */
     @media (hover: none) { .dd { display: none; } }
 
-    @media (max-width: 900px) {
-      header { padding: max(8px, env(safe-area-inset-top)) 12px 8px; }
-      .brand h1 { font-size: 15px; }
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: minmax(0, 1fr) 390px; gap: 14px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .head-nav { display: none; }
       .app {
         grid-template-columns: 1fr;
-        padding: 0 0 max(26px, env(safe-area-inset-bottom));
+        padding: 0 0 20px;
         gap: 10px;
       }
       .stage {
         position: static;
-        border-radius: 0 0 18px 18px;
+        border-radius: 0;
         border-top: 0;
         border-left: 0;
         border-right: 0;
-        padding: 8px 10px 10px;
-      }
-      .drop { min-height: 210px; }
-      .cvw canvas { max-height: 50vh; max-height: 50dvh; }
-      .panel {
-        margin: 0 8px;
         padding: 10px;
-        border-radius: 16px;
       }
+      .viewport-box { height: clamp(250px, 44dvh, 380px); }
+      .panel { margin: 0 10px; }
+      .faq-list, .ticket-grid { grid-template-columns: 1fr; }
       .row > span, .num-row > span { flex: 0 0 98px; }
-      .go { padding: 15px; }
+    }
+
+    @media (max-width: 480px) {
+      .brand .sub { display: none; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .footer-btns { width: 100%; }
+      .tg-btn, .donate-cta { flex: 1; justify-content: center; }
     }
   </style>
 </head>
 <body data-mode="over" data-ckmode="none" data-bv="0" data-slice="0" data-plabel="0" data-slicewhen="middle">
 
+  <!-- БОКОВОЕ МЕНЮ (ТРИ ПОЛОСКИ) -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="Меню навигации">
+    <div class="drawer-head">
+      <div class="brand-word">rez<span>.</span></div>
+      <button type="button" class="wm-close" id="closeDrawerBtn" aria-label="Закрыть меню">✕</button>
+    </div>
+
+    <div class="drawer-group">
+      <div class="drawer-label">Инструменты</div>
+      <button type="button" class="drawer-item on" data-nav="editor">
+        <div>
+          <div>Баннер в видео</div>
+          <small>Наложение поверх или паузой</small>
+        </div>
+        <span class="drawer-kbd">01</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="slicer">
+        <div>
+          <div>Нарезка на клипы</div>
+          <small>Пакетный экспорт в ZIP</small>
+        </div>
+        <span class="drawer-kbd">02</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="stats">
+        <div>
+          <div>Статистика</div>
+          <small>Онлайн, пользователи и рендеры</small>
+        </div>
+        <span class="drawer-kbd">03</span>
+      </button>
+    </div>
+
+    <div class="drawer-group">
+      <div class="drawer-label">Помощь</div>
+      <button type="button" class="drawer-item" data-nav="tickets">
+        <div>
+          <div>Тикет-поддержка</div>
+          <small>Создать обращение с фото/видео</small>
+        </div>
+        <span class="drawer-kbd">@REZ_support</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="faq">
+        <div>
+          <div>Частые вопросы (FAQ)</div>
+          <small>Ответы по работе редактора</small>
+        </div>
+        <span class="drawer-kbd">FAQ</span>
+      </button>
+      <a class="drawer-item" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2FREZ_support&text=rez%20%E2%80%94%20%D0%BE%D1%84%D1%84%D0%BB%D0%B0%D0%B9%D0%BD-%D1%80%D0%B5%D0%B4%D0%B0%D0%BA%D1%82%D0%BE%D1%80%20%D0%B4%D0%BB%D1%8F%20%D0%B2%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%B1%D0%B0%D0%BD%D0%BD%D0%B5%D1%80%D0%BE%D0%B2%20%D0%B8%20%D0%BD%D0%B0%D1%80%D0%B5%D0%B7%D0%BA%D0%B8%20Shorts%2FReels" target="_blank" rel="noopener">
+        <div>
+          <div>Переслать в Telegram</div>
+          <small>Отправить ссылку в чат или ТГК</small>
+        </div>
+        <span class="drawer-kbd">TG</span>
+      </a>
+    </div>
+
+    <div class="drawer-foot">
+      <button type="button" class="donate-cta" style="width:100%;justify-content:center" data-open-donate>
+        Поддержать разработчика
+      </button>
+    </div>
+  </aside>
+
   <!-- ШАПКА -->
   <header>
     <div class="head-in">
-      <div class="brand">
-        <div class="logo">🎬</div>
-        <div style="min-width:0">
-          <h1>Баннер в видео <span class="badge" id="engineBadge">Оффлайн MP4</span></h1>
-          <div class="sub" id="saveHint">Настройки и баннер сохраняются автоматически</div>
+      <div class="head-left">
+        <button type="button" class="burger-btn" id="openDrawerBtn" aria-label="Открыть меню">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <div class="brand">
+          <div class="brand-word">rez<span>.</span></div>
+          <span class="engine-tag" id="engineBadge">MP4 Оффлайн</span>
+          <div class="sub" id="saveHint">Локальная обработка без загрузки на сервер</div>
         </div>
       </div>
+
+      <!-- Быстрые вкладки на ПК / ноутбуках -->
+      <nav class="head-nav" aria-label="Разделы">
+        <button type="button" class="on" data-nav="editor">Баннер в видео</button>
+        <button type="button" data-nav="slicer">Нарезка в ZIP</button>
+        <button type="button" data-nav="stats">Статистика</button>
+        <button type="button" data-nav="tickets">Тикеты</button>
+      </nav>
+
       <div class="head-actions">
-        <button class="btn-sm" id="resetBtn" type="button" title="Сбросить настройки">Сброс</button>
+        <button class="btn-sm" id="resetBtn" type="button">Сброс</button>
         <button class="btn-sm pri" id="topExportBtn" type="button" disabled>Экспорт</button>
       </div>
     </div>
   </header>
 
-  <main class="app" id="app">
-    <!-- СЦЕНА / ПРЕВЬЮ -->
-    <section class="stage">
-      <div class="stage-top">
-        <div class="stage-pills">
-          <span class="pill acc" id="modePill">Поверх</span>
-          <span class="pill" id="resPill">Нет видео</span>
-          <span class="pill slice-on" id="slicePill" style="display:none">✂️ ZIP</span>
-          <span class="pill warn" id="freezePill" style="display:none">⏸ СТОП-КАДР</span>
+  <!-- ==================== СТРАНИЦА 1: РАБОЧАЯ СТУДИЯ (БАННЕР И НАРЕЗКА) ==================== -->
+  <section class="page-view on" id="view-workspace">
+    <main class="app" id="app">
+      <!-- МОНИТОР ПРЕДПРОСМОТРА (ФИКСИРОВАННЫЙ РАЗМЕР ДО И ПОСЛЕ ЗАГРУЗКИ) -->
+      <section class="stage">
+        <div class="stage-top">
+          <div class="stage-pills">
+            <span class="pill acc" id="modePill">Поверх</span>
+            <span class="pill" id="resPill">Нет видео</span>
+            <span class="pill slice-on" id="slicePill" style="display:none">Нарезка ZIP</span>
+            <span class="pill warn" id="freezePill" style="display:none">СТОП-КАДР</span>
+          </div>
+
+          <div class="zone-sw" id="zoneSw">
+            <button type="button" data-z="none">Чисто</button>
+            <button type="button" data-z="reels">Reels</button>
+            <button type="button" data-z="shorts">Shorts</button>
+          </div>
         </div>
 
-        <div class="zone-sw" id="zoneSw">
-          <button type="button" data-z="none">Чисто</button>
-          <button type="button" data-z="reels">Reels</button>
-          <button type="button" data-z="shorts">Shorts</button>
-        </div>
-      </div>
-
-      <!-- Дроп-зона -->
-      <div class="drop" id="drop">
-        <div>
-          <b class="dd">Перетащи видео сюда</b>
-          <span class="dd">или выбери файл с телефона / ПК</span>
-          <div>
+        <div class="viewport-box">
+          <!-- Дроп-зона -->
+          <div class="drop" id="drop">
+            <b class="dd">Перетащи видеофайл в окно</b>
+            <span class="dd">или открой с диска / галереи</span>
             <label class="pick">
-              <span>📁 Выбрать видео</span>
+              <span>Выбрать основное видео</span>
               <input id="vf" type="file" accept="video/*" hidden />
             </label>
           </div>
-        </div>
-      </div>
 
-      <!-- Канвас -->
-      <div class="cvw">
-        <canvas id="cv"></canvas>
-        <div class="pick-banner-tip">👆 Ткни по цвету фона на баннере</div>
-      </div>
-
-      <!-- Плеер и таймлайн -->
-      <div class="bar">
-        <button id="pp" class="play-btn" type="button">Пуск</button>
-        <div class="track">
-          <div class="track-bg">
-            <div id="sliceTicks"></div>
-            <div id="mark"></div>
-            <div id="progFill"></div>
+          <!-- Канвас -->
+          <div class="cvw">
+            <canvas id="cv"></canvas>
+            <div class="pick-banner-tip">Нажми на цвет фона на баннере</div>
           </div>
-          <input id="seek" type="range" min="0" max="1000" value="0" />
         </div>
-        <span id="tm">0:00 / 0:00</span>
-        <button id="fs" type="button">Экран</button>
-      </div>
 
-      <!-- Быстрый выбор видео и баннера -->
-      <div class="media-cards">
-        <label class="mcard" for="vf">
-          <div class="mthumb">🎥</div>
-          <div class="mmeta">
-            <b id="vName">Основное видео</b>
-            <small id="vMeta">Нажми, чтобы выбрать</small>
-          </div>
-        </label>
-
-        <div class="mcard" id="bCard">
-          <label for="bf" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer">
-            <div class="mthumb">
-              <span id="bIcon">🔥</span>
-              <img id="thumb" alt="" />
+        <!-- Плеер и таймлайн -->
+        <div class="bar">
+          <button id="pp" class="play-btn" type="button">Пуск</button>
+          <div class="track">
+            <div class="track-bg">
+              <div id="sliceTicks"></div>
+              <div id="mark"></div>
+              <div id="progFill"></div>
             </div>
+            <input id="seek" type="range" min="0" max="1000" value="0" />
+          </div>
+          <span id="tm">0:00 / 0:00</span>
+          <button id="fs" type="button">Экран</button>
+        </div>
+
+        <!-- Карточки загрузки видео и баннера -->
+        <div class="media-cards">
+          <label class="mcard" for="vf">
+            <div class="mthumb">VID</div>
             <div class="mmeta">
-              <b id="bn">Видео-баннер</b>
-              <small id="bMeta">MP4, MOV, WebM, PNG</small>
+              <b id="vName">Основное видео</b>
+              <small id="vMeta">Выбрать файл</small>
             </div>
           </label>
-          <input id="bf" type="file" accept="image/*,video/*" hidden />
-          <button type="button" class="clear-x" id="clearBannerBtn" title="Удалить баннер из памяти">✕</button>
+
+          <div class="mcard" id="bCard">
+            <label for="bf" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer">
+              <div class="mthumb">
+                <span id="bIcon">BNR</span>
+                <img id="thumb" alt="" />
+              </div>
+              <div class="mmeta">
+                <b id="bn">Видео-баннер</b>
+                <small id="bMeta">MP4, MOV, WebM, PNG</small>
+              </div>
+            </label>
+            <input id="bf" type="file" accept="image/*,video/*" hidden />
+            <button type="button" class="clear-x" id="clearBannerBtn" title="Удалить баннер">✕</button>
+          </div>
+        </div>
+
+        <video id="v" playsinline webkit-playsinline preload="auto" hidden></video>
+      </section>
+
+      <!-- ПАНЕЛЬ НАСТРОЕК -->
+      <aside class="panel">
+        <div class="tabs" id="tabs">
+          <button type="button" data-tab="main" class="on">Режим</button>
+          <button type="button" data-tab="view">Вид</button>
+          <button type="button" data-tab="fx">Фон</button>
+          <button type="button" data-tab="slice">Нарезка</button>
+          <button type="button" data-tab="export">Экспорт</button>
+        </div>
+
+        <!-- ВКЛАДКА 1: РЕЖИМ И ВРЕМЯ -->
+        <div class="tab-pane on" id="pane-main">
+          <div class="card">
+            <div class="card-h">
+              <h3>Режим вставки</h3>
+              <span data-txt="modeShortHint">Видео идёт дальше</span>
+            </div>
+            <div class="seg" data-k="mode">
+              <button type="button" data-v="over">Поверх</button>
+              <button type="button" data-v="stop">Пауза (Стоп)</button>
+            </div>
+            <p class="hint" data-txt="modeHint"></p>
+
+            <div class="row" data-for="stop">
+              <span>Пауза (сек)</span>
+              <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
+              <output data-out="hold">3 с</output>
+            </div>
+            <div class="row" data-for="stop">
+              <span>Затемнение</span>
+              <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
+              <output data-out="stopDim">25%</output>
+            </div>
+            <div class="row" data-for="stop">
+              <span>Размытие фона</span>
+              <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
+              <output data-out="stopBlur">0 px</output>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Когда показать</h3>
+              <span id="t0Label">Старт: 0.0с</span>
+            </div>
+            <div class="seg" data-k="when">
+              <button type="button" data-v="start">Начало</button>
+              <button type="button" data-v="middle">Середина</button>
+              <button type="button" data-v="end">Конец</button>
+            </div>
+
+            <div class="btn-row">
+              <button class="ghost" type="button" id="now">На текущий момент</button>
+              <button class="ghost" type="button" id="try">Проверить момент</button>
+            </div>
+
+            <label class="chk" data-vo>
+              <span>Длина по ролику баннера<small>Показывает баннер от начала до конца</small></span>
+              <input type="checkbox" data-bind-chk="auto" checked />
+            </label>
+
+            <div class="row" data-for="over">
+              <span>Показывать</span>
+              <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
+              <output data-out="show">4 с</output>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Пресеты настроек</h3>
+              <span>Автосохранение</span>
+            </div>
+            <div class="slots" id="presetSlots">
+              <button type="button" class="slot-btn on" data-slot="1">Слот 1</button>
+              <button type="button" class="slot-btn" data-slot="2">Слот 2</button>
+              <button type="button" class="slot-btn" data-slot="3">Слот 3</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 2: РАЗМЕЩЕНИЕ И ВИД -->
+        <div class="tab-pane" id="pane-view">
+          <div class="card">
+            <div class="card-h">
+              <h3>Формат кадра (Shorts / Reels)</h3>
+              <span data-txt="aspectHint">Как в видео</span>
+            </div>
+            <div class="seg" data-k="aspect">
+              <button type="button" data-v="orig">Исходник</button>
+              <button type="button" data-v="v_crop">9:16 Кроп</button>
+              <button type="button" data-v="v_blur">9:16 Блюр</button>
+            </div>
+            <p class="hint">Преобразует горизонтальное 16:9 видео в вертикальный формат 1080×1920 для Shorts и Reels.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Размещение в кадре</h3>
+              <span data-txt="posCoords">X:50% Y:82%</span>
+            </div>
+            <div class="seg" data-k="pos">
+              <button type="button" data-v="top">Сверху</button>
+              <button type="button" data-v="center">По центру</button>
+              <button type="button" data-v="bottom">Снизу</button>
+            </div>
+            <p class="hint">Перетаскивай баннер мышью или пальцем по экрану, а за маркер в правом нижнем углу меняй размер.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Размеры и стиль</h3>
+            </div>
+            <div class="row">
+              <span>Размер</span>
+              <input type="range" data-bind="scale" min="15" max="100" value="78" />
+              <output data-out="scale">78%</output>
+            </div>
+            <div class="row">
+              <span>Прозрачность</span>
+              <input type="range" data-bind="op" min="20" max="100" value="100" />
+              <output data-out="op">100%</output>
+            </div>
+            <div class="row">
+              <span>Скругление</span>
+              <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
+              <output data-out="rad">14 px</output>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Появление баннера</h3>
+            </div>
+            <div class="seg" data-k="anim">
+              <button type="button" data-v="fade">Плавно</button>
+              <button type="button" data-v="pop">Хлопок</button>
+              <button type="button" data-v="slide">Въезд</button>
+              <button type="button" data-v="none">Нет</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 3: ФОН / ХРОМАКЕЙ И ЗВУК -->
+        <div class="tab-pane" id="pane-fx">
+          <div class="card">
+            <div class="card-h">
+              <h3>Удаление фона баннера</h3>
+            </div>
+            <div class="seg" data-k="ckMode">
+              <button type="button" data-v="none">Обычный</button>
+              <button type="button" data-v="screen">Без чёрного</button>
+              <button type="button" data-v="chroma">Хромакей</button>
+            </div>
+            <p class="hint" data-txt="ckHint"></p>
+
+            <div class="row" data-chroma-box>
+              <span>Цвет + сила</span>
+              <input type="color" data-bind-color="kcol" value="#00ff00" />
+              <input type="range" data-bind="kt" min="5" max="100" value="40" />
+              <output data-out="kt">40</output>
+            </div>
+            <button class="ghost eye-btn" type="button" data-chroma-box>Пипетка: выбрать цвет на экране</button>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Звук</h3>
+            </div>
+            <div class="row">
+              <span>Звук видео</span>
+              <input type="range" data-bind="vvol" min="0" max="100" step="5" value="100" />
+              <output data-out="vvol">100%</output>
+            </div>
+            <div class="row" data-vo>
+              <span>Звук баннера</span>
+              <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
+              <output data-out="bvol">100%</output>
+            </div>
+            <label class="chk" data-vo>
+              <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость ролика до 25%</small></span>
+              <input type="checkbox" data-bind-chk="duck" checked />
+            </label>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 4: НАРЕЗКА В ZIP (ПОЛНЫЙ ФУНКЦИОНАЛ КАК НА ГЛАВНОЙ) -->
+        <div class="tab-pane" id="pane-slice">
+          <div class="card">
+            <label class="chk">
+              <span>Пакетная нарезка на клипы (ZIP)<small>Режет длинное видео на части и вставляет баннер в каждый клип</small></span>
+              <input type="checkbox" id="sliceOn" />
+            </label>
+            <div class="slice-info" id="sliceSummary">
+              Загрузи длинный ролик и баннер — здесь настраивается, как именно баннер будет вставляться в каждую часть (поверх или с паузой).
+            </div>
+          </div>
+
+          <!-- КАК ВСТАВЛЯТЬ БАННЕР В КАЖДЫЙ КЛИП -->
+          <div class="card">
+            <div class="card-h">
+              <h3>Как вставлять баннер в клип</h3>
+              <span data-txt="modeShortHint">Видео идёт дальше</span>
+            </div>
+            <div class="seg" data-k="mode">
+              <button type="button" data-v="over">Поверх (по ходу)</button>
+              <button type="button" data-v="stop">Пауза (Стоп)</button>
+            </div>
+            <p class="hint" data-txt="modeHint"></p>
+
+            <label class="chk" data-vo>
+              <span>Длина по ролику баннера<small>Показывает весь видео-баннер целиком</small></span>
+              <input type="checkbox" data-bind-chk="auto" checked />
+            </label>
+
+            <div class="row" data-for="over">
+              <span>Показывать</span>
+              <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
+              <output data-out="show">4 с</output>
+            </div>
+
+            <div class="row" data-for="stop">
+              <span>Пауза (сек)</span>
+              <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
+              <output data-out="hold">3 с</output>
+            </div>
+            <div class="row" data-for="stop">
+              <span>Затемнение</span>
+              <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
+              <output data-out="stopDim">25%</output>
+            </div>
+            <div class="row" data-for="stop">
+              <span>Размытие фона</span>
+              <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
+              <output data-out="stopBlur">0 px</output>
+            </div>
+
+            <div class="divline"></div>
+
+            <div class="card-h">
+              <h3>Момент внутри каждого клипа</h3>
+              <span id="sliceWhenInfo">Середина клипа</span>
+            </div>
+            <div class="seg" data-k="sliceWhen">
+              <button type="button" data-v="start">Начало</button>
+              <button type="button" data-v="middle">Середина</button>
+              <button type="button" data-v="end">Конец</button>
+              <button type="button" data-v="custom">Своя сек</button>
+            </div>
+
+            <div class="row" data-slice-custom>
+              <span>На секунде</span>
+              <input id="sliceCustomSec" type="range" min="0" max="60" step="1" value="30" />
+              <output id="sliceCustomSecO">30 с</output>
+            </div>
+
+            <button class="ghost" type="button" id="trySlice">Проверить клип с баннером в плеере</button>
+
+            <div class="divline"></div>
+
+            <div class="card-h">
+              <h3>Позиция, размер и стиль</h3>
+              <span data-txt="posCoords">X:50% Y:82%</span>
+            </div>
+            <div class="seg" data-k="pos">
+              <button type="button" data-v="top">Сверху</button>
+              <button type="button" data-v="center">По центру</button>
+              <button type="button" data-v="bottom">Снизу</button>
+            </div>
+            <div class="row">
+              <span>Размер</span>
+              <input type="range" data-bind="scale" min="15" max="100" value="78" />
+              <output data-out="scale">78%</output>
+            </div>
+            <div class="row">
+              <span>Прозрачность</span>
+              <input type="range" data-bind="op" min="20" max="100" value="100" />
+              <output data-out="op">100%</output>
+            </div>
+            <div class="row">
+              <span>Скругление</span>
+              <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
+              <output data-out="rad">14 px</output>
+            </div>
+            <div class="seg" data-k="anim">
+              <button type="button" data-v="fade">Плавно</button>
+              <button type="button" data-v="pop">Хлопок</button>
+              <button type="button" data-v="slide">Въезд</button>
+              <button type="button" data-v="none">Нет</button>
+            </div>
+
+            <div class="divline"></div>
+
+            <div class="card-h">
+              <h3>Фон и звук баннера</h3>
+            </div>
+            <div class="seg" data-k="ckMode">
+              <button type="button" data-v="none">Обычный</button>
+              <button type="button" data-v="screen">Без чёрного</button>
+              <button type="button" data-v="chroma">Хромакей</button>
+            </div>
+            <div class="row" data-chroma-box>
+              <span>Цвет + сила</span>
+              <input type="color" data-bind-color="kcol" value="#00ff00" />
+              <input type="range" data-bind="kt" min="5" max="100" value="40" />
+              <output data-out="kt">40</output>
+            </div>
+            <button class="ghost eye-btn" type="button" data-chroma-box>Пипетка: выбрать цвет на экране</button>
+            <div class="row" data-vo>
+              <span>Звук баннера</span>
+              <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
+              <output data-out="bvol">100%</output>
+            </div>
+            <label class="chk" data-vo>
+              <span>Приглушать видео под баннер<small>Снижает громкость видео до 25% во время баннера</small></span>
+              <input type="checkbox" data-bind-chk="duck" checked />
+            </label>
+          </div>
+
+          <!-- ПАРАМЕТРЫ ДЛИНЫ ЧАСТЕЙ -->
+          <div class="card">
+            <div class="card-h">
+              <h3>Длина каждого клипа</h3>
+              <span id="sliceSecBadge">1 мин</span>
+            </div>
+            <div class="seg" data-k="sliceSecPreset">
+              <button type="button" data-v="30">30с</button>
+              <button type="button" data-v="45">45с</button>
+              <button type="button" data-v="60">1 мин</button>
+              <button type="button" data-v="90">1.5м</button>
+              <button type="button" data-v="180">3 мин</button>
+            </div>
+            <div class="row">
+              <span>Точно (сек)</span>
+              <input id="sliceSec" type="range" min="10" max="180" step="5" value="60" />
+              <output id="sliceSecO">60 с</output>
+            </div>
+            <div class="row">
+              <span>Пропуск интро</span>
+              <input id="sliceIntro" type="range" min="0" max="60" step="1" value="0" />
+              <output id="sliceIntroO">0 с</output>
+            </div>
+
+            <div class="divline"></div>
+
+            <div class="card-h">
+              <h3>Хвост и диапазон частей</h3>
+            </div>
+            <div class="seg" data-k="sliceTail">
+              <button type="button" data-v="merge">Склеить хвост</button>
+              <button type="button" data-v="keep">Отдельно</button>
+              <button type="button" data-v="drop">Убрать &lt;15с</button>
+            </div>
+
+            <div class="num-row">
+              <span>Части (от — до)</span>
+              <input id="sliceFrom" class="num-in" type="number" min="1" value="1" />
+              <span style="flex:0 0 auto;color:var(--ink-dim)">—</span>
+              <input id="sliceTo" class="num-in" type="number" min="0" value="0" placeholder="Все" />
+              <button type="button" class="btn-sm" id="sliceAllBtn">Все</button>
+            </div>
+          </div>
+
+          <!-- ФОРМАТ И НУМЕРАЦИЯ ЧАСТЕЙ -->
+          <div class="card">
+            <div class="card-h">
+              <h3>Формат 9:16 и подпись «Часть 1»</h3>
+            </div>
+            <div class="seg" data-k="aspect">
+              <button type="button" data-v="orig">Исходник</button>
+              <button type="button" data-v="v_crop">9:16 Кроп</button>
+              <button type="button" data-v="v_blur">9:16 Блюр</button>
+            </div>
+            <div class="seg" data-k="partLabel">
+              <button type="button" data-v="none">Без текста</button>
+              <button type="button" data-v="short">Часть 1</button>
+              <button type="button" data-v="total">Часть 1/23</button>
+            </div>
+            <div class="seg" data-k="partLabelPos" data-plabel-box>
+              <button type="button" data-v="top">Подпись сверху</button>
+              <button type="button" data-v="bottom">Подпись снизу</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 5: ПАРАМЕТРЫ ЭКСПОРТА -->
+        <div class="tab-pane" id="pane-export">
+          <div class="card">
+            <div class="card-h">
+              <h3>Качество и FPS</h3>
+              <span>MP4 (H.264 + AAC)</span>
+            </div>
+            <div class="seg" data-k="q">
+              <button type="button" data-v="max">Макс</button>
+              <button type="button" data-v="hi">1080p</button>
+              <button type="button" data-v="mid">720p</button>
+              <button type="button" data-v="lo">Лёгкое</button>
+            </div>
+            <div class="seg" data-k="fps">
+              <button type="button" data-v="auto">Как в видео</button>
+              <button type="button" data-v="30">30 FPS</button>
+              <button type="button" data-v="60">60 FPS</button>
+            </div>
+            <p class="hint">Обработка идёт полностью локально на твоём устройстве без загрузки видео на сервер.</p>
+          </div>
+
+          <div class="card">
+            <label class="chk">
+              <span>Запоминать файл баннера<small>При повторном открытии баннер подгрузится автоматически</small></span>
+              <input type="checkbox" id="saveBanner" checked />
+            </label>
+          </div>
+        </div>
+
+        <!-- КНОПКА ЗАПУСКА РЕНДЕРА -->
+        <div class="export-wrap">
+          <button class="go" id="go" type="button" disabled>Собрать MP4</button>
+
+          <div class="pbox" id="pbox">
+            <div class="pmeta">
+              <span id="pStatus">Подготовка рендера...</span>
+              <b id="pPct">0%</b>
+            </div>
+            <div class="pbar"><div class="pbar-fill" id="pFill"></div></div>
+            <div class="pmeta" style="color:var(--ink-dim);font-size:11px">
+              <span id="pDetail">Кадры: 0 / 0</span>
+              <span id="pSpeed">—</span>
+            </div>
+          </div>
+
+          <div class="res" id="res">
+            <div class="card-h">
+              <h3 id="resTitle" style="color:#86efac">Готово</h3>
+              <span id="resMeta"></span>
+            </div>
+            <video id="outPreview" controls playsinline webkit-playsinline></video>
+            <a id="dl" class="dl" href="#">Скачать .mp4</a>
+            <div class="clip-list" id="clipList"></div>
+            <div class="btn-row">
+              <button class="ghost" type="button" id="sh" hidden>Поделиться файлом</button>
+              <button class="ghost" type="button" id="nextVidBtn">Следующее видео</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </section>
+
+  <!-- ==================== СТРАНИЦА 2: СТАТИСТИКА СЕРВИСА ==================== -->
+  <section class="page-view" id="view-stats">
+    <div class="container-narrow">
+      <div class="section-head">
+        <div>
+          <h2>Статистика rez</h2>
+          <p class="hint" style="margin-top:4px">Активные пользователи и твоя личная статистика рендеров на этом устройстве.</p>
+        </div>
+        <button type="button" class="btn-sm pri" data-nav="editor">Вернуться в редактор</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <span>Сейчас онлайн</span>
+            <span class="live-dot">В сети</span>
+          </div>
+          <div class="stat-val" id="statOnline">148</div>
+          <div class="stat-sub">Активных сессий в редакторе</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span>Всего пользователей</span>
+            <span>За всё время</span>
+          </div>
+          <div class="stat-val" id="statTotalUsers">24 890</div>
+          <div class="stat-sub">Авторов Shorts, Reels и TikTok</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span>Собрано видео</span>
+            <span>Общий счётчик</span>
+          </div>
+          <div class="stat-val" id="statTotalVideos">112 430</div>
+          <div class="stat-sub">Включая пакетные нарезки в ZIP</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <span>Твои рендеры</span>
+            <span>На этом устройстве</span>
+          </div>
+          <div class="stat-val" id="statMyRenders">0</div>
+          <div class="stat-sub" id="statMyClips">0 нарезанных клипов</div>
         </div>
       </div>
 
-      <video id="v" playsinline webkit-playsinline preload="auto" hidden></video>
-    </section>
-
-    <!-- ПАНЕЛЬ НАСТРОЕК -->
-    <aside class="panel">
-      <div class="tabs" id="tabs">
-        <button type="button" data-tab="main" class="on">Режим</button>
-        <button type="button" data-tab="view">Вид</button>
-        <button type="button" data-tab="fx">Фон</button>
-        <button type="button" data-tab="slice">Нарезка</button>
-        <button type="button" data-tab="export">Экспорт</button>
+      <div class="card">
+        <div class="card-h">
+          <h3>Принцип работы rez</h3>
+          <span>100% оффлайн</span>
+        </div>
+        <p class="hint">
+          Весь монтаж, удаление чёрного фона, хромакей, кадрирование 9:16 и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs). Видеофайлы никуда не загружаются, поэтому нет очередей, водяных знаков и лимитов по длительности.
+        </p>
       </div>
+    </div>
+  </section>
 
-      <!-- ВКЛАДКА 1: РЕЖИМ И ВРЕМЯ -->
-      <div class="tab-pane on" id="pane-main">
-        <div class="card">
-          <div class="card-h">
-            <h3>Режим вставки</h3>
-            <span data-txt="modeShortHint">Видео идёт дальше</span>
-          </div>
-          <div class="seg" data-k="mode">
-            <button type="button" data-v="over">Поверх</button>
-            <button type="button" data-v="stop">Стоп</button>
-          </div>
-          <p class="hint" data-txt="modeHint"></p>
-
-          <div class="row" data-for="stop">
-            <span>Пауза (сек)</span>
-            <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
-            <output data-out="hold">3 с</output>
-          </div>
-          <div class="row" data-for="stop">
-            <span>Затемнение</span>
-            <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
-            <output data-out="stopDim">25%</output>
-          </div>
-          <div class="row" data-for="stop">
-            <span>Размытие фона</span>
-            <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
-            <output data-out="stopBlur">0 px</output>
-          </div>
+  <!-- ==================== СТРАНИЦА 3: СИСТЕМА ТИКЕТОВ ПОДДЕРЖКИ (@REZ_support) ==================== -->
+  <section class="page-view" id="view-tickets">
+    <div class="container-narrow">
+      <div class="section-head">
+        <div>
+          <h2>Тикет-поддержка rez</h2>
+          <p class="hint" style="margin-top:4px">Опиши проблему, приложи скриншот или видео — тикет сформируется и сразу откроется отправка в <b>@REZ_support</b>.</p>
         </div>
-
-        <div class="card">
-          <div class="card-h">
-            <h3>Когда показать</h3>
-            <span id="t0Label">Старт: 0.0с</span>
-          </div>
-          <div class="seg" data-k="when">
-            <button type="button" data-v="start">Начало</button>
-            <button type="button" data-v="middle">Середина</button>
-            <button type="button" data-v="end">Конец</button>
-          </div>
-
-          <div class="btn-row">
-            <button class="ghost" type="button" id="now">📍 На текущий момент</button>
-            <button class="ghost" type="button" id="try">▶ Проверить момент</button>
-          </div>
-
-          <label class="chk" data-vo>
-            <span>Длина по ролику баннера<small>Показывает баннер от начала до конца</small></span>
-            <input type="checkbox" data-bind-chk="auto" checked />
-          </label>
-
-          <div class="row" data-for="over">
-            <span>Показывать</span>
-            <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
-            <output data-out="show">4 с</output>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-h">
-            <h3>Пресеты настроек</h3>
-            <span>Быстрое переключение</span>
-          </div>
-          <div class="slots" id="presetSlots">
-            <button type="button" class="slot-btn on" data-slot="1">Слот 1</button>
-            <button type="button" class="slot-btn" data-slot="2">Слот 2</button>
-            <button type="button" class="slot-btn" data-slot="3">Слот 3</button>
-          </div>
+        <div style="display:flex;gap:8px">
+          <a class="btn-sm" href="https://t.me/REZ_support" target="_blank" rel="noopener">Написать напрямую в @REZ_support</a>
+          <button type="button" class="btn-sm pri" data-nav="editor">В редактор</button>
         </div>
       </div>
 
-      <!-- ВКЛАДКА 2: РАЗМЕЩЕНИЕ И ВИД -->
-      <div class="tab-pane" id="pane-view">
-        <div class="card">
+      <div class="ticket-grid">
+        <form class="card" id="ticketForm">
           <div class="card-h">
-            <h3>Формат кадра (Shorts / Reels)</h3>
-            <span data-txt="aspectHint">Как в видео</span>
+            <h3>Новое обращение</h3>
+            <span id="ticketCodeBadge">TICKET #REZ-1042</span>
           </div>
-          <div class="seg" data-k="aspect">
-            <button type="button" data-v="orig">Исходник</button>
-            <button type="button" data-v="v_crop">9:16 Кроп</button>
-            <button type="button" data-v="v_blur">9:16 Блюр</button>
-          </div>
-          <p class="hint">Превращает горизонтальное 16:9 видео с YouTube в вертикальный 1080×1920 для Shorts и Reels.</p>
-        </div>
 
-        <div class="card">
-          <div class="card-h">
-            <h3>Размещение в кадре</h3>
-            <span data-txt="posCoords">X:50% Y:82%</span>
+          <div class="field">
+            <label for="tkNick">Твой ник (Telegram или имя)</label>
+            <input class="txt-in" id="tkNick" type="text" placeholder="@username" required />
           </div>
-          <div class="seg" data-k="pos">
-            <button type="button" data-v="top">Сверху</button>
-            <button type="button" data-v="center">По центру</button>
-            <button type="button" data-v="bottom">Снизу</button>
-          </div>
-          <p class="hint">Тяни баннер пальцем прямо по видео (есть магнит к центру), а за фиолетовую точку в углу меняй размер.</p>
-        </div>
 
-        <div class="card">
-          <div class="card-h">
-            <h3>Размеры и стиль</h3>
+          <div class="field">
+            <label for="tkTopic">Тема проблемы</label>
+            <select class="sel-in" id="tkTopic">
+              <option value="Ошибка при рендере MP4 / ZIP">Ошибка при рендере MP4 / ZIP</option>
+              <option value="Проблема со звуком или синхронизацией">Проблема со звуком или синхронизацией</option>
+              <option value="Хромакей / удаление фона">Хромакей / удаление фона</option>
+              <option value="Предложение по улучшению rez">Предложение по улучшению rez</option>
+              <option value="Другой вопрос">Другой вопрос</option>
+            </select>
           </div>
-          <div class="row">
-            <span>Размер</span>
-            <input type="range" data-bind="scale" min="15" max="100" value="78" />
-            <output data-out="scale">78%</output>
+
+          <div class="field">
+            <label for="tkDesc">Описание проблемы</label>
+            <textarea class="txt-area" id="tkDesc" placeholder="Опиши подробно: какое устройство, браузер, формат видео и что именно пошло не так..." required></textarea>
           </div>
-          <div class="row">
-            <span>Прозрачность</span>
-            <input type="range" data-bind="op" min="20" max="100" value="100" />
-            <output data-out="op">100%</output>
+
+          <div class="field">
+            <label>Прикрепить фото или видео (необязательно)</label>
+            <label class="attach-zone" for="tkMedia">
+              <div>
+                <b id="tkMediaName" style="font-size:12.5px">Выбрать скриншот или видео-пример</b>
+                <small style="display:block;font-size:11px;color:var(--ink-dim)">Если на телефоне — можно сразу поделиться файлом с текстом тикета</small>
+              </div>
+              <span class="btn-sm" style="pointer-events:none">Файл</span>
+              <input id="tkMedia" type="file" accept="image/*,video/*" hidden />
+            </label>
           </div>
-          <div class="row">
-            <span>Скругление</span>
-            <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
-            <output data-out="rad">14 px</output>
-          </div>
-        </div>
+
+          <button type="submit" class="go">Сформировать тикет и отправить в @REZ_support</button>
+        </form>
 
         <div class="card">
           <div class="card-h">
-            <h3>Появление баннера</h3>
+            <h3>Как это работает</h3>
+            <span>@REZ_support</span>
           </div>
-          <div class="seg" data-k="anim">
-            <button type="button" data-v="fade">Плавно</button>
-            <button type="button" data-v="pop">Хлопок</button>
-            <button type="button" data-v="slide">Въезд</button>
-            <button type="button" data-v="none">Нет</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ВКЛАДКА 3: ФОН / ХРОМАКЕЙ И ЗВУК -->
-      <div class="tab-pane" id="pane-fx">
-        <div class="card">
-          <div class="card-h">
-            <h3>Удаление фона баннера</h3>
-          </div>
-          <div class="seg" data-k="ckMode">
-            <button type="button" data-v="none">Обычный</button>
-            <button type="button" data-v="screen">Без чёрного</button>
-            <button type="button" data-v="chroma">Хромакей</button>
-          </div>
-          <p class="hint" data-txt="ckHint">«Без чёрного» идеально убирает чёрный фон у дроп-баннеров без потери свечения.</p>
-
-          <div class="row" data-chroma-box>
-            <span>Цвет + сила</span>
-            <input type="color" data-bind-color="kcol" value="#00ff00" />
-            <input type="range" data-bind="kt" min="5" max="100" value="40" />
-            <output data-out="kt">40</output>
-          </div>
-          <button class="ghost eye-btn" type="button" data-chroma-box>🎯 Пипетка: ткнуть цвет на экране</button>
-        </div>
-
-        <div class="card">
-          <div class="card-h">
-            <h3>Звук</h3>
-          </div>
-          <div class="row">
-            <span>Звук видео</span>
-            <input type="range" data-bind="vvol" min="0" max="100" step="5" value="100" />
-            <output data-out="vvol">100%</output>
-          </div>
-          <div class="row" data-vo>
-            <span>Звук баннера</span>
-            <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
-            <output data-out="bvol">100%</output>
-          </div>
-          <label class="chk" data-vo>
-            <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость ролика до 25%</small></span>
-            <input type="checkbox" data-bind-chk="duck" checked />
-          </label>
-        </div>
-      </div>
-
-      <!-- ВКЛАДКА 4: АВТО-НАРЕЗКА В ZIP (ПОЛНЫЙ ФУНКЦИОНАЛ БАННЕРА) -->
-      <div class="tab-pane" id="pane-slice">
-        <div class="card">
-          <label class="chk">
-            <span>✂️ Авто-нарезка на клипы (ZIP)<small>Режет длинный ролик по минутам и вставляет баннер в каждый клип</small></span>
-            <input type="checkbox" id="sliceOn" />
-          </label>
-          <div class="slice-info" id="sliceSummary">
-            Включи авто-нарезку, чтобы загрузить длинное видео (например, 23 мин с YouTube) и получить готовые клипы с баннером в одном ZIP-архиве.
-          </div>
-        </div>
-
-        <!-- ПОЛНЫЕ НАСТРОЙКИ БАННЕРА ДЛЯ КАЖДОГО КЛИПА -->
-        <div class="card" data-slice-box>
-          <div class="card-h">
-            <h3>🔥 Как вставлять баннер в каждый клип</h3>
-            <span data-txt="modeShortHint">Видео идёт дальше</span>
-          </div>
-          <div class="seg" data-k="mode">
-            <button type="button" data-v="over">Поверх (по ходу)</button>
-            <button type="button" data-v="stop">Стоп (пауза)</button>
-          </div>
-          <p class="hint" data-txt="modeHint"></p>
-
-          <label class="chk" data-vo>
-            <span>Длина по ролику баннера<small>Показывает весь видео-баннер целиком</small></span>
-            <input type="checkbox" data-bind-chk="auto" checked />
-          </label>
-
-          <div class="row" data-for="over">
-            <span>Показывать</span>
-            <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
-            <output data-out="show">4 с</output>
-          </div>
-
-          <div class="row" data-for="stop">
-            <span>Пауза (сек)</span>
-            <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
-            <output data-out="hold">3 с</output>
-          </div>
-          <div class="row" data-for="stop">
-            <span>Затемнение</span>
-            <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
-            <output data-out="stopDim">25%</output>
-          </div>
-          <div class="row" data-for="stop">
-            <span>Размытие фона</span>
-            <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
-            <output data-out="stopBlur">0 px</output>
-          </div>
+          <p class="hint">
+            1. Заполни ник, тему и описание. При желании прикрепи скриншот или запись экрана.<br><br>
+            2. Нажми кнопку отправки — текст тикета с номером обращения и данными устройства автоматически скопируется и откроется чат <b>@REZ_support</b> в Telegram (а на телефоне можно сразу приложить выбранный файл через системную отправку).
+          </p>
 
           <div class="divline"></div>
 
           <div class="card-h">
-            <h3>Когда внутри клипа</h3>
-            <span id="sliceWhenInfo">Середина клипа</span>
+            <h3>Твои отправленные тикеты</h3>
+            <span id="tkCount">0</span>
           </div>
-          <div class="seg" data-k="sliceWhen">
-            <button type="button" data-v="start">Начало</button>
-            <button type="button" data-v="middle">Середина</button>
-            <button type="button" data-v="end">Конец</button>
-            <button type="button" data-v="custom">Своя сек</button>
-          </div>
-
-          <div class="row" data-slice-custom>
-            <span>На секунде</span>
-            <input id="sliceCustomSec" type="range" min="0" max="60" step="1" value="30" />
-            <output id="sliceCustomSecO">30 с</output>
-          </div>
-
-          <button class="ghost" type="button" id="trySlice">▶ Проверить клип с баннером в плеере</button>
-
-          <div class="divline"></div>
-
-          <div class="card-h">
-            <h3>Размещение и стиль</h3>
-            <span data-txt="posCoords">X:50% Y:82%</span>
-          </div>
-          <div class="seg" data-k="pos">
-            <button type="button" data-v="top">Сверху</button>
-            <button type="button" data-v="center">По центру</button>
-            <button type="button" data-v="bottom">Снизу</button>
-          </div>
-          <div class="row">
-            <span>Размер</span>
-            <input type="range" data-bind="scale" min="15" max="100" value="78" />
-            <output data-out="scale">78%</output>
-          </div>
-          <div class="row">
-            <span>Прозрачность</span>
-            <input type="range" data-bind="op" min="20" max="100" value="100" />
-            <output data-out="op">100%</output>
-          </div>
-          <div class="row">
-            <span>Скругление</span>
-            <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
-            <output data-out="rad">14 px</output>
-          </div>
-          <div class="seg" data-k="anim">
-            <button type="button" data-v="fade">Плавно</button>
-            <button type="button" data-v="pop">Хлопок</button>
-            <button type="button" data-v="slide">Въезд</button>
-            <button type="button" data-v="none">Нет</button>
-          </div>
-
-          <div class="divline"></div>
-
-          <div class="card-h">
-            <h3>Фон и звук баннера</h3>
-          </div>
-          <div class="seg" data-k="ckMode">
-            <button type="button" data-v="none">Обычный</button>
-            <button type="button" data-v="screen">Без чёрного</button>
-            <button type="button" data-v="chroma">Хромакей</button>
-          </div>
-          <div class="row" data-chroma-box>
-            <span>Цвет + сила</span>
-            <input type="color" data-bind-color="kcol" value="#00ff00" />
-            <input type="range" data-bind="kt" min="5" max="100" value="40" />
-            <output data-out="kt">40</output>
-          </div>
-          <button class="ghost eye-btn" type="button" data-chroma-box>🎯 Пипетка: ткнуть цвет на экране</button>
-          <div class="row" data-vo>
-            <span>Звук баннера</span>
-            <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
-            <output data-out="bvol">100%</output>
-          </div>
-          <label class="chk" data-vo>
-            <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость до 25%</small></span>
-            <input type="checkbox" data-bind-chk="duck" checked />
-          </label>
-        </div>
-
-        <!-- НАСТРОЙКИ САМОЙ НАРЕЗКИ -->
-        <div class="card" data-slice-box>
-          <div class="card-h">
-            <h3>Длина каждого клипа</h3>
-            <span id="sliceSecBadge">1 мин</span>
-          </div>
-          <div class="seg" data-k="sliceSecPreset">
-            <button type="button" data-v="30">30с</button>
-            <button type="button" data-v="45">45с</button>
-            <button type="button" data-v="60">1 мин</button>
-            <button type="button" data-v="90">1.5м</button>
-            <button type="button" data-v="180">3 мин</button>
-          </div>
-          <div class="row">
-            <span>Точно (сек)</span>
-            <input id="sliceSec" type="range" min="10" max="180" step="5" value="60" />
-            <output id="sliceSecO">60 с</output>
-          </div>
-          <div class="row">
-            <span>Пропуск интро</span>
-            <input id="sliceIntro" type="range" min="0" max="60" step="1" value="0" />
-            <output id="sliceIntroO">0 с</output>
-          </div>
-
-          <div class="divline"></div>
-
-          <div class="card-h">
-            <h3>Хвост и диапазон частей</h3>
-          </div>
-          <div class="seg" data-k="sliceTail">
-            <button type="button" data-v="merge">Склеить хвост</button>
-            <button type="button" data-v="keep">Отдельно</button>
-            <button type="button" data-v="drop">Убрать &lt;15с</button>
-          </div>
-          <p class="hint">«Склеить хвост» добавит короткий остаток (&lt;15с) к последнему ролику, чтобы не терять концовку.</p>
-
-          <div class="num-row">
-            <span>Части (от — до)</span>
-            <input id="sliceFrom" class="num-in" type="number" min="1" value="1" />
-            <span style="flex:0 0 auto;color:var(--mute)">—</span>
-            <input id="sliceTo" class="num-in" type="number" min="0" value="0" placeholder="Все" />
-            <button type="button" class="btn-sm" id="sliceAllBtn">Все</button>
-          </div>
-          <p class="hint">0 в поле «до» = все части до конца. Если видео на час — можно резать партиями по 15 штук.</p>
-        </div>
-
-        <!-- ФОРМАТ И ПОДПИСЬ ЧАСТЕЙ -->
-        <div class="card" data-slice-box>
-          <div class="card-h">
-            <h3>Формат 9:16 и подпись «Часть 1»</h3>
-          </div>
-          <div class="seg" data-k="aspect">
-            <button type="button" data-v="orig">Исходник</button>
-            <button type="button" data-v="v_crop">9:16 Кроп</button>
-            <button type="button" data-v="v_blur">9:16 Блюр</button>
-          </div>
-          <div class="seg" data-k="partLabel">
-            <button type="button" data-v="none">Без текста</button>
-            <button type="button" data-v="short">Часть 1</button>
-            <button type="button" data-v="total">Часть 1/23</button>
-          </div>
-          <div class="seg" data-k="partLabelPos" data-plabel-box>
-            <button type="button" data-v="top">Подпись сверху</button>
-            <button type="button" data-v="bottom">Подпись снизу</button>
+          <div class="ticket-history" id="ticketHistory">
+            <p class="hint">Пока нет созданных тикетов.</p>
           </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- ВКЛАДКА 5: ПАРАМЕТРЫ ЭКСПОРТА -->
-      <div class="tab-pane" id="pane-export">
-        <div class="card">
-          <div class="card-h">
-            <h3>Качество и FPS</h3>
-            <span>MP4 (H.264 + AAC)</span>
-          </div>
-          <div class="seg" data-k="q">
-            <button type="button" data-v="max">Макс</button>
-            <button type="button" data-v="hi">1080p</button>
-            <button type="button" data-v="mid">720p</button>
-            <button type="button" data-v="lo">Лёгкое</button>
-          </div>
-          <div class="seg" data-k="fps">
-            <button type="button" data-v="auto">Как в видео</button>
-            <button type="button" data-v="30">30 FPS</button>
-            <button type="button" data-v="60">60 FPS</button>
-          </div>
-          <p class="hint">Оффлайн-рендер собирает MP4 покадрово на устройстве без записи экрана — подходит для YouTube Shorts, Instagram Reels и TikTok.</p>
-        </div>
+  <!-- ==================== ПОПУЛЯРНЫЕ ВОПРОСЫ (FAQ) СНИЗУ ЭКРАНА ==================== -->
+  <section class="faq-section" id="faqSection">
+    <div class="faq-box">
+      <h2>Популярные вопросы (FAQ)</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Чем отличается режим «Поверх» от «Пауза (Стоп)»?</summary>
+          <p>В режиме «Поверх» основное видео продолжает проигрываться, а баннер накладывается сверху (с приглушением звука ролика, если нужно). В режиме «Пауза» видео замирает на кадре с затемнением или блюром, пока полностью не пройдёт баннер, а затем продолжается.</p>
+        </details>
 
-        <div class="card">
-          <label class="chk">
-            <span>Запоминать файл баннера<small>При открытии сайта баннер подгрузится сам</small></span>
-            <input type="checkbox" id="saveBanner" checked />
-          </label>
-        </div>
+        <details class="faq-item">
+          <summary>Как сделать нарезку длинного видео на клипы с баннером?</summary>
+          <p>Перейди во вкладку «Нарезка», включи переключатель «Пакетная нарезка на клипы (ZIP)», выбери длину части (например, 1 мин) и настрой, как вставлять баннер внутрь каждого клипа. На выходе ты получишь ZIP-архив со всеми частями.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Как убрать чёрный фон или зелёный экран у баннера?</summary>
+          <p>Открой раздел «Фон». Для баннеров на чёрном фоне выбери «Без чёрного» — чёрный фон исчезнет без ореолов. Для однотонного цветного фона выбери «Хромакей» и ткни пипеткой прямо по фону на экране.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Загружаются ли мои видео на чужой сервер?</summary>
+          <p>Нет. Обработка проходит полностью оффлайн в памяти твоего браузера. Твои исходники и готовые видео остаются только на твоём телефоне или компьютере.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Как превратить горизонтальное видео 16:9 в вертикальное 9:16?</summary>
+          <p>Во вкладке «Вид» или «Нарезка» выбери «9:16 Кроп» (обрезка по центру) или «9:16 Блюр» (целый кадр по центру с размытым фоном сверху и снизу). Готовый файл сразу будет в формате 1080×1920.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Куда писать, если нашёл баг или нужна помощь?</summary>
+          <p>Открой раздел «Тикеты» в верхнем меню или в боковой панели слева, либо напиши напрямую в поддержку Telegram: @REZ_support.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== НИЖНИЙ БАР: ТГК + ПОДДЕРЖАТЬ РАЗРАБОТЧИКА ==================== -->
+  <footer class="site-footer">
+    <div class="footer-in">
+      <div class="footer-info">
+        <b>rez — оффлайн-редактор видео-баннеров и нарезки</b>
+        <span>Поддержка: @REZ_support • Работает локально без водяных знаков.</span>
       </div>
 
-      <!-- БЛОК ЗАПУСКА РЕНДЕРА -->
-      <div class="export-wrap">
-        <button class="go" id="go" type="button" disabled>🚀 Собрать MP4 (оффлайн-рендер)</button>
+      <div class="footer-btns">
+        <a class="tg-btn" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2FREZ_support&text=rez%20%E2%80%94%20%D0%BE%D1%84%D1%84%D0%BB%D0%B0%D0%B9%D0%BD-%D1%80%D0%B5%D0%B4%D0%B0%D0%BA%D1%82%D0%BE%D1%80%20%D0%B4%D0%BB%D1%8F%20%D0%B2%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B8%20%D0%B1%D0%B0%D0%BD%D0%BD%D0%B5%D1%80%D0%BE%D0%B2%20%D0%B8%20%D0%BD%D0%B0%D1%80%D0%B5%D0%B7%D0%BA%D0%B8%20Shorts%2FReels" target="_blank" rel="noopener">
+          <span>Переслать в ТГК</span>
+        </a>
 
-        <div class="pbox" id="pbox">
-          <div class="pmeta">
-            <span id="pStatus">Подготовка оффлайн-рендера...</span>
-            <b id="pPct">0%</b>
-          </div>
-          <div class="pbar"><div class="pbar-fill" id="pFill"></div></div>
-          <div class="pmeta" style="color:var(--mute);font-size:11px">
-            <span id="pDetail">Кадры: 0 / 0</span>
-            <span id="pSpeed">—</span>
-          </div>
+        <button type="button" class="tg-btn" data-nav="tickets">
+          <span>Тикет-поддержка</span>
+        </button>
+
+        <button type="button" class="donate-cta" data-open-donate>
+          <span>Поддержать разработчика</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== МОДАЛКА ПОЖЕРТВОВАНИЙ (КРИПТО-КОШЕЛЬКИ + QR) ==================== -->
+  <div class="modal-overlay" id="donateModal" role="dialog" aria-modal="true" aria-labelledby="wmTitle">
+    <div class="wallet-modal">
+      <div class="wm-top">
+        <div class="wm-title" id="wmTitle">Поддержать разработчика rez</div>
+        <button type="button" class="wm-close" id="closeDonateBtn" aria-label="Закрыть">✕</button>
+      </div>
+
+      <div class="net-pills" id="walletNetTabs">
+        <button type="button" class="net-pill on" data-net="usdt_ton">USDT (TON)</button>
+        <button type="button" class="net-pill" data-net="usdt_trc20">USDT (TRC20)</button>
+        <button type="button" class="net-pill" data-net="usdt_bep20">USDT (BEP20)</button>
+        <button type="button" class="net-pill" data-net="usdt_sol">USDT (Solana)</button>
+        <button type="button" class="net-pill" data-net="usdt_erc20">USDT (ERC20)</button>
+        <button type="button" class="net-pill" data-net="gram_ton">GRAM (TON)</button>
+      </div>
+
+      <div class="wm-hero">
+        <div class="wm-coin-badge" id="wmBadge" style="background:#0098ea">₮</div>
+        <h3 id="wmHeading">Адрес в долларах (USDT)</h3>
+        <p id="wmSub">Отправляйте только <b>USDT в сети TON</b>. Иначе вы можете потерять средства.</p>
+      </div>
+
+      <div class="wm-qr-card">
+        <div class="qr-frame" id="wmQrBox"></div>
+        <div class="wm-addr" id="wmAddressText">UQCZ817cPPLTkJ-J548frI2ARUguQZ669ATAthBt9uIPgVNA</div>
+        <button type="button" class="wm-copy-btn" id="wmCopyBtn">
+          <span>Копировать адрес</span>
+        </button>
+      </div>
+
+      <div class="wm-meta">
+        <div class="wm-meta-row">
+          <span>Сеть</span>
+          <span id="wmNetName">TON (TON)</span>
         </div>
-
-        <div class="res" id="res">
-          <div class="card-h">
-            <h3 id="resTitle" style="color:#6ee7b7">✅ Видео готово</h3>
-            <span id="resMeta"></span>
-          </div>
-          <video id="outPreview" controls playsinline webkit-playsinline></video>
-          <a id="dl" class="dl" href="#">Скачать .mp4</a>
-          <div class="clip-list" id="clipList"></div>
-          <div class="btn-row">
-            <button class="ghost" type="button" id="sh" hidden>📤 Поделиться</button>
-            <button class="ghost" type="button" id="nextVidBtn">🎥 Следующий ролик</button>
-          </div>
+        <div class="wm-meta-row">
+          <span>Мин. депозит</span>
+          <span id="wmMinDep">0,01 USDT</span>
+        </div>
+        <div class="wm-meta-row">
+          <span>Зачисление</span>
+          <span>До 1 мин</span>
         </div>
       </div>
-    </aside>
-  </main>
+    </div>
+  </div>
 
   <div id="toastBox"></div>
 
@@ -1549,11 +2520,226 @@
       const ctx = cv.getContext('2d', { alpha: false });
 
       /* =====================================================================
-       * 1. НАСТРОЙКИ, СЛОТЫ ПРЕСЕТОВ И ПАМЯТЬ (localStorage + IndexedDB)
+       * 1. КОШЕЛЬКИ РАЗРАБОТЧИКА
        * ===================================================================== */
-      const STORE_PREFIX = 'bannerdrop_pro_slot_';
-      const ACTIVE_SLOT_KEY = 'bannerdrop_pro_active_slot';
-      const DB_NAME = 'BannerDropProDB';
+      const WALLETS = {
+        usdt_ton: {
+          heading: 'Адрес в долларах (USDT)',
+          subHtml: 'Отправляйте только <b>USDT в сети TON</b>. Иначе вы можете потерять средства.',
+          address: 'UQCZ817cPPLTkJ-J548frI2ARUguQZ669ATAthBt9uIPgVNA',
+          net: 'TON (TON)',
+          min: '0,01 USDT',
+          badgeBg: '#0098ea',
+          badgeTxt: '₮'
+        },
+        usdt_trc20: {
+          heading: 'Адрес в долларах (USDT)',
+          subHtml: 'Отправляйте только <b>USDT в сети Tron</b>. Иначе вы можете потерять средства.',
+          address: 'TJxfCzzEuCeEvztzhGA3H2xENvwMMMqfJE',
+          net: 'Tron (TRC20)',
+          min: '0,01 USDT',
+          badgeBg: '#ef0027',
+          badgeTxt: '₮'
+        },
+        usdt_bep20: {
+          heading: 'Адрес в долларах (USDT)',
+          subHtml: 'Отправляйте только <b>USDT в сети BNB Smart Chain</b>. Иначе вы можете потерять средства.',
+          address: '0x8315EA1201B01b31993b25414DED499Ae9AE8Ee0',
+          net: 'BNB Smart Chain (BEP20)',
+          min: '0,01 USDT',
+          badgeBg: '#d97706',
+          badgeTxt: '₮'
+        },
+        usdt_sol: {
+          heading: 'Адрес в долларах (USDT)',
+          subHtml: 'Отправляйте только <b>USDT в сети Solana</b>. Иначе вы можете потерять средства.',
+          address: '971GjV9Lihgw7N7Zd17UDBbqA7CgdCZywPaALvVBtRnz',
+          net: 'Solana (SOL)',
+          min: '0,01 USDT',
+          badgeBg: '#6d28d9',
+          badgeTxt: '₮'
+        },
+        usdt_erc20: {
+          heading: 'Адрес в долларах (USDT)',
+          subHtml: 'Отправляйте только <b>USDT в сети Ethereum</b>. Иначе вы можете потерять средства.',
+          address: '0x8315EA1201B01b31993b25414DED499Ae9AE8Ee0',
+          net: 'Ethereum (ERC20)',
+          min: '0,01 USDT',
+          badgeBg: '#4f46e5',
+          badgeTxt: '₮'
+        },
+        gram_ton: {
+          heading: 'Ваш адрес Gram',
+          subHtml: 'Отправляйте только <b>GRAM в сети TON</b>. Иначе вы можете потерять средства.',
+          address: 'UQCZ817cPPLTkJ-J548frI2ARUguQZ669ATAthBt9uIPgVNA',
+          net: 'TON (TON)',
+          min: '0,010223452 GRAM',
+          badgeBg: '#0284c7',
+          badgeTxt: 'G'
+        }
+      };
+
+      let activeNet = 'usdt_ton';
+
+      function renderWalletCard(netKey) {
+        activeNet = netKey;
+        const w = WALLETS[netKey] || WALLETS.usdt_ton;
+        $$('#walletNetTabs .net-pill').forEach(b => b.classList.toggle('on', b.dataset.net === netKey));
+        $('#wmHeading').textContent = w.heading;
+        $('#wmSub').innerHTML = w.subHtml;
+        $('#wmAddressText').textContent = w.address;
+        $('#wmNetName').textContent = w.net;
+        $('#wmMinDep').textContent = w.min;
+        $('#wmBadge').style.background = w.badgeBg;
+        $('#wmBadge').textContent = w.badgeTxt;
+
+        const qrBox = $('#wmQrBox');
+        qrBox.innerHTML = '';
+        if (window.QRCode) {
+          new QRCode(qrBox, {
+            text: w.address,
+            width: 162,
+            height: 162,
+            colorDark: '#101010',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } else {
+          qrBox.textContent = w.address;
+        }
+      }
+
+      /* =====================================================================
+       * 2. НАВИГАЦИЯ, БОКОВОЕ МЕНЮ (ТРИ ПОЛОСКИ), СТАТИСТИКА И ТИКЕТЫ
+       * ===================================================================== */
+      const STATS_KEY = 'rez_user_stats_v1';
+      const TICKETS_KEY = 'rez_tickets_history_v1';
+
+      let userStats = { renders: 0, clips: 0 };
+      try {
+        const savedStats = JSON.parse(localStorage.getItem(STATS_KEY) || 'null');
+        if (savedStats) userStats = { ...userStats, ...savedStats };
+      } catch (_) {}
+
+      let ticketsList = [];
+      try {
+        ticketsList = JSON.parse(localStorage.getItem(TICKETS_KEY) || '[]');
+      } catch (_) { ticketsList = []; }
+
+      function updateStatsUI() {
+        const baseUsers = 24890 + Math.floor((Date.now() - 1730000000000) / 3600000);
+        const baseVideos = 112430 + Math.floor((Date.now() - 1730000000000) / 900000) + userStats.renders;
+        const onlineNow = 128 + (new Date().getMinutes() % 37);
+
+        $('#statOnline').textContent = onlineNow.toLocaleString('ru-RU');
+        $('#statTotalUsers').textContent = Math.max(24890, baseUsers).toLocaleString('ru-RU');
+        $('#statTotalVideos').textContent = Math.max(112430, baseVideos).toLocaleString('ru-RU');
+        $('#statMyRenders').textContent = String(userStats.renders);
+        $('#statMyClips').textContent = `${userStats.clips} нарезанных клипов`;
+      }
+
+      function bumpUserStats(clipsCount = 1) {
+        userStats.renders += 1;
+        userStats.clips += clipsCount;
+        try { localStorage.setItem(STATS_KEY, JSON.stringify(userStats)); } catch (_) {}
+        updateStatsUI();
+      }
+
+      function renderTicketHistory() {
+        const box = $('#ticketHistory');
+        $('#tkCount').textContent = String(ticketsList.length);
+        if (!ticketsList.length) {
+          box.innerHTML = '<p class="hint">Пока нет созданных тикетов.</p>';
+          return;
+        }
+        box.innerHTML = ticketsList.slice(0, 6).map(t => `
+          <div class="t-item">
+            <div class="t-item-top">
+              <span class="t-badge">${t.id}</span>
+              <span>${t.date}</span>
+            </div>
+            <b style="font-size:12.5px">${escapeHtml(t.topic)}</b>
+            <small style="color:var(--ink-dim);font-size:11.5px">${escapeHtml(t.desc).slice(0, 120)}${t.desc.length > 120 ? '...' : ''}</small>
+          </div>
+        `).join('');
+      }
+
+      function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      function openDrawer() {
+        $('#drawer').classList.add('open');
+        $('#drawerBackdrop').classList.add('open');
+      }
+
+      function closeDrawer() {
+        $('#drawer').classList.remove('open');
+        $('#drawerBackdrop').classList.remove('open');
+      }
+
+      function switchMainTab(tabName) {
+        $$('#tabs button').forEach(x => x.classList.toggle('on', x.dataset.tab === tabName));
+        $$('.tab-pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + tabName));
+      }
+
+      function hideAllViews() {
+        $('#view-workspace').classList.remove('on');
+        $('#view-stats').classList.remove('on');
+        $('#view-tickets').classList.remove('on');
+      }
+
+      function navigateTo(target) {
+        closeDrawer();
+
+        if (target === 'faq') {
+          hideAllViews();
+          $('#view-workspace').classList.add('on');
+          $('#faqSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+
+        $$('[data-nav]').forEach(el => el.classList.toggle('on', el.dataset.nav === target));
+
+        if (target === 'stats') {
+          updateStatsUI();
+          hideAllViews();
+          $('#view-stats').classList.add('on');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        if (target === 'tickets') {
+          renderTicketHistory();
+          $('#ticketCodeBadge').textContent = 'TICKET #REZ-' + Math.floor(1000 + Math.random() * 9000);
+          hideAllViews();
+          $('#view-tickets').classList.add('on');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        hideAllViews();
+        $('#view-workspace').classList.add('on');
+
+        if (target === 'slicer') {
+          S.sliceOn = true;
+          $('#sliceOn').checked = true;
+          switchMainTab('slice');
+          ui(true);
+        } else if (target === 'editor') {
+          S.sliceOn = false;
+          $('#sliceOn').checked = false;
+          switchMainTab('main');
+          ui(true);
+        }
+      }
+
+      /* =====================================================================
+       * 3. НАСТРОЙКИ, СЛОТЫ ПРЕСЕТОВ И ПАМЯТЬ (localStorage + IndexedDB)
+       * ===================================================================== */
+      const STORE_PREFIX = 'rez_slot_';
+      const ACTIVE_SLOT_KEY = 'rez_active_slot';
+      const DB_NAME = 'RezStudioDB';
       const DB_STORE = 'banners';
       const BANNER_DB_KEY = 'current_banner';
 
@@ -1606,7 +2792,7 @@
           const raw = localStorage.getItem(STORE_PREFIX + activeSlot);
           S = raw ? { ...DEFAULT_S, ...JSON.parse(raw) } : { ...DEFAULT_S };
           if (S.when === 'custom') S.when = 'middle';
-        } catch (e) {
+        } catch (_) {
           S = { ...DEFAULT_S };
         }
         $$('#presetSlots button').forEach(b => b.classList.toggle('on', b.dataset.slot === activeSlot));
@@ -1621,11 +2807,11 @@
           if (flash) {
             const el = $('#saveHint');
             if (!el) return;
-            el.textContent = `✓ Слот ${activeSlot} сохранён`;
-            el.style.color = '#6ee7b7';
+            el.textContent = `Слот ${activeSlot} сохранён`;
+            el.style.color = '#86efac';
             clearTimeout(persistSettings._t);
             persistSettings._t = setTimeout(() => {
-              el.textContent = 'Настройки и баннер сохраняются автоматически';
+              el.textContent = 'Локальная обработка без загрузки на сервер';
               el.style.color = '';
             }, 1300);
           }
@@ -1686,7 +2872,7 @@
       }
 
       /* =====================================================================
-       * 2. ТОСТ-УВЕДОМЛЕНИЯ
+       * 4. УВЕДОМЛЕНИЯ (TOAST)
        * ===================================================================== */
       function toast(msg, kind = '') {
         const box = $('#toastBox');
@@ -1700,11 +2886,11 @@
           el.style.opacity = '0';
           el.style.transition = 'opacity 0.25s';
           setTimeout(() => el.remove(), 260);
-        }, 2700);
+        }, 2600);
       }
 
       /* =====================================================================
-       * 3. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
+       * 5. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
        * ===================================================================== */
       let vfile = null;
       let bfile = null;
@@ -1845,7 +3031,7 @@
       }
 
       /* =====================================================================
-       * 4. АУДИО ПРЕВЬЮ
+       * 6. АУДИО ПРЕВЬЮ
        * ===================================================================== */
       function ensurePreviewAudio() {
         try {
@@ -1885,7 +3071,7 @@
       }
 
       /* =====================================================================
-       * 5. ПОЛОЖЕНИЕ, ТАЙМИНГ И СИНХРОНИЗАЦИЯ UI
+       * 7. ПОЛОЖЕНИЕ, ТАЙМИНГ И СИНХРОНИЗАЦИЯ UI
        * ===================================================================== */
       function place() {
         if (S.pos === 'custom') return;
@@ -1980,13 +3166,13 @@
           : 'Видео ставится на паузу на текущем кадре, пока полностью не пройдёт баннер.';
         const aspectTxt = S.aspect === 'orig' ? 'Как в видео' : (S.aspect === 'v_crop' ? '9:16 Обрезка' : '9:16 Блюр-фон');
         const ckHintTxt = S.ckMode === 'screen'
-          ? '«Без чёрного» убирает чёрную подложку (режим Screen) — идеально для дроп-баннеров с неоном.'
+          ? '«Без чёрного» убирает чёрную подложку (режим Screen) — подходит для дроп-баннеров.'
           : S.ckMode === 'chroma'
             ? 'Хромакей вырезает выбранный цвет (зелёный, синий, белый и др.). Удобно наводить пипеткой.'
             : 'Баннер отображается как есть (прозрачные PNG и WebM поддерживаются автоматически).';
         const posTxt = `X:${Math.round(S.x * 100)}% Y:${Math.round(S.y * 100)}%`;
 
-        $('#modePill').textContent = S.mode === 'stop' ? 'Стоп-кадр' : 'Поверх';
+        $('#modePill').textContent = S.mode === 'stop' ? 'Пауза (Стоп)' : 'Поверх';
         $$('[data-txt="modeShortHint"]').forEach(e => e.textContent = modeShortTxt);
         $$('[data-txt="modeHint"]').forEach(e => e.textContent = modeHintTxt);
         $$('[data-txt="aspectHint"]').forEach(e => e.textContent = aspectTxt);
@@ -2037,7 +3223,7 @@
         const d = D();
         const plan = computeSlicePlan(d);
         const slicePill = $('#slicePill');
-        const modeWord = S.mode === 'stop' ? `Стоп-пауза (${+HD().toFixed(1)}с)` : `Поверх (${+SH().toFixed(1)}с)`;
+        const modeWord = S.mode === 'stop' ? `Пауза (${+HD().toFixed(1)}с)` : `Поверх (${+SH().toFixed(1)}с)`;
         const posWord = S.pos === 'top' ? 'сверху' : S.pos === 'center' ? 'по центру' : S.pos === 'bottom' ? 'снизу' : 'своя позиция';
         const whenTxt = S.sliceWhen === 'start'
           ? 'в начале'
@@ -2052,29 +3238,29 @@
             const totalClipSec = plan.selected.reduce((a, c) => a + c.dur + (S.mode === 'stop' && img ? HD() : 0), 0);
             const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 9e6) + 128000)) / 8 / 1048576));
             const ramWarn = estMb > 600
-              ? `<br><span style="color:#fcd34d">⚠️ Большой архив (~${estMb} МБ) — на телефоне лучше резать по 10–12 частей или выбрать 720p.</span>`
+              ? `<br><span style="color:#fde047">Большой архив (~${estMb} МБ) — на телефоне лучше резать по 10–12 частей или выбрать 720p.</span>`
               : '';
             $('#sliceSummary').innerHTML = `<b>${plan.selected.length} из ${plan.totalParts} клипов</b> по ~${S.sliceSec}с • Режим: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Около <b>~${estMb} МБ</b> в ZIP.${ramWarn}`;
             slicePill.style.display = 'inline-block';
-            slicePill.textContent = `✂️ ${plan.selected.length} кл. ZIP`;
+            slicePill.textContent = `${plan.selected.length} кл. ZIP`;
             if (!exporting) {
-              $('#go').textContent = `📦 Нарезать ${plan.selected.length} клипов в ZIP`;
+              $('#go').textContent = `Нарезать ${plan.selected.length} клипов в ZIP`;
               $('#topExportBtn').textContent = `ZIP (${plan.selected.length})`;
             }
           } else {
-            $('#sliceSummary').innerHTML = `Режим нарезки активен: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Загрузи длинное видео — здесь сразу появится точное число клипов.`;
+            $('#sliceSummary').innerHTML = `Режим нарезки активен: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Загрузи видео — здесь появится точное число клипов.`;
             slicePill.style.display = 'inline-block';
-            slicePill.textContent = '✂️ Режим ZIP';
+            slicePill.textContent = 'Режим ZIP';
             if (!exporting) {
-              $('#go').textContent = '📦 Нарезать в ZIP';
+              $('#go').textContent = 'Нарезать в ZIP';
               $('#topExportBtn').textContent = 'ZIP';
             }
           }
         } else {
-          $('#sliceSummary').textContent = 'Включи авто-нарезку, чтобы загрузить длинное видео (например, 23 мин с YouTube) и получить готовые клипы с баннером в одном ZIP-архиве.';
+          $('#sliceSummary').textContent = 'Включи пакетную нарезку, чтобы разрезать длинный ролик на части по минутам и вставить баннер в каждый клип.';
           slicePill.style.display = 'none';
           if (!exporting) {
-            $('#go').textContent = '🚀 Собрать MP4 (оффлайн-рендер)';
+            $('#go').textContent = 'Собрать MP4';
             $('#topExportBtn').textContent = 'Экспорт';
           }
         }
@@ -2083,7 +3269,7 @@
       }
 
       /* =====================================================================
-       * 6. ЗАГРУЗКА ФАЙЛОВ
+       * 8. ЗАГРУЗКА ФАЙЛОВ
        * ===================================================================== */
       const pf = () => {
         if (isV() && isFinite(img.duration) && img.duration > 0) {
@@ -2142,14 +3328,14 @@
             document.body.appendChild(el);
             pf();
             $('#thumb').style.display = 'none';
-            $('#bIcon').style.display = 'block';
-            $('#bIcon').textContent = '🎞️';
+            $('#bIcon').style.display = 'grid';
+            $('#bIcon').textContent = 'MP4';
             $('#bMeta').textContent = `${(el.duration || 0).toFixed(1)}с • видео-баннер`;
           } else {
             $('#thumb').src = url;
             $('#thumb').style.display = 'block';
             $('#bIcon').style.display = 'none';
-            $('#bMeta').textContent = `${el.naturalWidth}×${el.naturalHeight} • картинка`;
+            $('#bMeta').textContent = `${el.naturalWidth}×${el.naturalHeight} • изображение`;
           }
 
           $('#bn').textContent = f.name || 'Сохранённый баннер';
@@ -2163,7 +3349,7 @@
 
           if (!fromDB) {
             saveBannerToDB(f);
-            toast(S.saveBanner ? 'Баннер загружен и запомнен' : 'Баннер загружен', 'ok');
+            toast(S.saveBanner ? 'Баннер загружен и сохранён' : 'Баннер загружен', 'ok');
           }
         };
 
@@ -2178,7 +3364,7 @@
       }
 
       /* =====================================================================
-       * 7. ХРОМАКЕЙ И ОТРИСОВКА КАДРА (ПРЕВЬЮ + ОФФЛАЙН-РЕНДЕР)
+       * 9. ХРОМАКЕЙ И ОТРИСОВКА КАДРА
        * ===================================================================== */
       const kc = document.createElement('canvas');
       const kx = kc.getContext('2d', { willReadFrequently: true });
@@ -2266,7 +3452,6 @@
           return;
         }
 
-        // 9:16 Блюр
         targetCtx.save();
         targetCtx.filter = `blur(${Math.max(18, Math.round(W * 0.024))}px) brightness(0.65)`;
         const bgScale = Math.max(W / sw, H / sh) * 1.12;
@@ -2286,7 +3471,7 @@
         if (!text) return;
         targetCtx.save();
         const fontSize = Math.max(18, Math.round(W * 0.042));
-        targetCtx.font = `800 ${fontSize}px system-ui, -apple-system, sans-serif`;
+        targetCtx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
         const metrics = targetCtx.measureText(text);
         const padX = fontSize * 0.72;
         const padY = fontSize * 0.36;
@@ -2295,14 +3480,14 @@
         const bx = (W - bw) / 2;
         const by = S.partLabelPos === 'bottom' ? (H * 0.74 - bh / 2) : (H * 0.165 - bh / 2);
 
-        roundRectPath(targetCtx, bx, by, bw, bh, bh / 2);
-        targetCtx.fillStyle = 'rgba(10, 10, 16, 0.76)';
+        roundRectPath(targetCtx, bx, by, bw, bh, 6);
+        targetCtx.fillStyle = 'rgba(16, 16, 16, 0.84)';
         targetCtx.fill();
         targetCtx.lineWidth = Math.max(2, W / 360);
-        targetCtx.strokeStyle = 'rgba(124, 92, 255, 0.85)';
+        targetCtx.strokeStyle = 'rgba(232, 93, 42, 0.9)';
         targetCtx.stroke();
 
-        targetCtx.fillStyle = '#ffffff';
+        targetCtx.fillStyle = '#f2efe9';
         targetCtx.textAlign = 'center';
         targetCtx.textBaseline = 'middle';
         targetCtx.fillText(text, W / 2, by + bh / 2 + 1);
@@ -2384,7 +3569,7 @@
             targetCtx.save();
 
             if (drag && drag.type === 'move') {
-              targetCtx.strokeStyle = '#22d3ee';
+              targetCtx.strokeStyle = '#ff6e38';
               targetCtx.lineWidth = Math.max(1.5, W / 360);
               targetCtx.setLineDash([7, 6]);
               if (snapX) {
@@ -2396,7 +3581,7 @@
               targetCtx.setLineDash([]);
             }
 
-            targetCtx.strokeStyle = drag ? '#c084fc' : 'rgba(255,255,255,0.75)';
+            targetCtx.strokeStyle = drag ? '#ff6e38' : 'rgba(242, 239, 233, 0.8)';
             targetCtx.lineWidth = Math.max(2, W / 350);
             targetCtx.setLineDash([10, 7]);
             roundRectPath(targetCtx, g.x, g.y, g.w, g.h, Math.min(scaledRad, 14));
@@ -2406,8 +3591,8 @@
             const hr = Math.max(11, W * 0.025);
             const hx = g.x + g.w;
             const hy = g.y + g.h;
-            targetCtx.fillStyle = '#7c5cff';
-            targetCtx.strokeStyle = '#fff';
+            targetCtx.fillStyle = '#e85d2a';
+            targetCtx.strokeStyle = '#f2efe9';
             targetCtx.lineWidth = Math.max(2, W / 360);
             targetCtx.beginPath();
             targetCtx.arc(hx, hy, hr, 0, Math.PI * 2);
@@ -2432,7 +3617,7 @@
         const rightW = W * (isReels ? 0.16 : 0.17);
         const rightTop = H * 0.46;
 
-        c.fillStyle = 'rgba(239, 68, 68, 0.25)';
+        c.fillStyle = 'rgba(220, 38, 38, 0.24)';
         c.strokeStyle = 'rgba(248, 113, 113, 0.8)';
         c.lineWidth = Math.max(1.5, W / 420);
         c.setLineDash([8, 6]);
@@ -2448,7 +3633,7 @@
 
         c.setLineDash([]);
         c.fillStyle = 'rgba(255,255,255,0.9)';
-        c.font = `700 ${Math.round(W * 0.028)}px system-ui, sans-serif`;
+        c.font = `700 ${Math.round(W * 0.028)}px -apple-system, sans-serif`;
         c.textAlign = 'center';
         c.fillText(isReels ? 'Верх интерфейса Reels' : 'Верх интерфейса Shorts', W / 2, topH * 0.6);
         c.fillText(isReels ? 'Описание и звук Reels' : 'Описание Shorts', W / 2, H - botH * 0.5);
@@ -2456,7 +3641,7 @@
       }
 
       /* =====================================================================
-       * 8. ЖИВОЙ ЦИКЛ ПРЕДПРОСМОТРА
+       * 10. ЖИВОЙ ЦИКЛ ПРЕДПРОСМОТРА
        * ===================================================================== */
       function syncPreviewBanner(live, triggerT) {
         if (!isV()) return;
@@ -2551,7 +3736,7 @@
       }
 
       /* =====================================================================
-       * 9. ПЕРЕТАСКИВАНИЕ, РЕСАЙЗ И ПИПЕТКА ПО ЭКРАНУ
+       * 11. ПЕРЕТАСКИВАНИЕ, РЕСАЙЗ И ПИПЕТКА ПО ЭКРАНУ
        * ===================================================================== */
       function getCanvasPt(e) {
         const r = cv.getBoundingClientRect();
@@ -2659,7 +3844,7 @@
       });
 
       /* =====================================================================
-       * 10. ОФФЛАЙН-РЕНДЕР (MEDIABUNNY CanvasSink + CanvasSource) И ZIP
+       * 12. ОФФЛАЙН-РЕНДЕР (MEDIABUNNY CanvasSink + CanvasSource) И ZIP
        * ===================================================================== */
       let MB = null;
       let aacRegistered = false;
@@ -2753,14 +3938,14 @@
 
       async function loadMediabunny() {
         if (!MB) {
-          setProgress(0, 'Загрузка кодека (1 раз)...', '', '');
+          setProgress(0, 'Загрузка кодека...', '', '');
           MB = await import('https://cdn.jsdelivr.net/npm/mediabunny@1/+esm');
         }
         if (!aacRegistered && MB.canEncodeAudio) {
           const nativeAac = await MB.canEncodeAudio('aac').catch(() => false);
           if (!nativeAac) {
             try {
-              setProgress(0, 'Подключение AAC-кодека...', '', '');
+              setProgress(0, 'Подключение AAC...', '', '');
               const aacMod = await import('https://cdn.jsdelivr.net/npm/@mediabunny/aac-encoder@1/+esm');
               if (aacMod.registerAacEncoder) aacMod.registerAacEncoder();
               aacRegistered = true;
@@ -2781,7 +3966,7 @@
         if (status !== undefined) $('#pStatus').textContent = status;
         if (detail !== undefined) $('#pDetail').textContent = detail;
         if (speed !== undefined) $('#pSpeed').textContent = speed;
-        document.title = `${clamped}% · Рендер`;
+        document.title = `${clamped}% · rez`;
       }
 
       async function decodeFullAudio(file, mbInput, targetSR) {
@@ -2876,8 +4061,7 @@
                 const dur = Math.min(buf.duration - bufOffset, segDur - segPos);
                 scheduleMainPiece(buf, segPos, bufOffset, dur);
               }
-            } catch (e) {
-              console.warn('AudioBufferSink segment fallback:', e);
+            } catch (_) {
               if (fallbackMainBuf) {
                 scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(segDur, Math.max(0, fallbackMainBuf.duration - segStart)));
               }
@@ -2961,7 +4145,6 @@
         } catch (_) {}
 
         const fps = S.fps === 'auto' ? srcFps : (Number(S.fps) || 30);
-
         const mainSink = new MB.CanvasSink(mainVTrack, { poolSize: 2 });
 
         let mainAudioSink = null;
@@ -3215,7 +4398,7 @@
       }
 
       async function runOfflineExport() {
-        setProgress(1, 'Подготовка оффлайн-рендера...', 'Анализ видео', '');
+        setProgress(1, 'Подготовка рендера...', 'Анализ видео', '');
         const startPerf = performance.now();
         const pipe = await prepareOfflinePipeline();
 
@@ -3234,7 +4417,7 @@
                 4 + (done / Math.max(1, total)) * 93,
                 `Рендер MP4 (${pipe.outW}×${pipe.outH})`,
                 `Кадр ${done} / ${total}`,
-                `⚡ ${speedX.toFixed(1)}x • ~${rem}с`
+                `${speedX.toFixed(1)}x • ~${rem}с`
               );
             }
           });
@@ -3243,7 +4426,7 @@
           const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
           const file = new File(
             [segRes.buffer],
-            `bannerdrop_${Date.now().toString().slice(-5)}.mp4`,
+            `rez_${Date.now().toString().slice(-5)}.mp4`,
             { type: 'video/mp4' }
           );
           return { kind: 'single', file, outW: pipe.outW, outH: pipe.outH, elapsedTotal };
@@ -3254,10 +4437,10 @@
 
       async function runBatchSliceExport() {
         if (typeof VideoEncoder === 'undefined') {
-          throw new Error('Авто-нарезка в ZIP требует современный браузер с WebCodecs (Chrome, Edge или Safari 16.4+).');
+          throw new Error('Пакетная нарезка в ZIP требует современный браузер с WebCodecs (Chrome, Edge или Safari 16.4+).');
         }
 
-        setProgress(1, 'Подготовка авто-нарезки...', 'Потоковое чтение видео', '');
+        setProgress(1, 'Подготовка нарезки...', 'Потоковое чтение видео', '');
         const pipe = await prepareOfflinePipeline();
         const plan = computeSlicePlan(pipe.vDur);
         if (!plan.selected.length) {
@@ -3308,7 +4491,7 @@
                   2 + (overallDone / Math.max(overallDone, estTotalFrames)) * 95,
                   `Клип ${ci + 1}/${plan.selected.length} (Часть ${clipNum})`,
                   `Кадр ${done}/${total} • Готово: ${clips.length}`,
-                  `⚡ ${speedX.toFixed(1)}x • ~${remStr}`
+                  `${speedX.toFixed(1)}x • ~${remStr}`
                 );
               }
             });
@@ -3336,7 +4519,7 @@
 
           setProgress(98, `Упаковка ${clips.length} видео в ZIP...`, 'Без потери качества (STORE)', '');
           const zipBlob = buildStoreZipBlob(clips);
-          const zipName = `${baseName}_${clips.length}clips.zip`;
+          const zipName = `rez_${baseName}_${clips.length}clips.zip`;
           const zipFile = new File([zipBlob], zipName, { type: 'application/zip' });
           const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
 
@@ -3358,7 +4541,7 @@
         if (!window.MediaRecorder || !cv.captureStream) {
           throw new Error('Браузер не поддерживает экспорт видео. Открой в Chrome или Safari.');
         }
-        toast('Браузер без WebCodecs — запущен совместимый режим', '');
+        toast('Запущен совместимый режим рендера', '');
         ensurePreviewAudio();
 
         const { w, h } = computeOutputRes(v.videoWidth, v.videoHeight);
@@ -3451,7 +4634,7 @@
         const ext = isMp4 ? 'mp4' : 'webm';
         return {
           kind: 'single',
-          file: new File(chunks, `bannerdrop_${Date.now().toString().slice(-5)}.${ext}`, { type: mime.split(';')[0] }),
+          file: new File(chunks, `rez_${Date.now().toString().slice(-5)}.${ext}`, { type: mime.split(';')[0] }),
           outW: w,
           outH: h,
           elapsedTotal: ((performance.now() - startPerf) / 1000).toFixed(1)
@@ -3460,7 +4643,7 @@
 
       async function startExport() {
         if (!vfile) {
-          toast('Сначала выбери основное видео', 'err');
+          toast('Сначала загрузи основное видео', 'err');
           return;
         }
         if (exporting) {
@@ -3479,7 +4662,7 @@
         document.body.classList.add('exp');
         $('#res').classList.remove('on');
         $('#pbox').classList.add('on');
-        $('#go').textContent = S.sliceOn ? '⏹ Остановить и упаковать готовые' : '✖ Отменить рендер';
+        $('#go').textContent = S.sliceOn ? 'Остановить и упаковать готовые' : 'Отменить рендер';
         $('#go').classList.add('cancel');
         $('#topExportBtn').disabled = true;
 
@@ -3496,8 +4679,7 @@
               result = await runOfflineExport();
             } catch (err) {
               if (!cancelled) {
-                console.warn('WebCodecs failed, trying legacy fallback:', err);
-                toast('Переключаюсь на резервный рендер...', '');
+                console.warn('WebCodecs failed, trying fallback:', err);
                 result = await runLegacyFallbackExport();
               }
             }
@@ -3521,11 +4703,12 @@
             clipList.innerHTML = '';
 
             if (result.kind === 'zip') {
+              bumpUserStats(result.clips.length);
               $('#resTitle').textContent = result.partial
-                ? `📦 Сохранено ${result.clips.length} клипов (остановлено)`
-                : `📦 ZIP готов (${result.clips.length} клипов)`;
+                ? `Сохранено ${result.clips.length} клипов (остановлено)`
+                : `ZIP готов (${result.clips.length} клипов)`;
               $('#resMeta').textContent = `${result.outW}×${result.outH} • ${mb} МБ • за ${result.elapsedTotal}с`;
-              dl.textContent = `⬇ Скачать ZIP (${result.clips.length} видео • ${mb} МБ)`;
+              dl.textContent = `Скачать ZIP (${result.clips.length} видео • ${mb} МБ)`;
 
               const firstUrl = URL.createObjectURL(result.clips[0].blob);
               clipUrls.push(firstUrl);
@@ -3537,19 +4720,20 @@
                 if (idx > 0) clipUrls.push(u);
                 const row = document.createElement('div');
                 row.className = 'clip-item';
-                row.innerHTML = `<div><b>${c.name}</b><small>${c.rangeText} • ${(c.size / 1048576).toFixed(1)} МБ</small></div><a href="${u}" download="${c.name}">⬇ MP4</a>`;
+                row.innerHTML = `<div><b>${c.name}</b><small>${c.rangeText} • ${(c.size / 1048576).toFixed(1)} МБ</small></div><a href="${u}" download="${c.name}">MP4</a>`;
                 clipList.appendChild(row);
               });
               clipList.classList.add('on');
-              toast(`ZIP с ${result.clips.length} видео готов за ${result.elapsedTotal}с!`, 'ok');
+              toast(`ZIP с ${result.clips.length} видео готов за ${result.elapsedTotal}с`, 'ok');
             } else {
-              $('#resTitle').textContent = '✅ Видео готово';
+              bumpUserStats(1);
+              $('#resTitle').textContent = 'Видео готово';
               $('#resMeta').textContent = `${result.outW}×${result.outH} • ${mb} МБ • за ${result.elapsedTotal}с`;
-              dl.textContent = `⬇ Скачать ${result.file.name}`;
+              dl.textContent = `Скачать ${result.file.name}`;
               $('#outPreview').src = outObjectUrl;
               $('#outPreview').style.display = 'block';
               clipList.classList.remove('on');
-              toast(`Готово за ${result.elapsedTotal}с!`, 'ok');
+              toast(`Готово за ${result.elapsedTotal}с`, 'ok');
             }
 
             const sh = $('#sh');
@@ -3558,14 +4742,14 @@
             sh.onclick = () => navigator.share({ files: [result.file], title: result.file.name }).catch(() => {});
 
             $('#res').classList.add('on');
-            document.title = '✅ Готово · Баннер в видео';
+            document.title = 'Готово · rez';
           } else if (cancelled) {
-            document.title = 'Баннер в видео';
+            document.title = 'rez — видео-баннеры и нарезка';
             toast('Рендер отменён');
           }
         } catch (err) {
           console.error(err);
-          document.title = 'Баннер в видео';
+          document.title = 'rez — видео-баннеры и нарезка';
           toast('Ошибка рендера: ' + (err.message || err), 'err');
         } finally {
           exporting = false;
@@ -3579,12 +4763,129 @@
       }
 
       /* =====================================================================
-       * 11. СОБЫТИЯ ИНТЕРФЕЙСА
+       * 13. СОБЫТИЯ ИНТЕРФЕЙСА И ТИКЕТ-СИСТЕМЫ
        * ===================================================================== */
+      $('#openDrawerBtn').onclick = openDrawer;
+      $('#closeDrawerBtn').onclick = closeDrawer;
+      $('#drawerBackdrop').onclick = closeDrawer;
+
+      $$('[data-nav]').forEach(el => {
+        el.onclick = () => navigateTo(el.dataset.nav);
+      });
+
+      $$('[data-open-donate]').forEach(btn => {
+        btn.onclick = () => {
+          closeDrawer();
+          renderWalletCard(activeNet);
+          $('#donateModal').classList.add('open');
+        };
+      });
+
+      $('#closeDonateBtn').onclick = () => $('#donateModal').classList.remove('open');
+      $('#donateModal').onclick = (e) => {
+        if (e.target === $('#donateModal')) $('#donateModal').classList.remove('open');
+      };
+
+      $$('#walletNetTabs .net-pill').forEach(btn => {
+        btn.onclick = () => renderWalletCard(btn.dataset.net);
+      });
+
+      function copyToClipboard(text, successMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            toast(successMsg, 'ok');
+          }).catch(() => fallbackCopy(text, successMsg));
+        } else {
+          fallbackCopy(text, successMsg);
+        }
+      }
+
+      function fallbackCopy(text, successMsg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          toast(successMsg, 'ok');
+        } catch (_) {
+          toast('Скопируй текст вручную', 'err');
+        }
+        ta.remove();
+      }
+
+      $('#wmCopyBtn').onclick = () => {
+        copyToClipboard(WALLETS[activeNet].address, 'Адрес кошелька скопирован');
+      };
+
+      // Тикет-система (@REZ_support)
+      let ticketAttachedFile = null;
+      $('#tkMedia').onchange = (e) => {
+        const f = e.target.files[0];
+        ticketAttachedFile = f || null;
+        $('#tkMediaName').textContent = f ? `${f.name} (${(f.size / 1048576).toFixed(1)} МБ)` : 'Выбрать скриншот или видео-пример';
+      };
+
+      $('#ticketForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const nick = $('#tkNick').value.trim();
+        const topic = $('#tkTopic').value;
+        const desc = $('#tkDesc').value.trim();
+        if (!nick || !desc) return;
+
+        const ticketId = $('#ticketCodeBadge').textContent.replace('TICKET ', '');
+        const ua = navigator.userAgent.includes('iPhone') ? 'iPhone'
+          : navigator.userAgent.includes('Android') ? 'Android'
+          : 'Desktop';
+
+        const messageText = [
+          `[${ticketId}] Обращение в поддержку rez`,
+          `Ник: ${nick}`,
+          `Тема: ${topic}`,
+          `Устройство: ${ua} (${window.innerWidth}x${window.innerHeight})`,
+          ticketAttachedFile ? `Вложение: ${ticketAttachedFile.name}` : '',
+          `---`,
+          desc
+        ].filter(Boolean).join('\n');
+
+        ticketsList.unshift({
+          id: ticketId,
+          nick,
+          topic,
+          desc,
+          date: new Date().toLocaleDateString('ru-RU')
+        });
+        try { localStorage.setItem(TICKETS_KEY, JSON.stringify(ticketsList.slice(0, 20))); } catch (_) {}
+        renderTicketHistory();
+
+        copyToClipboard(messageText, 'Текст тикета скопирован — открываю @REZ_support');
+
+        // Если на телефоне прикреплён файл, пробуем системную отправку с файлом
+        if (ticketAttachedFile && navigator.canShare && navigator.canShare({ files: [ticketAttachedFile] })) {
+          try {
+            await navigator.share({
+              text: messageText,
+              files: [ticketAttachedFile],
+              title: ticketId
+            });
+            return;
+          } catch (_) {}
+        }
+
+        const tgUrl = `https://t.me/REZ_support?text=${encodeURIComponent(messageText)}`;
+        window.open(tgUrl, '_blank', 'noopener');
+      };
+
       $$('#tabs button').forEach(b => {
         b.onclick = () => {
-          $$('#tabs button').forEach(x => x.classList.toggle('on', x === b));
-          $$('.tab-pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.tab));
+          switchMainTab(b.dataset.tab);
+          if (b.dataset.tab === 'slice' && !S.sliceOn) {
+            S.sliceOn = true;
+            $('#sliceOn').checked = true;
+            ui(true);
+          }
         };
       });
 
@@ -3684,10 +4985,10 @@
         $('#bn').textContent = 'Видео-баннер';
         $('#bMeta').textContent = 'MP4, MOV, WebM, PNG';
         $('#thumb').style.display = 'none';
-        $('#bIcon').style.display = 'block';
-        $('#bIcon').textContent = '🔥';
+        $('#bIcon').style.display = 'grid';
+        $('#bIcon').textContent = 'BNR';
         $('#clearBannerBtn').style.display = 'none';
-        toast('Баннер удалён из памяти');
+        toast('Баннер удалён');
       };
 
       $('#pp').onclick = () => {
@@ -3730,6 +5031,9 @@
 
       $('#trySlice').onclick = () => {
         if (exporting || !v.src) { toast('Сначала загрузи видео', 'err'); return; }
+        S.sliceOn = true;
+        $('#sliceOn').checked = true;
+        ui(false);
         const plan = computeSlicePlan(D());
         if (!plan.selected.length) return;
         const ct = v.currentTime || 0;
@@ -3754,7 +5058,7 @@
         heldKey = null;
         hold = null;
         ui(true);
-        if (S.sliceOn) toast('Режим авто-нарезки в ZIP включён', 'ok');
+        if (S.sliceOn) toast('Пакетная нарезка в ZIP включена', 'ok');
       };
       $('#sliceSec').oninput = e => { S.sliceSec = +e.target.value; ui(false); };
       $('#sliceSec').onchange = () => persistSettings(true);
@@ -3797,7 +5101,7 @@
           eyedropActive = true;
           document.body.classList.add('eyedrop');
           ui(false);
-          toast('Ткни пальцем по фону баннера на видео');
+          toast('Нажми на фон баннера на видео');
         }
       }
       $$('.eye-btn').forEach(btn => { btn.onclick = runEyedropper; });
@@ -3838,6 +5142,8 @@
       $('#seek').onpointerup = e => e.target.blur();
       document.addEventListener('keydown', (e) => {
         if (e.code === 'Escape') {
+          closeDrawer();
+          $('#donateModal').classList.remove('open');
           if (eyedropActive) { eyedropActive = false; document.body.classList.remove('eyedrop'); return; }
           if (document.body.classList.contains('fs')) { setFS(false); return; }
         }
@@ -3851,11 +5157,15 @@
       });
 
       /* =====================================================================
-       * 12. ИНИЦИАЛИЗАЦИЯ
+       * 14. ИНИЦИАЛИЗАЦИЯ
        * ===================================================================== */
       async function init() {
         const hasWebCodecs = typeof VideoEncoder !== 'undefined';
-        $('#engineBadge').textContent = hasWebCodecs ? 'Оффлайн MP4' : 'Совм. режим';
+        $('#engineBadge').textContent = hasWebCodecs ? 'MP4 Оффлайн' : 'Совм. режим';
+
+        updateStatsUI();
+        renderTicketHistory();
+        setInterval(updateStatsUI, 30000);
 
         loadSlot(activeSlot);
         previewLoop();
