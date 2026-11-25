@@ -123,18 +123,6 @@
 
     .brand-word span { color: var(--acc); }
 
-    .engine-tag {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--card);
-      color: var(--ink-dim);
-      border: 1px solid var(--line);
-      text-transform: uppercase;
-    }
-
     .sub {
       font-size: 11.5px;
       color: var(--ink-mute);
@@ -1790,7 +1778,6 @@
 
         <div class="brand">
           <div class="brand-word">rez<span>.</span></div>
-          <span class="engine-tag" id="engineBadge">MP4 Оффлайн</span>
           <div class="sub" id="saveHint">Локальная обработка без сжатия и серверов</div>
         </div>
       </div>
@@ -2354,7 +2341,7 @@
 
       <div class="dl-panel">
         <div class="plat-list" id="platChips">
-          <span class="plat-chip" data-plat="youtube">YouTube / Shorts</span>
+          <span class="plat-chip" data-plat="youtube">YouTube / Shorts (ytsave.to)</span>
           <span class="plat-chip" data-plat="twitch">Twitch VOD / Clips</span>
           <span class="plat-chip" data-plat="tiktok">TikTok без вотермарки</span>
           <span class="plat-chip" data-plat="instagram">Instagram Reels</span>
@@ -2404,12 +2391,12 @@
         <div class="divline"></div>
 
         <div class="card-h">
-          <h3>Быстрые загрузчики по твоей ссылке</h3>
-          <span>Если браузер заблокировал прямой поток</span>
+          <h3>Запасные загрузчики</h3>
+          <span>Выбор сервиса вручную</span>
         </div>
         <div class="gateways-grid">
+          <button type="button" class="ghost" data-gw="ytsave">ytsave.to (YouTube)</button>
           <button type="button" class="ghost" data-gw="cobalt">cobalt.tools</button>
-          <button type="button" class="ghost" data-gw="savefrom">SaveFrom</button>
           <button type="button" class="ghost" data-gw="snaptik">SnapTik (TikTok)</button>
           <button type="button" class="ghost" data-gw="twitch">Clipr (Twitch)</button>
         </div>
@@ -2469,7 +2456,7 @@
       <div class="card">
         <div class="card-h">
           <h3>Принцип работы rez</h3>
-          <span>100% оффлайн</span>
+          <span>100% локально</span>
         </div>
         <p class="hint">
           Весь монтаж, удаление чёрного фона, хромакей, кадрирование 9:16 и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs) с высоким битрейтом. Видеофайлы никуда не загружаются, поэтому нет очередей, водяных знаков и потери чёткости.
@@ -2572,7 +2559,7 @@
 
         <details class="faq-item">
           <summary>Как скачать видео с YouTube, Twitch или TikTok?</summary>
-          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество (Макс 4K / 1080p / MP3) и нажми «Скачать видео».</p>
+          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество и нажми «Скачать видео» — ролики с YouTube сразу откроются через ytsave.to с готовой ссылкой.</p>
         </details>
 
         <details class="faq-item">
@@ -2776,7 +2763,7 @@
       }
 
       /* =====================================================================
-       * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ (YOUTUBE, TWITCH, TIKTOK, REELS, VK)
+       * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ (YOUTUBE ЧЕРЕЗ ytsave.to/ru3/, TWITCH, TIKTOK, REELS)
        * ===================================================================== */
       let dlQual = 'max';
       let dlDest = 'studio';
@@ -2805,6 +2792,10 @@
         return /^https?:\/\//i.test(s) ? s : 'https://' + s;
       }
 
+      function buildYtSaveUrl(ytUrl) {
+        return `https://app.ytsave.to/ru3/?url=${encodeURIComponent(ytUrl)}`;
+      }
+
       function openGateway(gw) {
         const url = normalizeInputUrl($('#dlUrlInput').value);
         if (!url) {
@@ -2812,8 +2803,8 @@
           return;
         }
         const enc = encodeURIComponent(url);
-        let target = `https://cobalt.tools/#${enc}`;
-        if (gw === 'savefrom') target = `https://ru.savefrom.net/1-youtube-video-downloader-4/?url=${enc}`;
+        let target = buildYtSaveUrl(url);
+        if (gw === 'cobalt') target = `https://cobalt.tools/#${enc}`;
         else if (gw === 'snaptik') target = `https://snaptik.app/?url=${enc}`;
         else if (gw === 'twitch') target = `https://clipr.xyz/?url=${enc}`;
         window.open(target, '_blank', 'noopener');
@@ -2823,6 +2814,23 @@
         const url = normalizeInputUrl($('#dlUrlInput').value);
         if (!url) {
           toast('Вставь ссылку на YouTube, Twitch, TikTok или Reels', 'err');
+          return;
+        }
+
+        const plat = detectPlatform(url);
+
+        // Для YouTube и YouTube Shorts открываем скачивание напрямую через app.ytsave.to/ru3/
+        if (plat === 'youtube') {
+          const ytSaveTarget = buildYtSaveUrl(url);
+          copyToClipboard(url, 'Ссылка скопирована — открываю ytsave.to');
+          $('#dlResTitle').textContent = 'Загрузка YouTube через ytsave.to';
+          $('#dlResBadge').textContent = 'YTSAVE.TO';
+          $('#dlResText').textContent = 'Открылась страница app.ytsave.to/ru3/ (ссылка также скопирована в буфер). Выбери нужное разрешение MP4, скачай ролик и загрузи его в редактор rez.';
+          $('#dlDirectHref').href = ytSaveTarget;
+          $('#dlDirectHref').textContent = 'Открыть ytsave.to ещё раз';
+          $('#dlToEditorBtn').style.display = 'none';
+          $('#dlResBox').classList.add('on');
+          window.open(ytSaveTarget, '_blank', 'noopener');
           return;
         }
 
@@ -2858,8 +2866,7 @@
                   url,
                   videoQuality: dlQual === 'audio' ? '1080' : dlQual,
                   downloadMode: dlQual === 'audio' ? 'audio' : 'auto',
-                  filenameStyle: 'basic',
-                  youtubeVideoCodec: 'h264'
+                  filenameStyle: 'basic'
                 })
               });
               if (!resp.ok) continue;
@@ -2883,10 +2890,11 @@
               dlQual === 'audio' ? 'MP3 Аудио' : (dlQual === 'max' ? 'Макс MP4' : `${dlQual}p MP4`)
             );
           } else {
-            const plat = detectPlatform(url);
             const fallbackUrl = plat === 'twitch'
               ? `https://clipr.xyz/?url=${encodeURIComponent(url)}`
-              : `https://cobalt.tools/#${encodeURIComponent(url)}`;
+              : plat === 'tiktok'
+                ? `https://snaptik.app/?url=${encodeURIComponent(url)}`
+                : `https://cobalt.tools/#${encodeURIComponent(url)}`;
             $('#dlResTitle').textContent = 'Площадка ограничила прямой поток';
             $('#dlResBadge').textContent = 'СЕРВИС';
             $('#dlResText').textContent = 'Нажми «Открыть и скачать» — ссылка уже передана. Сохрани MP4 в максимальном качестве и выбери его в редакторе rez.';
@@ -3244,7 +3252,6 @@
 
       let actx = null, asrc = null, again = null, adest = null;
 
-      // Повышенные битрейты для кристальной чёткости без сжатия
       const BR = { max: 28_000_000, hi: 16_000_000, mid: 8_000_000, lo: 4_000_000 };
       const CAP = { max: 3840, hi: 1920, mid: 1280, lo: 960 };
 
@@ -3708,7 +3715,6 @@
       const kx = kc.getContext('2d', { willReadFrequently: true });
 
       function applyChromaToSource(source, srcW, srcH) {
-        // Обрабатываем в полном разрешении исходника (до 1920px) без потери чёткости краёв
         const k = Math.min(1, 1920 / Math.max(1, srcW));
         const w = Math.max(2, Math.round(srcW * k));
         const h = Math.max(2, Math.round(srcH * k));
@@ -5550,9 +5556,6 @@
        * 15. ИНИЦИАЛИЗАЦИЯ
        * ===================================================================== */
       async function init() {
-        const hasWebCodecs = typeof VideoEncoder !== 'undefined';
-        $('#engineBadge').textContent = hasWebCodecs ? 'MP4 Оффлайн' : 'Совм. режим';
-
         const shareUrl = encodeURIComponent(window.location.href);
         const shareText = encodeURIComponent('rez — оффлайн-студия для вставки баннеров, нарезки Shorts/Reels и загрузки видео по ссылке');
         const tgShareHref = `https://t.me/share/url?url=${shareUrl}&text=${shareText}`;
