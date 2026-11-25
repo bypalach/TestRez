@@ -7,9 +7,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="description" content="rez — локальная студия вставки баннеров, нарезки видео в ZIP и загрузки роликов по ссылке в максимальном качестве" />
+  <meta name="description" content="rez — локальная студия: баннеры, нарезка, пакетная очередь ZIP, уникализатор, split-screen и авто-субтитры" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2216%22 fill=%22%23f2efe9%22/><text x=%2250%%22 y=%2254%%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22900%22 font-size=%2244%22 fill=%22%23101010%22>rez</text></svg>" />
-  <title>rez — видео-баннеры, нарезка и загрузчик</title>
+  <title>rez — видео-баннеры, нарезка, split-screen и субтитры</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -73,18 +73,18 @@
     }
 
     .head-in {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .head-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       min-width: 0;
     }
 
@@ -139,15 +139,16 @@
       border: 1px solid var(--line);
       padding: 3px;
       border-radius: 7px;
+      overflow-x: auto;
     }
 
     .head-nav button {
       border: 0;
       background: transparent;
       color: var(--ink-dim);
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 5px;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       transition: 0.12s;
@@ -214,13 +215,13 @@
       left: 0;
       bottom: 0;
       z-index: 65;
-      width: min(310px, 86vw);
+      width: min(320px, 86vw);
       background: var(--surface);
       border-right: 1px solid var(--line-hi);
       padding: max(14px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       transform: translateX(-102%);
       transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
       overflow-y: auto;
@@ -253,7 +254,7 @@
     .drawer-group {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
     }
 
     .drawer-label {
@@ -275,7 +276,7 @@
       border: 1px solid transparent;
       background: transparent;
       color: var(--ink);
-      padding: 9px 10px;
+      padding: 8px 10px;
       border-radius: 6px;
       font-size: 13px;
       font-weight: 600;
@@ -323,11 +324,11 @@
     .page-view.on { display: block; }
 
     .app {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: auto;
       padding: 14px 16px 28px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 440px;
+      grid-template-columns: minmax(0, 1fr) 450px;
       gap: 16px;
       align-items: start;
     }
@@ -355,16 +356,16 @@
     .stage-pills {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
       flex-wrap: wrap;
     }
 
     .pill {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
-      padding: 3px 8px;
+      padding: 3px 7px;
       border-radius: 4px;
       background: var(--card);
       border: 1px solid var(--line);
@@ -701,8 +702,8 @@
 
     .tabs {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 2px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3px;
       background: var(--bg);
       padding: 3px;
       border-radius: 6px;
@@ -713,7 +714,7 @@
       border: 0;
       background: transparent;
       color: var(--ink-dim);
-      padding: 7px 2px;
+      padding: 7px 3px;
       border-radius: 4px;
       font-size: 11.5px;
       font-weight: 600;
@@ -775,7 +776,7 @@
       background: transparent;
       padding: 7px 4px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--ink-dim);
       cursor: pointer;
@@ -988,7 +989,7 @@
       border-radius: 6px;
     }
 
-    /* Авто-нарезка */
+    /* Авто-нарезка, очередь и списки */
     .slice-info {
       background: var(--bg);
       border-left: 3px solid var(--acc);
@@ -1022,13 +1023,15 @@
       text-align: center;
     }
 
-    .clip-list {
-      display: none;
+    .clip-list, .queue-list {
+      display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 210px;
+      max-height: 220px;
       overflow-y: auto;
     }
+
+    .clip-list { display: none; }
     .clip-list.on { display: flex; }
 
     .clip-item {
@@ -1043,7 +1046,7 @@
       font-size: 12px;
     }
     .clip-item small { color: var(--ink-dim); display: block; font-size: 11px; }
-    .clip-item a {
+    .clip-item a, .clip-item button {
       background: var(--card);
       color: var(--ink);
       border: 1px solid var(--line-hi);
@@ -1053,9 +1056,26 @@
       font-weight: 600;
       font-size: 11px;
       flex-shrink: 0;
+      cursor: pointer;
     }
 
-    /* ==================== ЗАГРУЗЧИК ПО ССЫЛКЕ (YOUTUBE, TWITCH, TIKTOK, REELS) ==================== */
+    .sub-textarea {
+      width: 100%;
+      min-height: 145px;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line-hi);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+    }
+    .sub-textarea:focus { border-color: var(--acc); }
+
+    /* ==================== ЗАГРУЗЧИК ПО ССЫЛКЕ ==================== */
     .dl-panel {
       background: var(--surface);
       border: 1px solid var(--line);
@@ -1301,7 +1321,7 @@
 
     /* FAQ Аккордеон */
     .faq-section {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: 0 auto;
       padding: 12px 16px 32px;
     }
@@ -1368,7 +1388,7 @@
     }
 
     .footer-in {
-      max-width: 1440px;
+      max-width: 1480px;
       margin: auto;
       display: flex;
       align-items: center;
@@ -1654,13 +1674,13 @@
 
     @media (hover: none) { .dd { display: none; } }
 
-    @media (max-width: 1120px) {
-      .app { grid-template-columns: minmax(0, 1fr) 390px; gap: 14px; }
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .gateways-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .head-nav { display: none; }
       .app {
         grid-template-columns: 1fr;
@@ -1701,7 +1721,7 @@
     </div>
 
     <div class="drawer-group">
-      <div class="drawer-label">Инструменты</div>
+      <div class="drawer-label">Режимы студии</div>
       <button type="button" class="drawer-item on" data-nav="editor">
         <div>
           <div>Баннер в видео</div>
@@ -1712,23 +1732,51 @@
       <button type="button" class="drawer-item" data-nav="slicer">
         <div>
           <div>Нарезка на клипы</div>
-          <small>Пакетный экспорт в ZIP</small>
+          <small>Длинный ролик в части ZIP</small>
         </div>
         <span class="drawer-kbd">02</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="batch">
+        <div>
+          <div>Пакетная очередь ZIP</div>
+          <small>5–20 роликов с одним баннером</small>
+        </div>
+        <span class="drawer-kbd">03</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="uniq">
+        <div>
+          <div>Уникализатор (Анти-дубль)</div>
+          <small>Защита от банов TikTok / Reels</small>
+        </div>
+        <span class="drawer-kbd">04</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="split">
+        <div>
+          <div>Split-screen (Залипалка)</div>
+          <small>2 видео на одном экране</small>
+        </div>
+        <span class="drawer-kbd">05</span>
+      </button>
+      <button type="button" class="drawer-item" data-nav="subs">
+        <div>
+          <div>Авто-субтитры по голосу</div>
+          <small>Крупные слова по центру кадра</small>
+        </div>
+        <span class="drawer-kbd">06</span>
       </button>
       <button type="button" class="drawer-item" data-nav="downloader">
         <div>
           <div>Скачать по ссылке</div>
           <small>YouTube, Twitch, TikTok, Reels</small>
         </div>
-        <span class="drawer-kbd">03</span>
+        <span class="drawer-kbd">07</span>
       </button>
       <button type="button" class="drawer-item" data-nav="stats">
         <div>
           <div>Статистика</div>
           <small>Онлайн, пользователи и рендеры</small>
         </div>
-        <span class="drawer-kbd">04</span>
+        <span class="drawer-kbd">08</span>
       </button>
     </div>
 
@@ -1737,14 +1785,14 @@
       <button type="button" class="drawer-item" data-nav="tickets">
         <div>
           <div>Тикет-поддержка</div>
-          <small>Создать обращение с фото/видео</small>
+          <small>Обращение с фото/видео</small>
         </div>
         <span class="drawer-kbd">@REZ_support</span>
       </button>
       <button type="button" class="drawer-item" data-nav="faq">
         <div>
           <div>Частые вопросы (FAQ)</div>
-          <small>Ответы по работе редактора</small>
+          <small>Ответы по работе студии</small>
         </div>
         <span class="drawer-kbd">FAQ</span>
       </button>
@@ -1778,17 +1826,19 @@
 
         <div class="brand">
           <div class="brand-word">rez<span>.</span></div>
-          <div class="sub" id="saveHint">Локальная обработка без сжатия и серверов</div>
+          <div class="sub" id="saveHint">Локальная студия без сжатия и серверов</div>
         </div>
       </div>
 
-      <!-- Быстрые вкладки на ПК / ноутбуках -->
-      <nav class="head-nav" aria-label="Разделы">
-        <button type="button" class="on" data-nav="editor">Баннер в видео</button>
-        <button type="button" data-nav="slicer">Нарезка в ZIP</button>
-        <button type="button" data-nav="downloader">Скачать по ссылке</button>
-        <button type="button" data-nav="stats">Статистика</button>
-        <button type="button" data-nav="tickets">Тикеты</button>
+      <!-- Быстрые режимы на ПК / ноутбуках -->
+      <nav class="head-nav" aria-label="Режимы">
+        <button type="button" class="on" data-nav="editor">Баннер</button>
+        <button type="button" data-nav="slicer">Нарезка</button>
+        <button type="button" data-nav="batch">Очередь ZIP</button>
+        <button type="button" data-nav="uniq">Анти-дубль</button>
+        <button type="button" data-nav="split">Split-screen</button>
+        <button type="button" data-nav="subs">Субтитры</button>
+        <button type="button" data-nav="downloader">Скачать</button>
       </nav>
 
       <div class="head-actions">
@@ -1798,16 +1848,20 @@
     </div>
   </header>
 
-  <!-- ==================== СТРАНИЦА 1: РАБОЧАЯ СТУДИЯ (БАННЕР И НАРЕЗКА) ==================== -->
+  <!-- ==================== СТРАНИЦА 1: РАБОЧАЯ СТУДИЯ ==================== -->
   <section class="page-view on" id="view-workspace">
     <main class="app" id="app">
-      <!-- МОНИТОР ПРЕДПРОСМОТРА (ФИКСИРОВАННЫЙ РАЗМЕР ДО И ПОСЛЕ ЗАГРУЗКИ) -->
+      <!-- МОНИТОР ПРЕДПРОСМОТРА -->
       <section class="stage">
         <div class="stage-top">
           <div class="stage-pills">
             <span class="pill acc" id="modePill">Поверх</span>
             <span class="pill" id="resPill">Нет видео</span>
             <span class="pill slice-on" id="slicePill" style="display:none">Нарезка ZIP</span>
+            <span class="pill slice-on" id="batchPill" style="display:none">Очередь: 0</span>
+            <span class="pill acc" id="uniqPill" style="display:none">Анти-дубль</span>
+            <span class="pill acc" id="splitPill" style="display:none">Split-screen</span>
+            <span class="pill acc" id="subsPill" style="display:none">Субтитры</span>
             <span class="pill warn" id="freezePill" style="display:none">СТОП-КАДР</span>
           </div>
 
@@ -1819,7 +1873,6 @@
         </div>
 
         <div class="viewport-box">
-          <!-- Дроп-зона -->
           <div class="drop" id="drop">
             <b class="dd">Перетащи видеофайл в окно</b>
             <span class="dd">или открой с диска / галереи</span>
@@ -1832,7 +1885,6 @@
             </div>
           </div>
 
-          <!-- Канвас -->
           <div class="cvw">
             <canvas id="cv"></canvas>
             <div class="pick-banner-tip">Нажми на цвет фона на баннере</div>
@@ -1881,15 +1933,19 @@
         </div>
 
         <video id="v" playsinline webkit-playsinline preload="auto" hidden></video>
+        <video id="sv" playsinline webkit-playsinline preload="auto" loop muted hidden></video>
       </section>
 
-      <!-- ПАНЕЛЬ НАСТРОЕК -->
+      <!-- ПАНЕЛЬ НАСТРОЕК (8 ВКЛАДОК В 2 РЯДА ПО 4) -->
       <aside class="panel">
         <div class="tabs" id="tabs">
           <button type="button" data-tab="main" class="on">Режим</button>
-          <button type="button" data-tab="view">Вид</button>
-          <button type="button" data-tab="fx">Фон</button>
+          <button type="button" data-tab="view">Вид / Фон</button>
           <button type="button" data-tab="slice">Нарезка</button>
+          <button type="button" data-tab="batch">Очередь</button>
+          <button type="button" data-tab="uniq">Анти-дубль</button>
+          <button type="button" data-tab="split">Split-screen</button>
+          <button type="button" data-tab="subs">Субтитры</button>
           <button type="button" data-tab="export">Экспорт</button>
         </div>
 
@@ -1897,7 +1953,7 @@
         <div class="tab-pane on" id="pane-main">
           <div class="card">
             <div class="card-h">
-              <h3>Режим вставки</h3>
+              <h3>Режим вставки баннера</h3>
               <span data-txt="modeShortHint">Видео идёт дальше</span>
             </div>
             <div class="seg" data-k="mode">
@@ -1964,7 +2020,7 @@
           </div>
         </div>
 
-        <!-- ВКЛАДКА 2: РАЗМЕЩЕНИЕ И ВИД -->
+        <!-- ВКЛАДКА 2: ВИД, ФОН И ЗВУК -->
         <div class="tab-pane" id="pane-view">
           <div class="card">
             <div class="card-h">
@@ -1976,25 +2032,17 @@
               <button type="button" data-v="v_crop">9:16 Кроп</button>
               <button type="button" data-v="v_blur">9:16 Блюр</button>
             </div>
-            <p class="hint">Преобразует горизонтальное 16:9 видео в вертикальный формат 1080×1920 для Shorts и Reels.</p>
           </div>
 
           <div class="card">
             <div class="card-h">
-              <h3>Размещение в кадре</h3>
+              <h3>Размещение и размеры баннера</h3>
               <span data-txt="posCoords">X:50% Y:82%</span>
             </div>
             <div class="seg" data-k="pos">
               <button type="button" data-v="top">Сверху</button>
               <button type="button" data-v="center">По центру</button>
               <button type="button" data-v="bottom">Снизу</button>
-            </div>
-            <p class="hint">Перетаскивай баннер мышью или пальцем по экрану, а за маркер в правом нижнем углу меняй размер.</p>
-          </div>
-
-          <div class="card">
-            <div class="card-h">
-              <h3>Размеры и стиль</h3>
             </div>
             <div class="row">
               <span>Размер</span>
@@ -2011,12 +2059,6 @@
               <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
               <output data-out="rad">14 px</output>
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-h">
-              <h3>Появление баннера</h3>
-            </div>
             <div class="seg" data-k="anim">
               <button type="button" data-v="fade">Плавно</button>
               <button type="button" data-v="pop">Хлопок</button>
@@ -2024,13 +2066,10 @@
               <button type="button" data-v="none">Нет</button>
             </div>
           </div>
-        </div>
 
-        <!-- ВКЛАДКА 3: ФОН / ХРОМАКЕЙ И ЗВУК -->
-        <div class="tab-pane" id="pane-fx">
           <div class="card">
             <div class="card-h">
-              <h3>Удаление фона баннера</h3>
+              <h3>Удаление фона баннера и звук</h3>
             </div>
             <div class="seg" data-k="ckMode">
               <button type="button" data-v="none">Обычный</button>
@@ -2046,12 +2085,9 @@
               <output data-out="kt">40</output>
             </div>
             <button class="ghost eye-btn" type="button" data-chroma-box>Пипетка: выбрать цвет на экране</button>
-          </div>
 
-          <div class="card">
-            <div class="card-h">
-              <h3>Звук</h3>
-            </div>
+            <div class="divline"></div>
+
             <div class="row">
               <span>Звук видео</span>
               <input type="range" data-bind="vvol" min="0" max="100" step="5" value="100" />
@@ -2063,21 +2099,21 @@
               <output data-out="bvol">100%</output>
             </div>
             <label class="chk" data-vo>
-              <span>Приглушать видео под баннер<small>В режиме «Поверх» снижает громкость ролика до 25%</small></span>
+              <span>Приглушать видео под баннер<small>Снижает громкость ролика до 25%</small></span>
               <input type="checkbox" data-bind-chk="duck" checked />
             </label>
           </div>
         </div>
 
-        <!-- ВКЛАДКА 4: НАРЕЗКА В ZIP (ПОЛНЫЙ ФУНКЦИОНАЛ КАК НА ГЛАВНОЙ) -->
+        <!-- ВКЛАДКА 3: НАРЕЗКА ОДНОГО ДЛИННОГО ВИДЕО В ZIP -->
         <div class="tab-pane" id="pane-slice">
           <div class="card">
             <label class="chk">
-              <span>Пакетная нарезка на клипы (ZIP)<small>Режет длинное видео на части и вставляет баннер в каждый клип</small></span>
+              <span>Нарезка длинного видео на клипы (ZIP)<small>Режет ролик по минутам и вставляет баннер в каждый клип</small></span>
               <input type="checkbox" id="sliceOn" />
             </label>
             <div class="slice-info" id="sliceSummary">
-              Загрузи длинный ролик и баннер — здесь настраивается, как именно баннер будет вставляться в каждую часть (поверх или с паузой).
+              Включи режим нарезки, чтобы разрезать длинное видео на части и получить ZIP-архив.
             </div>
           </div>
 
@@ -2090,36 +2126,6 @@
               <button type="button" data-v="over">Поверх (по ходу)</button>
               <button type="button" data-v="stop">Пауза (Стоп)</button>
             </div>
-            <p class="hint" data-txt="modeHint"></p>
-
-            <label class="chk" data-vo>
-              <span>Длина по ролику баннера<small>Показывает весь видео-баннер целиком</small></span>
-              <input type="checkbox" data-bind-chk="auto" checked />
-            </label>
-
-            <div class="row" data-for="over">
-              <span>Показывать</span>
-              <input type="range" data-bind="show" min="0.5" max="20" step="0.5" value="4" />
-              <output data-out="show">4 с</output>
-            </div>
-
-            <div class="row" data-for="stop">
-              <span>Пауза (сек)</span>
-              <input type="range" data-bind="hold" min="0.5" max="15" step="0.5" value="3" />
-              <output data-out="hold">3 с</output>
-            </div>
-            <div class="row" data-for="stop">
-              <span>Затемнение</span>
-              <input type="range" data-bind="stopDim" min="0" max="80" step="5" value="25" />
-              <output data-out="stopDim">25%</output>
-            </div>
-            <div class="row" data-for="stop">
-              <span>Размытие фона</span>
-              <input type="range" data-bind="stopBlur" min="0" max="14" step="1" value="0" />
-              <output data-out="stopBlur">0 px</output>
-            </div>
-
-            <div class="divline"></div>
 
             <div class="card-h">
               <h3>Момент внутри каждого клипа</h3>
@@ -2139,71 +2145,11 @@
             </div>
 
             <button class="ghost" type="button" id="trySlice">Проверить клип с баннером в плеере</button>
-
-            <div class="divline"></div>
-
-            <div class="card-h">
-              <h3>Позиция, размер и стиль</h3>
-              <span data-txt="posCoords">X:50% Y:82%</span>
-            </div>
-            <div class="seg" data-k="pos">
-              <button type="button" data-v="top">Сверху</button>
-              <button type="button" data-v="center">По центру</button>
-              <button type="button" data-v="bottom">Снизу</button>
-            </div>
-            <div class="row">
-              <span>Размер</span>
-              <input type="range" data-bind="scale" min="15" max="100" value="78" />
-              <output data-out="scale">78%</output>
-            </div>
-            <div class="row">
-              <span>Прозрачность</span>
-              <input type="range" data-bind="op" min="20" max="100" value="100" />
-              <output data-out="op">100%</output>
-            </div>
-            <div class="row">
-              <span>Скругление</span>
-              <input type="range" data-bind="rad" min="0" max="48" step="2" value="14" />
-              <output data-out="rad">14 px</output>
-            </div>
-            <div class="seg" data-k="anim">
-              <button type="button" data-v="fade">Плавно</button>
-              <button type="button" data-v="pop">Хлопок</button>
-              <button type="button" data-v="slide">Въезд</button>
-              <button type="button" data-v="none">Нет</button>
-            </div>
-
-            <div class="divline"></div>
-
-            <div class="card-h">
-              <h3>Фон и звук баннера</h3>
-            </div>
-            <div class="seg" data-k="ckMode">
-              <button type="button" data-v="none">Обычный</button>
-              <button type="button" data-v="screen">Без чёрного</button>
-              <button type="button" data-v="chroma">Хромакей</button>
-            </div>
-            <div class="row" data-chroma-box>
-              <span>Цвет + сила</span>
-              <input type="color" data-bind-color="kcol" value="#00ff00" />
-              <input type="range" data-bind="kt" min="5" max="100" value="40" />
-              <output data-out="kt">40</output>
-            </div>
-            <button class="ghost eye-btn" type="button" data-chroma-box>Пипетка: выбрать цвет на экране</button>
-            <div class="row" data-vo>
-              <span>Звук баннера</span>
-              <input type="range" data-bind="bvol" min="0" max="100" step="5" value="100" />
-              <output data-out="bvol">100%</output>
-            </div>
-            <label class="chk" data-vo>
-              <span>Приглушать видео под баннер<small>Снижает громкость видео до 25% во время баннера</small></span>
-              <input type="checkbox" data-bind-chk="duck" checked />
-            </label>
           </div>
 
           <div class="card">
             <div class="card-h">
-              <h3>Длина каждого клипа</h3>
+              <h3>Длина частей и диапазон</h3>
               <span id="sliceSecBadge">1 мин</span>
             </div>
             <div class="seg" data-k="sliceSecPreset">
@@ -2223,35 +2169,17 @@
               <input id="sliceIntro" type="range" min="0" max="60" step="1" value="0" />
               <output id="sliceIntroO">0 с</output>
             </div>
-
-            <div class="divline"></div>
-
-            <div class="card-h">
-              <h3>Хвост и диапазон частей</h3>
-            </div>
             <div class="seg" data-k="sliceTail">
               <button type="button" data-v="merge">Склеить хвост</button>
               <button type="button" data-v="keep">Отдельно</button>
               <button type="button" data-v="drop">Убрать &lt;15с</button>
             </div>
-
             <div class="num-row">
               <span>Части (от — до)</span>
               <input id="sliceFrom" class="num-in" type="number" min="1" value="1" />
               <span style="flex:0 0 auto;color:var(--ink-dim)">—</span>
               <input id="sliceTo" class="num-in" type="number" min="0" value="0" placeholder="Все" />
               <button type="button" class="btn-sm" id="sliceAllBtn">Все</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-h">
-              <h3>Формат 9:16 и подпись «Часть 1»</h3>
-            </div>
-            <div class="seg" data-k="aspect">
-              <button type="button" data-v="orig">Исходник</button>
-              <button type="button" data-v="v_crop">9:16 Кроп</button>
-              <button type="button" data-v="v_blur">9:16 Блюр</button>
             </div>
             <div class="seg" data-k="partLabel">
               <button type="button" data-v="none">Без текста</button>
@@ -2265,7 +2193,175 @@
           </div>
         </div>
 
-        <!-- ВКЛАДКА 5: ПАРАМЕТРЫ ЭКСПОРТА -->
+        <!-- ВКЛАДКА 4: ПАКЕТНАЯ ОЧЕРЕДЬ (5–20 ГОТОВЫХ РОЛИКОВ -> ZIP) -->
+        <div class="tab-pane" id="pane-batch">
+          <div class="card">
+            <label class="chk">
+              <span>Пакетная очередь роликов (Batch ZIP)<small>Закинь сразу 5–20 видео — наложит баннер на каждое и соберёт ZIP</small></span>
+              <input type="checkbox" id="batchOn" />
+            </label>
+            <div class="slice-info" id="batchSummary">
+              Добавь несколько готовых роликов ниже. Настройки баннера, уникализации, split-screen и субтитров применятся ко всей пачке автоматически.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Список роликов в очереди</h3>
+              <span id="batchCountBadge">0 файлов</span>
+            </div>
+
+            <div class="btn-row">
+              <label class="btn-sm pri" style="justify-content:center;padding:10px;cursor:pointer">
+                <span>+ Добавить видео (пачкой)</span>
+                <input id="batchFilesInput" type="file" accept="video/*" multiple hidden />
+              </label>
+              <button type="button" class="ghost" id="clearBatchBtn">Очистить список</button>
+            </div>
+
+            <div class="queue-list" id="batchQueueList">
+              <p class="hint">Очередь пуста. Нажми «+ Добавить видео» и выбери сразу несколько файлов.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 5: УНИКАЛИЗАТОР / АНТИ-ДУБЛЬ -->
+        <div class="tab-pane" id="pane-uniq">
+          <div class="card">
+            <label class="chk">
+              <span>Уникализатор видео (Анти-дубль)<small>Меняет цифровой отпечаток кадра, звука и метаданных для TikTok, Reels и Shorts</small></span>
+              <input type="checkbox" id="uniqOn" />
+            </label>
+            <p class="hint">Незаметно для глаза и слуха меняет хэш каждого кадра и аудиодорожки, чтобы алгоритмы не резали охваты за перезалив.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Уровень защиты</h3>
+              <span id="uniqPresetBadge">Выкл</span>
+            </div>
+            <div class="seg" data-k="uniqLevel">
+              <button type="button" data-v="soft">Мягкий</button>
+              <button type="button" data-v="mid">Оптимальный</button>
+              <button type="button" data-v="hard">Макс защита</button>
+            </div>
+
+            <div class="row">
+              <span>Микро-зум</span>
+              <input type="range" data-bind="uniqZoom" min="0" max="5" step="0.5" value="2" />
+              <output data-out="uniqZoom">+2%</output>
+            </div>
+            <div class="row">
+              <span>Сдвиг скорости</span>
+              <input type="range" data-bind="uniqSpeed" min="0" max="4" step="0.5" value="1.5" />
+              <output data-out="uniqSpeed">+1.5%</output>
+            </div>
+            <div class="row">
+              <span>Цветокоррекция</span>
+              <input type="range" data-bind="uniqColor" min="0" max="6" step="1" value="2" />
+              <output data-out="uniqColor">±2%</output>
+            </div>
+            <label class="chk">
+              <span>Микро-сдвиг кадра (1–2 px)<small>Смещает сетку пикселей без чёрных полос</small></span>
+              <input type="checkbox" data-bind-chk="uniqShift" checked />
+            </label>
+            <label class="chk">
+              <span>Очистка и генерация новых метаданных<small>Создаёт уникальный ID и таймстамп контейнера MP4</small></span>
+              <input type="checkbox" data-bind-chk="uniqMeta" checked />
+            </label>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 6: SPLIT-SCREEN (ДВА ВИДЕО НА ОДНОМ ЭКРАНЕ) -->
+        <div class="tab-pane" id="pane-split">
+          <div class="card">
+            <label class="chk">
+              <span>Режим Split-screen (Залипалка)<small>Сверху основное видео, снизу фоновый ролик (GTA, пресс, реакция)</small></span>
+              <input type="checkbox" id="splitOn" />
+            </label>
+            <p class="hint">Звук нижнего видео автоматически глушится в ноль, а ролик зацикливается на всю длину основного видео.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Нижнее видео (Залипалка)</h3>
+              <span id="splitDurBadge">Нет файла</span>
+            </div>
+
+            <div class="btn-row">
+              <label class="btn-sm pri" style="justify-content:center;padding:10px;cursor:pointer">
+                <span>Выбрать нижнее видео</span>
+                <input id="svf" type="file" accept="video/*" hidden />
+              </label>
+              <button type="button" class="ghost" id="clearSplitVidBtn">Удалить</button>
+            </div>
+            <p class="hint" id="svName">Файл не выбран</p>
+
+            <div class="divline"></div>
+
+            <div class="card-h">
+              <h3>Пропорция разделения экрана</h3>
+              <span id="splitRatioBadge">50 / 50</span>
+            </div>
+            <div class="seg" data-k="splitRatio">
+              <button type="button" data-v="50">50 / 50</button>
+              <button type="button" data-v="60">60 / 40</button>
+              <button type="button" data-v="65">65 / 35</button>
+            </div>
+
+            <div class="row">
+              <span>Разделитель</span>
+              <input type="range" data-bind="splitLine" min="0" max="10" step="1" value="3" />
+              <output data-out="splitLine">3 px</output>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 7: АВТО-СУБТИТРЫ ПО ГОЛОСУ -->
+        <div class="tab-pane" id="pane-subs">
+          <div class="card">
+            <label class="chk">
+              <span>Вшивать крупные субтитры в видео<small>Контрастные слова по центру кадра с жирной обводкой</small></span>
+              <input type="checkbox" id="subsOn" />
+            </label>
+
+            <div class="btn-row">
+              <button type="button" class="btn-sm pri" style="justify-content:center;padding:9px" id="autoTranscribeBtn">Распознать речь из видео</button>
+              <button type="button" class="ghost" id="sampleSubsBtn">Вставить шаблон</button>
+            </div>
+            <p class="hint" id="subsStatusHint">Нажми «Распознать речь» (проиграет ролик и сам расставит таймкоды) или впиши строки вручную ниже.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h">
+              <h3>Стиль и размер субтитров</h3>
+              <span id="subsCountBadge">0 фраз</span>
+            </div>
+            <div class="seg" data-k="subsStyle">
+              <button type="button" data-v="white">Белые</button>
+              <button type="button" data-v="yellow">Жёлтые</button>
+              <button type="button" data-v="box">На плашке</button>
+            </div>
+
+            <div class="row">
+              <span>Размер шрифта</span>
+              <input type="range" data-bind="subsSize" min="36" max="88" step="2" value="56" />
+              <output data-out="subsSize">56 px</output>
+            </div>
+            <div class="row">
+              <span>Высота в кадре</span>
+              <input type="range" data-bind="subsY" min="20" max="85" step="1" value="54" />
+              <output data-out="subsY">54%</output>
+            </div>
+
+            <div class="field">
+              <label for="subsEditorText">Таймкоды (формат: 0:01 - 0:03 | Текст фразы)</label>
+              <textarea class="sub-textarea" id="subsEditorText" placeholder="0:00 - 0:02 | ОНИ НЕ ОЖИДАЛИ&#10;0:02 - 0:04 | ТАКОГО ФИНАЛА&#10;0:04 - 0:06 | СМОТРИ ДО КОНЦА"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА 8: ПАРАМЕТРЫ ЭКСПОРТА -->
         <div class="tab-pane" id="pane-export">
           <div class="card">
             <div class="card-h">
@@ -2459,7 +2555,7 @@
           <span>100% локально</span>
         </div>
         <p class="hint">
-          Весь монтаж, удаление чёрного фона, хромакей, кадрирование 9:16 и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs) с высоким битрейтом. Видеофайлы никуда не загружаются, поэтому нет очередей, водяных знаков и потери чёткости.
+          Весь монтаж, удаление чёрного фона, хромакей, split-screen, уникализация, субтитры и упаковка клипов в ZIP выполняются напрямую браузером (WebCodecs) с высоким битрейтом. Видеофайлы никуда не загружаются, поэтому нет очередей и водяных знаков.
         </p>
       </div>
     </div>
@@ -2495,9 +2591,9 @@
             <label for="tkTopic">Тема проблемы</label>
             <select class="sel-in" id="tkTopic">
               <option value="Ошибка при рендере MP4 / ZIP">Ошибка при рендере MP4 / ZIP</option>
+              <option value="Пакетная очередь / Уникализатор / Split-screen">Пакетная очередь / Уникализатор / Split-screen</option>
               <option value="Скачивание видео по ссылке">Скачивание видео по ссылке</option>
-              <option value="Проблема со звуком или синхронизацией">Проблема со звуком или синхронизацией</option>
-              <option value="Хромакей / удаление фона">Хромакей / удаление фона</option>
+              <option value="Хромакей / удаление фона / Субтитры">Хромакей / удаление фона / Субтитры</option>
               <option value="Предложение по улучшению rez">Предложение по улучшению rez</option>
               <option value="Другой вопрос">Другой вопрос</option>
             </select>
@@ -2530,7 +2626,7 @@
           </div>
           <p class="hint">
             1. Заполни ник, тему и описание. При желании прикрепи скриншот или запись экрана.<br><br>
-            2. Нажми кнопку отправки — текст тикета с номером обращения и данными устройства автоматически скопируется и откроется чат <b>@REZ_support</b> в Telegram (а на телефоне можно сразу приложить выбранный файл через системную отправку).
+            2. Нажми кнопку отправки — текст тикета с номером обращения и данными устройства автоматически скопируется и откроется чат <b>@REZ_support</b> в Telegram.
           </p>
 
           <div class="divline"></div>
@@ -2553,28 +2649,28 @@
       <h2>Популярные вопросы (FAQ)</h2>
       <div class="faq-list">
         <details class="faq-item">
-          <summary>Как получить максимальное качество без потери чёткости?</summary>
-          <p>Во вкладке «Экспорт» по умолчанию выбран режим «Макс (4K)» с битрейтом до 28 Мбит/с и сохранением исходного разрешения и FPS. Баннер и видео обрабатываются в полном разрешении с максимальным сглаживанием.</p>
+          <summary>Как работает «Пакетная очередь ZIP» (5–20 роликов)?</summary>
+          <p>Открой режим «Очередь ZIP» в меню или на панели, загрузи сразу пачку готовых роликов, выбери один баннер и нажми сборку. Студия автоматически прогонит каждый ролик через твои настройки и соберёт общий ZIP-архив.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Что делает режим «Анти-дубль» (Уникализатор)?</summary>
+          <p>Он применяет микро-зум (+1–3%), сдвиг пиксельной сетки на 1–2 px, лёгкую цветокоррекцию, микро-ускорение звука и меняет метаданные контейнера, чтобы TikTok, Reels и Shorts не определяли ролик как дубликат.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Как сделать Split-screen (основное видео сверху + залипалка снизу)?</summary>
+          <p>Перейди во вкладку «Split-screen», включи режим и выбери второе видео (паркур GTA, пресс, реакция). Нижний ролик автоматически зациклится без звука, а баннер можно поставить ровно на линию стыка.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Как вшить крупные авто-субтитры по голосу?</summary>
+          <p>Во вкладке «Субтитры» нажми «Распознать речь из видео» (или вставь текст с таймкодами вручную) и выбери цвет. Слова будут отрисованы крупным шрифтом с обводкой прямо поверх видео в MP4.</p>
         </details>
 
         <details class="faq-item">
           <summary>Как скачать видео с YouTube, Twitch или TikTok?</summary>
-          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество и нажми «Скачать видео» — ролики с YouTube сразу откроются через ytsave.to с готовой ссылкой.</p>
-        </details>
-
-        <details class="faq-item">
-          <summary>Чем отличается режим «Поверх» от «Пауза (Стоп)»?</summary>
-          <p>В режиме «Поверх» основное видео продолжает проигрываться, а баннер накладывается сверху (с приглушением звука ролика, если нужно). В режиме «Пауза» видео замирает на кадре с затемнением или блюром, пока полностью не пройдёт баннер, а затем продолжается.</p>
-        </details>
-
-        <details class="faq-item">
-          <summary>Как сделать нарезку длинного видео на клипы с баннером?</summary>
-          <p>Перейди во вкладку «Нарезка», включи переключатель «Пакетная нарезка на клипы (ZIP)», выбери длину части (например, 1 мин) и настрой, как вставлять баннер внутрь каждого клипа. На выходе ты получишь ZIP-архив со всеми частями.</p>
-        </details>
-
-        <details class="faq-item">
-          <summary>Как убрать чёрный фон или зелёный экран у баннера?</summary>
-          <p>Открой раздел «Фон». Для баннеров на чёрном фоне выбери «Без чёрного» — чёрный фон исчезнет без ореолов. Для однотонного цветного фона выбери «Хромакей» и ткни пипеткой прямо по фону на экране.</p>
+          <p>Открой раздел «Скачать по ссылке» в верхнем меню или в левой панели (три полоски), вставь ссылку на ролик или клип, выбери качество и нажми «Скачать видео» — YouTube сразу откроется через ytsave.to.</p>
         </details>
 
         <details class="faq-item">
@@ -2589,7 +2685,7 @@
   <footer class="site-footer">
     <div class="footer-in">
       <div class="footer-info">
-        <b>rez — оффлайн-редактор видео-баннеров, нарезки и загрузки</b>
+        <b>rez — оффлайн-студия видео-баннеров, нарезки, split-screen и субтитров</b>
         <span>Поддержка: @REZ_support • Максимальное качество без водяных знаков.</span>
       </div>
 
@@ -2667,6 +2763,7 @@
       const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
       const v = $('#v');
+      const sv = $('#sv');
       const cv = $('#cv');
       const ctx = cv.getContext('2d', { alpha: false });
       ctx.imageSmoothingEnabled = true;
@@ -2763,7 +2860,7 @@
       }
 
       /* =====================================================================
-       * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ (YOUTUBE ЧЕРЕЗ ytsave.to/ru3/, TWITCH, TIKTOK, REELS)
+       * 2. ЗАГРУЗЧИК ВИДЕО ПО ССЫЛКЕ
        * ===================================================================== */
       let dlQual = 'max';
       let dlDest = 'studio';
@@ -2818,8 +2915,6 @@
         }
 
         const plat = detectPlatform(url);
-
-        // Для YouTube и YouTube Shorts открываем скачивание напрямую через app.ytsave.to/ru3/
         if (plat === 'youtube') {
           const ytSaveTarget = buildYtSaveUrl(url);
           copyToClipboard(url, 'Ссылка скопирована — открываю ytsave.to');
@@ -3062,12 +3157,46 @@
 
         if (target === 'slicer') {
           S.sliceOn = true;
+          S.batchOn = false;
           $('#sliceOn').checked = true;
+          $('#batchOn').checked = false;
           switchMainTab('slice');
+          ui(true);
+        } else if (target === 'batch') {
+          S.batchOn = true;
+          S.sliceOn = false;
+          $('#batchOn').checked = true;
+          $('#sliceOn').checked = false;
+          switchMainTab('batch');
+          ui(true);
+        } else if (target === 'uniq') {
+          S.uniqOn = true;
+          $('#uniqOn').checked = true;
+          switchMainTab('uniq');
+          ui(true);
+        } else if (target === 'split') {
+          S.splitOn = true;
+          if (S.aspect === 'orig') {
+            S.aspect = 'v_crop';
+            setPreviewRes();
+            place();
+          }
+          $('#splitOn').checked = true;
+          switchMainTab('split');
+          ui(true);
+        } else if (target === 'subs') {
+          S.subsOn = true;
+          $('#subsOn').checked = true;
+          if (!$('#subsEditorText').value.trim()) {
+            loadSampleSubtitles(false);
+          }
+          switchMainTab('subs');
           ui(true);
         } else if (target === 'editor') {
           S.sliceOn = false;
+          S.batchOn = false;
           $('#sliceOn').checked = false;
+          $('#batchOn').checked = false;
           switchMainTab('main');
           ui(true);
         }
@@ -3116,6 +3245,22 @@
         sliceTo: 0,
         partLabel: 'none',
         partLabelPos: 'top',
+        batchOn: false,
+        uniqOn: false,
+        uniqLevel: 'mid',
+        uniqZoom: 2,
+        uniqSpeed: 1.5,
+        uniqColor: 2,
+        uniqShift: true,
+        uniqMeta: true,
+        splitOn: false,
+        splitRatio: '50',
+        splitLine: 3,
+        subsOn: false,
+        subsStyle: 'yellow',
+        subsSize: 56,
+        subsY: 54,
+        subsText: '',
         q: 'max',
         fps: 'auto',
         saveBanner: true
@@ -3136,6 +3281,7 @@
         }
         $$('#presetSlots button').forEach(b => b.classList.toggle('on', b.dataset.slot === activeSlot));
         syncInputs();
+        parseSubtitlesFromText();
         if (D()) { timing(); place(); }
         ui(false);
       }
@@ -3150,7 +3296,7 @@
             el.style.color = '#86efac';
             clearTimeout(persistSettings._t);
             persistSettings._t = setTimeout(() => {
-              el.textContent = 'Локальная обработка без сжатия и серверов';
+              el.textContent = 'Локальная студия без сжатия и серверов';
               el.style.color = '';
             }, 1300);
           }
@@ -3229,13 +3375,17 @@
       }
 
       /* =====================================================================
-       * 6. СОСТОЯНИЕ МЕДИА И ПРЕВЬЮ-ПЛЕЕРА
+       * 6. СОСТОЯНИЕ МЕДИА, ПАКЕТНОЙ ОЧЕРЕДИ, SPLIT-SCREEN И СУБТИТРОВ
        * ===================================================================== */
       let vfile = null;
       let bfile = null;
+      let svfile = null;
+      let batchFiles = [];
       let img = null;
       let burl = null;
       let bwas = false;
+
+      let parsedSubs = [];
 
       let hold = null;
       let heldKey = null;
@@ -3268,6 +3418,81 @@
         t = Math.max(0, t || 0);
         return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
       };
+
+      function parseTimecode(str) {
+        const parts = String(str || '').trim().split(':').map(Number);
+        if (parts.some(isNaN)) return null;
+        if (parts.length === 2) return parts[0] * 60 + parts[1];
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        return parts[0];
+      }
+
+      function parseSubtitlesFromText() {
+        const raw = $('#subsEditorText').value || '';
+        S.subsText = raw;
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        const list = [];
+        for (const line of lines) {
+          const m = line.match(/^([\d:.]+)\s*[-–—]\s*([\d:.]+)\s*\|\s*(.+)$/);
+          if (m) {
+            const start = parseTimecode(m[1]);
+            const end = parseTimecode(m[2]);
+            const text = m[3].trim();
+            if (start !== null && end !== null && end > start && text) {
+              list.push({ start, end, text });
+            }
+          }
+        }
+        parsedSubs = list;
+        $('#subsCountBadge').textContent = `${parsedSubs.length} фраз`;
+      }
+
+      function loadSampleSubtitles(notify = true) {
+        const d = D() || 10;
+        const step = Math.max(1.5, Math.min(2.5, d / 4));
+        const sample = [
+          `0:00 - 0:${String(Math.round(step)).padStart(2, '0')} | ОНИ НЕ ОЖИДАЛИ`,
+          `0:${String(Math.round(step)).padStart(2, '0')} - 0:${String(Math.round(step * 2)).padStart(2, '0')} | ТАКОГО ПОВОРОТА`,
+          `0:${String(Math.round(step * 2)).padStart(2, '0')} - 0:${String(Math.round(step * 3)).padStart(2, '0')} | СМОТРИ ДО КОНЦА`
+        ].join('\n');
+        $('#subsEditorText').value = sample;
+        parseSubtitlesFromText();
+        persistSettings(false);
+        if (notify) toast('Шаблон субтитров добавлен', 'ok');
+      }
+
+      function getActiveSubtitleAt(t) {
+        if (!S.subsOn || !parsedSubs.length) return '';
+        const item = parsedSubs.find(s => t >= s.start && t <= s.end);
+        return item ? item.text : '';
+      }
+
+      function renderBatchQueueUI() {
+        const box = $('#batchQueueList');
+        $('#batchCountBadge').textContent = `${batchFiles.length} файлов`;
+        if (!batchFiles.length) {
+          box.innerHTML = '<p class="hint">Очередь пуста. Нажми «+ Добавить видео» и выбери сразу несколько файлов.</p>';
+          return;
+        }
+        box.innerHTML = batchFiles.map((f, idx) => `
+          <div class="clip-item">
+            <div style="min-width:0">
+              <b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${idx + 1}. ${escapeHtml(f.name)}</b>
+              <small>${(f.size / 1048576).toFixed(1)} МБ</small>
+            </div>
+            <button type="button" data-rm-batch="${idx}">✕</button>
+          </div>
+        `).join('');
+
+        $$('[data-rm-batch]', box).forEach(btn => {
+          btn.onclick = () => {
+            const idx = Number(btn.dataset.rmBatch);
+            batchFiles.splice(idx, 1);
+            renderBatchQueueUI();
+            ui(false);
+          };
+        });
+      }
 
       function setPreviewRes() {
         if (!v.videoWidth || !v.videoHeight) return;
@@ -3445,12 +3670,17 @@
         $$('input[data-bind]').forEach(el => {
           const k = el.dataset.bind;
           const mult = BIND_SCALE[k] || 1;
-          el.value = mult === 1 ? S[k] : Math.round(S[k] * mult);
+          el.value = mult === 1 ? S[k] : (mult === 100 ? Math.round(S[k] * mult) : S[k]);
         });
         $$('input[data-bind-chk]').forEach(el => { el.checked = !!S[el.dataset.bindChk]; });
         $$('input[data-bind-color]').forEach(el => { el.value = S[el.dataset.bindColor]; });
         $('#saveBanner').checked = !!S.saveBanner;
         $('#sliceOn').checked = !!S.sliceOn;
+        $('#batchOn').checked = !!S.batchOn;
+        $('#uniqOn').checked = !!S.uniqOn;
+        $('#splitOn').checked = !!S.splitOn;
+        $('#subsOn').checked = !!S.subsOn;
+        $('#subsEditorText').value = S.subsText || '';
         $('#sliceSec').value = S.sliceSec;
         $('#sliceIntro').value = S.sliceIntro;
         $('#sliceFrom').value = S.sliceFrom || 1;
@@ -3513,7 +3743,7 @@
         const ckHintTxt = S.ckMode === 'screen'
           ? '«Без чёрного» убирает чёрную подложку (режим Screen) — подходит для дроп-баннеров.'
           : S.ckMode === 'chroma'
-            ? 'Хромакей вырезает выбранный цвет (зелёный, синий, белый и др.) в полном разрешении.'
+            ? 'Хромакей вырезает выбранный цвет в полном разрешении.'
             : 'Баннер отображается как есть (прозрачные PNG и WebM поддерживаются автоматически).';
         const posTxt = `X:${Math.round(S.x * 100)}% Y:${Math.round(S.y * 100)}%`;
 
@@ -3534,7 +3764,13 @@
           rad: S.rad + ' px',
           kt: String(S.kt),
           vvol: Math.round(S.vvol * 100) + '%',
-          bvol: Math.round(S.bvol * 100) + '%'
+          bvol: Math.round(S.bvol * 100) + '%',
+          uniqZoom: `+${S.uniqZoom}%`,
+          uniqSpeed: `+${S.uniqSpeed}%`,
+          uniqColor: `±${S.uniqColor}%`,
+          splitLine: `${S.splitLine} px`,
+          subsSize: `${S.subsSize} px`,
+          subsY: `${S.subsY}%`
         };
         $$('output[data-out]').forEach(o => {
           if (outMap[o.dataset.out] !== undefined) o.textContent = outMap[o.dataset.out];
@@ -3544,6 +3780,13 @@
         $('#sliceSecO').textContent = S.sliceSec + ' с';
         $('#sliceSecBadge').textContent = S.sliceSec >= 60 && S.sliceSec % 60 === 0 ? `${S.sliceSec / 60} мин` : `${S.sliceSec} сек`;
         $('#sliceIntroO').textContent = S.sliceIntro + ' с';
+        $('#uniqPresetBadge').textContent = S.uniqOn ? (S.uniqLevel === 'hard' ? 'Макс' : S.uniqLevel === 'soft' ? 'Мягкий' : 'Оптимальный') : 'Выкл';
+        $('#splitRatioBadge').textContent = `${S.splitRatio} / ${100 - Number(S.splitRatio)}`;
+
+        // Индикаторы активных модулей в шапке плеера
+        $('#uniqPill').style.display = S.uniqOn ? 'inline-block' : 'none';
+        $('#splitPill').style.display = S.splitOn ? 'inline-block' : 'none';
+        $('#subsPill').style.display = S.subsOn ? 'inline-block' : 'none';
 
         const scEl = $('#sliceCustomSec');
         scEl.max = String(Math.max(10, S.sliceSec));
@@ -3568,45 +3811,48 @@
         const d = D();
         const plan = computeSlicePlan(d);
         const slicePill = $('#slicePill');
-        const modeWord = S.mode === 'stop' ? `Пауза (${+HD().toFixed(1)}с)` : `Поверх (${+SH().toFixed(1)}с)`;
-        const posWord = S.pos === 'top' ? 'сверху' : S.pos === 'center' ? 'по центру' : S.pos === 'bottom' ? 'снизу' : 'своя позиция';
-        const whenTxt = S.sliceWhen === 'start'
-          ? 'в начале'
-          : S.sliceWhen === 'end'
-            ? 'в конце'
-            : S.sliceWhen === 'custom'
-              ? `на ${S.sliceCustomSec}с`
-              : 'в середине';
+        const batchPill = $('#batchPill');
 
-        if (S.sliceOn) {
-          if (d && plan.selected.length > 0) {
-            const totalClipSec = plan.selected.reduce((a, c) => a + c.dur + (S.mode === 'stop' && img ? HD() : 0), 0);
-            const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 28e6) + 192000)) / 8 / 1048576));
-            const ramWarn = estMb > 750
-              ? `<br><span style="color:#fde047">Крупный архив (~${estMb} МБ) — на телефоне можно резать партиями по 10 частей или выбрать 1080p HD.</span>`
-              : '';
-            $('#sliceSummary').innerHTML = `<b>${plan.selected.length} из ${plan.totalParts} клипов</b> по ~${S.sliceSec}с • Режим: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Около <b>~${estMb} МБ</b> в ZIP.${ramWarn}`;
-            slicePill.style.display = 'inline-block';
-            slicePill.textContent = `${plan.selected.length} кл. ZIP`;
-            if (!exporting) {
-              $('#go').textContent = `Нарезать ${plan.selected.length} клипов в ZIP`;
-              $('#topExportBtn').textContent = `ZIP (${plan.selected.length})`;
-            }
-          } else {
-            $('#sliceSummary').innerHTML = `Режим нарезки активен: <b>${modeWord}</b>, баннер <b>${whenTxt}</b> (${posWord}). Загрузи видео — здесь появится точное число клипов.`;
-            slicePill.style.display = 'inline-block';
-            slicePill.textContent = 'Режим ZIP';
-            if (!exporting) {
-              $('#go').textContent = 'Нарезать в ZIP';
-              $('#topExportBtn').textContent = 'ZIP';
-            }
+        if (S.batchOn) {
+          slicePill.style.display = 'none';
+          batchPill.style.display = 'inline-block';
+          batchPill.textContent = `Очередь: ${batchFiles.length}`;
+          $('#go').disabled = batchFiles.length === 0;
+          $('#topExportBtn').disabled = batchFiles.length === 0;
+          if (!exporting) {
+            $('#go').textContent = batchFiles.length > 0 ? `Собрать очередь (${batchFiles.length} видео) в ZIP` : 'Добавь видео в очередь';
+            $('#topExportBtn').textContent = `ZIP (${batchFiles.length})`;
           }
         } else {
-          $('#sliceSummary').textContent = 'Включи пакетную нарезку, чтобы разрезать длинный ролик на части по минутам и вставить баннер в каждый клип.';
-          slicePill.style.display = 'none';
-          if (!exporting) {
-            $('#go').textContent = 'Собрать MP4';
-            $('#topExportBtn').textContent = 'Экспорт';
+          batchPill.style.display = 'none';
+          $('#go').disabled = !vfile;
+          $('#topExportBtn').disabled = !vfile;
+
+          if (S.sliceOn) {
+            if (d && plan.selected.length > 0) {
+              const totalClipSec = plan.selected.reduce((a, c) => a + c.dur + (S.mode === 'stop' && img ? HD() : 0), 0);
+              const estMb = Math.max(1, Math.round((totalClipSec * ((BR[S.q] || 28e6) + 192000)) / 8 / 1048576));
+              $('#sliceSummary').innerHTML = `<b>${plan.selected.length} из ${plan.totalParts} клипов</b> по ~${S.sliceSec}с • Около <b>~${estMb} МБ</b> в ZIP.`;
+              slicePill.style.display = 'inline-block';
+              slicePill.textContent = `${plan.selected.length} кл. ZIP`;
+              if (!exporting) {
+                $('#go').textContent = `Нарезать ${plan.selected.length} клипов в ZIP`;
+                $('#topExportBtn').textContent = `ZIP (${plan.selected.length})`;
+              }
+            } else {
+              slicePill.style.display = 'inline-block';
+              slicePill.textContent = 'Режим ZIP';
+              if (!exporting) {
+                $('#go').textContent = 'Нарезать в ZIP';
+                $('#topExportBtn').textContent = 'ZIP';
+              }
+            }
+          } else {
+            slicePill.style.display = 'none';
+            if (!exporting) {
+              $('#go').textContent = 'Собрать MP4';
+              $('#topExportBtn').textContent = 'Экспорт';
+            }
           }
         }
 
@@ -3639,8 +3885,6 @@
       v.addEventListener('loadedmetadata', () => {
         setPreviewRes();
         $('#app').classList.add('has');
-        $('#go').disabled = false;
-        $('#topExportBtn').disabled = false;
         $('#resPill').textContent = `${v.videoWidth}×${v.videoHeight}`;
         $('#vMeta').textContent = `${fmt(v.duration)} • ${(vfile.size / 1048576).toFixed(1)} МБ`;
         heldKey = null;
@@ -3649,6 +3893,28 @@
         place();
         ui(false);
         toast('Видео загружено', 'ok');
+      });
+
+      function loadSplitVideo(f) {
+        if (!f || exporting) return;
+        if (sv.src && sv.src.startsWith('blob:')) URL.revokeObjectURL(sv.src);
+        svfile = f;
+        sv.src = URL.createObjectURL(f);
+        sv.load();
+        $('#svName').textContent = `${f.name} (${(f.size / 1048576).toFixed(1)} МБ)`;
+        S.splitOn = true;
+        $('#splitOn').checked = true;
+        if (S.aspect === 'orig') {
+          S.aspect = 'v_crop';
+          setPreviewRes();
+          place();
+        }
+        ui(true);
+        toast('Нижнее видео для Split-screen загружено', 'ok');
+      }
+
+      sv.addEventListener('loadedmetadata', () => {
+        $('#splitDurBadge').textContent = `${fmt(sv.duration)} • цикл`;
       });
 
       function loadBanner(f, fromDB = false) {
@@ -3709,7 +3975,7 @@
       }
 
       /* =====================================================================
-       * 10. ХРОМАКЕЙ И ОТРИСОВКА КАДРА В ПОЛНОМ РАЗРЕШЕНИИ
+       * 10. ХРОМАКЕЙ И ОТРИСОВКА КАДРА (SPLIT-SCREEN, УНИКАЛИЗАТОР, СУБТИТРЫ)
        * ===================================================================== */
       const kc = document.createElement('canvas');
       const kx = kc.getContext('2d', { willReadFrequently: true });
@@ -3774,7 +4040,22 @@
         return Math.max(0, Math.min(1, localT / Math.max(0.01, f), (totalT - localT) / Math.max(0.01, f)));
       }
 
-      function drawMainLayer(targetCtx, src, W, H, aspect, isFrozen, skipAspect) {
+      function drawCoverBox(c, src, boxX, boxY, boxW, boxH) {
+        if (!src) return;
+        const sw = src.videoWidth || src.naturalWidth || src.width || boxW;
+        const sh = src.videoHeight || src.naturalHeight || src.height || boxH;
+        const sc = Math.max(boxW / sw, boxH / sh);
+        const dw = sw * sc;
+        const dh = sh * sc;
+        c.save();
+        c.beginPath();
+        c.rect(boxX, boxY, boxW, boxH);
+        c.clip();
+        c.drawImage(src, boxX + (boxW - dw) / 2, boxY + (boxH - dh) / 2, dw, dh);
+        c.restore();
+      }
+
+      function drawMainLayer(targetCtx, src, splitSrc, W, H, aspect, isFrozen, skipAspect) {
         if (!src) return;
         const sw = src.videoWidth || src.naturalWidth || src.width || W;
         const sh = src.videoHeight || src.naturalHeight || src.height || H;
@@ -3782,8 +4063,54 @@
         targetCtx.save();
         targetCtx.imageSmoothingEnabled = true;
         targetCtx.imageSmoothingQuality = 'high';
-        if (isFrozen && S.stopBlur > 0) {
+
+        // Уникализатор: микро-зум, сдвиг кадра и легкая цветокоррекция
+        if (S.uniqOn) {
+          const z = 1 + (Number(S.uniqZoom) || 0) / 100;
+          const shiftX = S.uniqShift ? Math.round(W * 0.002) : 0;
+          const shiftY = S.uniqShift ? Math.round(H * 0.0015) : 0;
+          targetCtx.translate(W / 2 + shiftX, H / 2 + shiftY);
+          targetCtx.scale(z, z);
+          targetCtx.translate(-W / 2, -H / 2);
+
+          const cDelta = Number(S.uniqColor) || 0;
+          const filters = [];
+          if (isFrozen && S.stopBlur > 0) filters.push(`blur(${S.stopBlur}px)`);
+          if (cDelta > 0) {
+            filters.push(`contrast(${100 + cDelta}%) saturate(${100 + cDelta}%) brightness(${100 + Math.round(cDelta / 2)}%)`);
+          }
+          if (filters.length) targetCtx.filter = filters.join(' ');
+        } else if (isFrozen && S.stopBlur > 0) {
           targetCtx.filter = `blur(${S.stopBlur}px)`;
+        }
+
+        // Режим Split-screen (основное видео сверху, залипалка снизу)
+        if (S.splitOn) {
+          const topRatio = (Number(S.splitRatio) || 50) / 100;
+          const topH = Math.round(H * topRatio);
+          const botH = H - topH;
+
+          drawCoverBox(targetCtx, src, 0, 0, W, topH);
+
+          if (splitSrc) {
+            drawCoverBox(targetCtx, splitSrc, 0, topH, W, botH);
+          } else {
+            targetCtx.fillStyle = '#141414';
+            targetCtx.fillRect(0, topH, W, botH);
+            targetCtx.fillStyle = '#888';
+            targetCtx.font = `700 ${Math.round(W * 0.032)}px -apple-system, sans-serif`;
+            targetCtx.textAlign = 'center';
+            targetCtx.fillText('Выбери нижнее видео во вкладке Split-screen', W / 2, topH + botH / 2);
+          }
+
+          const lineH = Math.round(((Number(S.splitLine) || 0) * W) / 1080);
+          if (lineH > 0) {
+            targetCtx.fillStyle = '#101010';
+            targetCtx.fillRect(0, topH - Math.floor(lineH / 2), W, lineH);
+          }
+
+          targetCtx.restore();
+          return;
         }
 
         if (skipAspect || aspect === 'orig' || Math.abs((sw / sh) - (W / H)) < 0.02) {
@@ -3813,6 +4140,53 @@
         const fw = sw * fgScale;
         const fh = sh * fgScale;
         targetCtx.drawImage(src, (W - fw) / 2, (H - fh) / 2, fw, fh);
+        targetCtx.restore();
+      }
+
+      function drawSubtitlesLayer(targetCtx, W, H, text) {
+        if (!text) return;
+        targetCtx.save();
+        const fontSize = Math.max(22, Math.round((Number(S.subsSize) || 56) * (W / 1080)));
+        targetCtx.font = `900 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+
+        // Разбиваем длинную фразу на строки по 2-3 слова
+        const words = text.toUpperCase().split(/\s+/);
+        const lines = [];
+        for (let i = 0; i < words.length; i += 3) {
+          lines.push(words.slice(i, i + 3).join(' '));
+        }
+
+        const lineHeight = fontSize * 1.18;
+        const totalH = lines.length * lineHeight;
+        const centerY = H * ((Number(S.subsY) || 54) / 100);
+        const startY = centerY - totalH / 2 + lineHeight / 2;
+
+        lines.forEach((line, idx) => {
+          const y = startY + idx * lineHeight;
+          const metrics = targetCtx.measureText(line);
+
+          if (S.subsStyle === 'box') {
+            const padX = fontSize * 0.45;
+            const padY = fontSize * 0.22;
+            const bw = metrics.width + padX * 2;
+            const bh = fontSize + padY * 2;
+            roundRectPath(targetCtx, (W - bw) / 2, y - bh / 2, bw, bh, 8);
+            targetCtx.fillStyle = '#101010';
+            targetCtx.fill();
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.fillText(line, W / 2, y + 1);
+          } else {
+            targetCtx.lineJoin = 'round';
+            targetCtx.lineWidth = Math.max(4, Math.round(fontSize * 0.16));
+            targetCtx.strokeStyle = '#080808';
+            targetCtx.strokeText(line, W / 2, y);
+            targetCtx.fillStyle = S.subsStyle === 'yellow' ? '#fde047' : '#ffffff';
+            targetCtx.fillText(line, W / 2, y);
+          }
+        });
+
         targetCtx.restore();
       }
 
@@ -3846,6 +4220,7 @@
       function compositeFrame(targetCtx, W, H, opts) {
         const {
           mainSource,
+          splitSource = null,
           bannerSource,
           bannerW,
           bannerH,
@@ -3854,7 +4229,8 @@
           animK,
           isEditPreview,
           skipAspect = false,
-          partText = ''
+          partText = '',
+          subText = ''
         } = opts;
 
         targetCtx.save();
@@ -3863,7 +4239,7 @@
         targetCtx.fillStyle = '#000';
         targetCtx.fillRect(0, 0, W, H);
 
-        drawMainLayer(targetCtx, mainSource, W, H, S.aspect, isFrozen, skipAspect);
+        drawMainLayer(targetCtx, mainSource, splitSource, W, H, S.aspect, isFrozen, skipAspect);
 
         if (isFrozen && S.stopDim > 0) {
           targetCtx.fillStyle = `rgba(0,0,0,${S.stopDim})`;
@@ -3872,6 +4248,10 @@
 
         if (partText) {
           drawPartBadge(targetCtx, W, H, partText);
+        }
+
+        if (subText) {
+          drawSubtitlesLayer(targetCtx, W, H, subText);
         }
 
         const showBanner = bannerSource && (bannerActive || isEditPreview);
@@ -4019,6 +4399,9 @@
             setTimeout(r, 300);
           });
         }
+        if (S.splitOn && sv.src && sv.paused) {
+          sv.play().catch(() => {});
+        }
         v.play().catch(() => {});
       };
 
@@ -4029,6 +4412,11 @@
           const d = D();
           const ct = v.currentTime;
           const pctx = getPreviewClipContext(ct, d);
+
+          if (S.splitOn && sv.src) {
+            if (v.paused && !sv.paused) sv.pause();
+            else if (!v.paused && sv.paused) sv.play().catch(() => {});
+          }
 
           if (S.sliceOn && pctx.key !== lastPreviewClipKey) {
             lastPreviewClipKey = pctx.key;
@@ -4063,9 +4451,12 @@
 
           const [bw, bh] = dims();
           const bReady = img && (!isV() || img.readyState >= 2);
+          const sReady = S.splitOn && sv.src && sv.readyState >= 2 ? sv : null;
+          const subText = getActiveSubtitleAt(ct);
 
           compositeFrame(ctx, cv.width, cv.height, {
             mainSource: v,
+            splitSource: sReady,
             bannerSource: bReady ? img : null,
             bannerW: bw,
             bannerH: bh,
@@ -4073,7 +4464,8 @@
             bannerActive: live,
             animK,
             isEditPreview: isEdit,
-            partText: pctx.partText
+            partText: pctx.partText,
+            subText
           });
 
           $('#freezePill').style.display = hold ? 'inline-block' : 'none';
@@ -4353,7 +4745,9 @@
 
       async function renderSegmentAudio({ segStart, segEnd, localT0, bDur, mainAudioSink, fallbackMainBuf, banBuf }) {
         const SR = 48000;
-        const segDur = Math.max(0.05, segEnd - segStart);
+        const speedMult = S.uniqOn ? (1 + (Number(S.uniqSpeed) || 0) / 100) : 1;
+        const rawSegDur = Math.max(0.05, segEnd - segStart);
+        const segDur = rawSegDur / speedMult;
         const totalDur = S.mode === 'stop' ? (segDur + bDur) : Math.max(segDur, bDur > 0 ? localT0 + bDur : segDur);
         const useBan = !!(banBuf && bDur > 0 && S.bvol > 0);
         const useMain = S.vvol > 0 && (mainAudioSink || fallbackMainBuf);
@@ -4370,33 +4764,36 @@
 
           const scheduleMainPiece = (buf, segPos, bufOffset, dur) => {
             if (dur <= 0.001) return;
+            const scaledPos = segPos / speedMult;
+            const scaledDur = dur / speedMult;
+
             if (S.mode === 'stop' && bDur > 0) {
-              if (segPos + dur <= localT0) {
+              if (scaledPos + scaledDur <= localT0) {
                 const s = oc.createBufferSource();
-                s.buffer = buf; s.connect(mGain);
-                s.start(segPos, bufOffset, dur);
-              } else if (segPos >= localT0) {
+                s.buffer = buf; s.playbackRate.value = speedMult; s.connect(mGain);
+                s.start(scaledPos, bufOffset, dur);
+              } else if (scaledPos >= localT0) {
                 const s = oc.createBufferSource();
-                s.buffer = buf; s.connect(mGain);
-                s.start(segPos + bDur, bufOffset, dur);
+                s.buffer = buf; s.playbackRate.value = speedMult; s.connect(mGain);
+                s.start(scaledPos + bDur, bufOffset, dur);
               } else {
-                const durA = localT0 - segPos;
+                const durA = (localT0 - scaledPos) * speedMult;
                 const durB = dur - durA;
                 if (durA > 0.001) {
                   const sA = oc.createBufferSource();
-                  sA.buffer = buf; sA.connect(mGain);
-                  sA.start(segPos, bufOffset, durA);
+                  sA.buffer = buf; sA.playbackRate.value = speedMult; sA.connect(mGain);
+                  sA.start(scaledPos, bufOffset, durA);
                 }
                 if (durB > 0.001) {
                   const sB = oc.createBufferSource();
-                  sB.buffer = buf; sB.connect(mGain);
+                  sB.buffer = buf; sB.playbackRate.value = speedMult; sB.connect(mGain);
                   sB.start(localT0 + bDur, bufOffset + durA, durB);
                 }
               }
             } else {
               const s = oc.createBufferSource();
-              s.buffer = buf; s.connect(mGain);
-              s.start(segPos, bufOffset, dur);
+              s.buffer = buf; s.playbackRate.value = speedMult; s.connect(mGain);
+              s.start(scaledPos, bufOffset, dur);
             }
             hasAnyAudio = true;
           };
@@ -4409,16 +4806,16 @@
                 if (!buf || !buf.length) continue;
                 const segPos = Math.max(0, item.timestamp - segStart);
                 const bufOffset = Math.max(0, segStart - item.timestamp);
-                const dur = Math.min(buf.duration - bufOffset, segDur - segPos);
+                const dur = Math.min(buf.duration - bufOffset, rawSegDur - segPos);
                 scheduleMainPiece(buf, segPos, bufOffset, dur);
               }
             } catch (_) {
               if (fallbackMainBuf) {
-                scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(segDur, Math.max(0, fallbackMainBuf.duration - segStart)));
+                scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(rawSegDur, Math.max(0, fallbackMainBuf.duration - segStart)));
               }
             }
           } else if (fallbackMainBuf) {
-            scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(segDur, Math.max(0, fallbackMainBuf.duration - segStart)));
+            scheduleMainPiece(fallbackMainBuf, 0, segStart, Math.min(rawSegDur, Math.max(0, fallbackMainBuf.duration - segStart)));
           }
 
           if (hasAnyAudio && S.mode === 'over' && S.duck && useBan) {
@@ -4467,13 +4864,13 @@
         return out;
       }
 
-      async function prepareOfflinePipeline() {
+      async function preparePipelineForFile(targetVideoFile) {
         await loadMediabunny();
 
         const bitrate = BR[S.q] || 28_000_000;
         const mainInput = new MB.Input({
           formats: MB.ALL_FORMATS,
-          source: new MB.BlobSource(vfile)
+          source: new MB.BlobSource(targetVideoFile)
         });
 
         const mainVTrack = await mainInput.getPrimaryVideoTrack();
@@ -4482,9 +4879,9 @@
         const canDecodeMain = await mainVTrack.canDecode();
         if (!canDecodeMain) throw new Error('Браузер не поддерживает декодирование этого видеофайла.');
 
-        const dispW = (await mainVTrack.getDisplayWidth()) || v.videoWidth;
-        const dispH = (await mainVTrack.getDisplayHeight()) || v.videoHeight;
-        const vDur = (await mainInput.computeDuration()) || D();
+        const dispW = (await mainVTrack.getDisplayWidth()) || v.videoWidth || 1080;
+        const dispH = (await mainVTrack.getDisplayHeight()) || v.videoHeight || 1920;
+        const vDur = (await mainInput.computeDuration()) || D() || 1;
         const { w: outW, h: outH } = computeOutputRes(dispW, dispH);
 
         let srcFps = 30;
@@ -4503,8 +4900,24 @@
         const mainATrack = await mainInput.getPrimaryAudioTrack().catch(() => null);
         if (mainATrack && MB.AudioBufferSink && (await mainATrack.canDecode().catch(() => false))) {
           mainAudioSink = new MB.AudioBufferSink(mainATrack);
-        } else if (S.vvol > 0 && vfile.size < 160 * 1024 * 1024) {
-          fallbackMainBuf = await decodeFullAudio(vfile, mainInput, 48000);
+        } else if (S.vvol > 0 && targetVideoFile.size < 160 * 1024 * 1024) {
+          fallbackMainBuf = await decodeFullAudio(targetVideoFile, mainInput, 48000);
+        }
+
+        // Split-screen нижнее видео
+        let splitInput = null;
+        let splitSink = null;
+        let splitNatDur = 1;
+        if (S.splitOn && svfile) {
+          splitInput = new MB.Input({
+            formats: MB.ALL_FORMATS,
+            source: new MB.BlobSource(svfile)
+          });
+          const sTrack = await splitInput.getPrimaryVideoTrack();
+          if (sTrack && (await sTrack.canDecode())) {
+            splitNatDur = Math.max(0.2, (await splitInput.computeDuration()) || sv.duration || 1);
+            splitSink = new MB.CanvasSink(sTrack, { poolSize: 2 });
+          }
         }
 
         const hasBanner = !!img;
@@ -4555,11 +4968,13 @@
         return {
           fps, bitrate, outW, outH, vDur,
           mainInput, mainSink, mainAudioSink, fallbackMainBuf,
+          splitInput, splitSink, splitNatDur,
           hasBanner, bannerIsVid, bannerInput, bannerSink, bannerAudioBuf,
           bannerDispW, bannerDispH, bannerNatDur,
           renderCanvas, rCtx, freezeCanvas, fCtx, bestAudioCodec,
           dispose() {
             try { if (mainInput && mainInput.dispose) mainInput.dispose(); } catch (_) {}
+            try { if (splitInput && splitInput.dispose) splitInput.dispose(); } catch (_) {}
             try { if (bannerInput && bannerInput.dispose) bannerInput.dispose(); } catch (_) {}
           }
         };
@@ -4570,19 +4985,23 @@
         const {
           fps, bitrate, outW, outH, vDur,
           mainSink, mainAudioSink, fallbackMainBuf,
+          splitSink, splitNatDur,
           hasBanner, bannerIsVid, bannerSink, bannerAudioBuf,
           bannerDispW, bannerDispH, bannerNatDur,
           renderCanvas, rCtx, freezeCanvas, fCtx, bestAudioCodec
         } = pipe;
 
         const dt = 1 / fps;
-        const segDur = Math.max(0.2, segEnd - segStart);
+        const speedMult = S.uniqOn ? (1 + (Number(S.uniqSpeed) || 0) / 100) : 1;
+        const rawSegDur = Math.max(0.2, segEnd - segStart);
+        const segDur = rawSegDur / speedMult;
         const bDur = hasBanner ? Math.min(S.mode === 'stop' ? HD() : SH(), S.mode === 'stop' ? 60 : segDur) : 0;
         const clampedT0 = Math.min(Math.max(0, localT0), Math.max(0, segDur - 0.05));
         const maxSrcT = Math.max(0, vDur - 0.002);
         const banDurSafe = Math.max(0.05, bannerNatDur);
 
         const mainTimestamps = [];
+        const splitTimestamps = [];
         const bannerTimestamps = [];
         const framePlan = [];
 
@@ -4593,17 +5012,21 @@
 
           for (let i = 0; i < preCount; i++) {
             const relT = i * dt;
-            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
-            framePlan.push({ outTs: relT, needMain: true, captureFreeze: false, isFreeze: false, bannerActive: false, localT: 0 });
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT * speedMult));
+            if (splitSink) splitTimestamps.push(relT % splitNatDur);
+            framePlan.push({ outTs: relT, srcRelT: relT * speedMult, needMain: true, needSplit: !!splitSink, captureFreeze: false, isFreeze: false, bannerActive: false, localT: 0 });
           }
 
-          mainTimestamps.push(Math.min(maxSrcT, segStart + clampedT0));
+          mainTimestamps.push(Math.min(maxSrcT, segStart + clampedT0 * speedMult));
           for (let j = 0; j < pauseCount; j++) {
             const localT = j * dt;
             if (bannerIsVid && bannerSink) bannerTimestamps.push(localT % banDurSafe);
+            if (splitSink) splitTimestamps.push((clampedT0 + localT) % splitNatDur);
             framePlan.push({
               outTs: (preCount + j) * dt,
+              srcRelT: clampedT0 * speedMult,
               needMain: j === 0,
+              needSplit: !!splitSink,
               captureFreeze: j === 0,
               isFreeze: true,
               bannerActive: true,
@@ -4613,10 +5036,13 @@
 
           for (let k = 0; k < postCount; k++) {
             const relT = clampedT0 + k * dt;
-            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT * speedMult));
+            if (splitSink) splitTimestamps.push((relT + bDur) % splitNatDur);
             framePlan.push({
               outTs: (preCount + pauseCount + k) * dt,
+              srcRelT: relT * speedMult,
               needMain: true,
+              needSplit: !!splitSink,
               captureFreeze: false,
               isFreeze: false,
               bannerActive: false,
@@ -4627,13 +5053,16 @@
           const totalCount = Math.max(1, Math.round(segDur * fps));
           for (let i = 0; i < totalCount; i++) {
             const relT = i * dt;
-            mainTimestamps.push(Math.min(maxSrcT, segStart + relT));
+            mainTimestamps.push(Math.min(maxSrcT, segStart + relT * speedMult));
+            if (splitSink) splitTimestamps.push(relT % splitNatDur);
             const bannerActive = hasBanner && bDur > 0 && relT >= clampedT0 && relT < clampedT0 + bDur;
             const localT = bannerActive ? (relT - clampedT0) : 0;
             if (bannerActive && bannerIsVid && bannerSink) bannerTimestamps.push(localT % banDurSafe);
             framePlan.push({
               outTs: relT,
+              srcRelT: relT * speedMult,
               needMain: true,
+              needSplit: !!splitSink,
               captureFreeze: false,
               isFreeze: false,
               bannerActive,
@@ -4644,6 +5073,7 @@
 
         const totalFrames = framePlan.length;
         let mainIter = null;
+        let splitIter = null;
         let bannerIter = null;
 
         try {
@@ -4677,11 +5107,15 @@
           await output.start();
 
           mainIter = mainSink.canvasesAtTimestamps(mainTimestamps)[Symbol.asyncIterator]();
+          if (splitSink && splitTimestamps.length) {
+            splitIter = splitSink.canvasesAtTimestamps(splitTimestamps)[Symbol.asyncIterator]();
+          }
           if (bannerIsVid && bannerSink && bannerTimestamps.length) {
             bannerIter = bannerSink.canvasesAtTimestamps(bannerTimestamps)[Symbol.asyncIterator]();
           }
 
           let lastMainCanvas = null;
+          let lastSplitCanvas = null;
           let lastBannerCanvas = null;
 
           for (let i = 0; i < totalFrames; i++) {
@@ -4696,7 +5130,14 @@
               if (step.captureFreeze && lastMainCanvas) {
                 fCtx.fillStyle = '#000';
                 fCtx.fillRect(0, 0, outW, outH);
-                drawMainLayer(fCtx, lastMainCanvas, outW, outH, S.aspect, false, false);
+                drawMainLayer(fCtx, lastMainCanvas, lastSplitCanvas, outW, outH, S.aspect, false, false);
+              }
+            }
+
+            if (step.needSplit && splitIter) {
+              const sr = await splitIter.next();
+              if (!sr.done && sr.value && sr.value.canvas) {
+                lastSplitCanvas = sr.value.canvas;
               }
             }
 
@@ -4711,8 +5152,11 @@
               }
             }
 
+            const subText = getActiveSubtitleAt(segStart + step.srcRelT);
+
             compositeFrame(rCtx, outW, outH, {
               mainSource: step.isFreeze ? freezeCanvas : lastMainCanvas,
+              splitSource: S.splitOn ? lastSplitCanvas : null,
               bannerSource: bSource,
               bannerW: bannerDispW,
               bannerH: bannerDispH,
@@ -4721,7 +5165,8 @@
               animK: step.bannerActive ? calcAnimFactor(step.localT, bDur) : 1,
               isEditPreview: false,
               skipAspect: step.isFreeze,
-              partText
+              partText,
+              subText
             });
 
             await videoSource.add(step.outTs, dt);
@@ -4748,6 +5193,7 @@
           return { buffer: output.target.buffer, encodedFrames: totalFrames };
         } finally {
           try { if (mainIter) await mainIter.return(); } catch (_) {}
+          try { if (splitIter) await splitIter.return(); } catch (_) {}
           try { if (bannerIter) await bannerIter.return(); } catch (_) {}
         }
       }
@@ -4755,7 +5201,7 @@
       async function runOfflineExport() {
         setProgress(1, 'Подготовка рендера...', 'Анализ видео', '');
         const startPerf = performance.now();
-        const pipe = await prepareOfflinePipeline();
+        const pipe = await preparePipelineForFile(vfile);
 
         try {
           const segRes = await renderSingleSegment(pipe, {
@@ -4779,9 +5225,10 @@
           if (!segRes || cancelled) return null;
 
           const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
+          const uid = S.uniqOn && S.uniqMeta ? `_u${Math.floor(1000 + Math.random() * 9000)}` : '';
           const file = new File(
             [segRes.buffer],
-            `rez_${Date.now().toString().slice(-5)}.mp4`,
+            `rez_${Date.now().toString().slice(-5)}${uid}.mp4`,
             { type: 'video/mp4' }
           );
           return { kind: 'single', file, outW: pipe.outW, outH: pipe.outH, elapsedTotal };
@@ -4790,13 +5237,97 @@
         }
       }
 
+      async function runBatchQueueExport() {
+        if (!batchFiles.length) throw new Error('Очередь пуста — добавь видеофайлы.');
+        if (typeof VideoEncoder === 'undefined') {
+          throw new Error('Пакетная очередь требует современный браузер с WebCodecs (Chrome, Edge или Safari 16.4+).');
+        }
+
+        const startPerf = performance.now();
+        const clips = [];
+        let lastW = 1080, lastH = 1920;
+
+        for (let fi = 0; fi < batchFiles.length; fi++) {
+          if (cancelled) break;
+          const fileItem = batchFiles[fi];
+          setProgress(
+            Math.max(2, (fi / batchFiles.length) * 95),
+            `Ролик ${fi + 1} из ${batchFiles.length}: ${fileItem.name.slice(0, 20)}`,
+            `Готово: ${clips.length}`,
+            ''
+          );
+
+          const pipe = await preparePipelineForFile(fileItem);
+          lastW = pipe.outW;
+          lastH = pipe.outH;
+
+          try {
+            const bDur = pipe.hasBanner ? (S.mode === 'stop' ? HD() : SH()) : 0;
+            let localT0 = 0;
+            if (S.when === 'middle') localT0 = Math.max(0, S.mode === 'over' ? (pipe.vDur - bDur) / 2 : pipe.vDur / 2);
+            else if (S.when === 'end') localT0 = Math.max(0, S.mode === 'over' ? pipe.vDur - bDur : pipe.vDur - 0.15);
+
+            const segRes = await renderSingleSegment(pipe, {
+              segStart: 0,
+              segEnd: pipe.vDur,
+              localT0,
+              partText: '',
+              onFrameProgress: (done, total) => {
+                const fileFrac = (fi + done / Math.max(1, total)) / batchFiles.length;
+                setProgress(
+                  2 + fileFrac * 94,
+                  `Ролик ${fi + 1}/${batchFiles.length}`,
+                  `Кадр ${done}/${total} • Готово: ${clips.length}`,
+                  ''
+                );
+              }
+            });
+
+            if (!segRes || cancelled) break;
+            const u8 = new Uint8Array(segRes.buffer);
+            const crc = calcCrc32(u8);
+            const size = u8.byteLength;
+            const blob = new Blob([u8], { type: 'video/mp4' });
+            const cleanName = fileItem.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]+/g, '_').slice(0, 28);
+            const fname = `${String(fi + 1).padStart(2, '0')}_${cleanName}_rez.mp4`;
+
+            clips.push({
+              name: fname,
+              blob,
+              size,
+              crc,
+              index: fi + 1,
+              rangeText: `${fmt(pipe.vDur)}`
+            });
+          } finally {
+            pipe.dispose();
+          }
+        }
+
+        if (!clips.length) return null;
+        setProgress(98, `Упаковка ${clips.length} роликов в ZIP...`, 'Без потери качества', '');
+        const zipBlob = buildStoreZipBlob(clips);
+        const zipFile = new File([zipBlob], `rez_batch_${clips.length}videos.zip`, { type: 'application/zip' });
+        const elapsedTotal = ((performance.now() - startPerf) / 1000).toFixed(1);
+
+        return {
+          kind: 'zip',
+          file: zipFile,
+          clips,
+          partial: cancelled && clips.length < batchFiles.length,
+          outW: lastW,
+          outH: lastH,
+          elapsedTotal
+        };
+      }
+
       async function runBatchSliceExport() {
         if (typeof VideoEncoder === 'undefined') {
           throw new Error('Пакетная нарезка в ZIP требует современный браузер с WebCodecs (Chrome, Edge или Safari 16.4+).');
         }
 
         setProgress(1, 'Подготовка нарезки...', 'Потоковое чтение видео', '');
-        const pipe = await prepareOfflinePipeline();
+        const pipe = await preparePipelineForFile(vfile);
         const plan = computeSlicePlan(pipe.vDur);
         if (!plan.selected.length) {
           pipe.dispose();
@@ -4892,115 +5423,13 @@
         }
       }
 
-      async function runLegacyFallbackExport() {
-        if (!window.MediaRecorder || !cv.captureStream) {
-          throw new Error('Браузер не поддерживает экспорт видео. Открой в Chrome или Safari.');
-        }
-        toast('Запущен совместимый режим рендера', '');
-        ensurePreviewAudio();
-
-        const { w, h } = computeOutputRes(v.videoWidth, v.videoHeight);
-        cv.width = w;
-        cv.height = h;
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        const targetFps = S.fps === '60' ? 60 : 30;
-        const stream = cv.captureStream(targetFps);
-        if (adest) adest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
-
-        const mime = [
-          'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-          'video/mp4',
-          'video/webm;codecs=vp9,opus',
-          'video/webm'
-        ].find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
-
-        const chunks = [];
-        const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: BR[S.q] || 16_000_000 });
-        rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-        const donePromise = new Promise(res => { rec.onstop = res; });
-
-        v.pause();
-        v.currentTime = 0;
-        await new Promise(r => v.addEventListener('seeked', r, { once: true }));
-        if (isV()) { img.pause(); img.currentTime = 0; }
-
-        const t0 = S.t0;
-        const bDur = img ? (S.mode === 'stop' ? HD() : SH()) : 0;
-        const totalDur = S.mode === 'stop' ? D() + bDur : Math.max(D(), t0 + bDur);
-        const startPerf = performance.now();
-        let frozenAt = null;
-        let stopDone = false;
-
-        rec.start(300);
-        v.play().catch(() => {});
-
-        await new Promise(resolve => {
-          const timer = setInterval(() => {
-            if (cancelled) { clearInterval(timer); return resolve(); }
-            const elapsed = (performance.now() - startPerf) / 1000;
-            if (S.mode === 'stop' && img && !stopDone && !frozenAt && v.currentTime >= t0) {
-              v.pause();
-              frozenAt = performance.now();
-              if (isV()) { img.currentTime = 0; img.play().catch(() => {}); }
-            }
-            if (frozenAt && (performance.now() - frozenAt) / 1000 >= bDur) {
-              frozenAt = null;
-              stopDone = true;
-              if (isV()) img.pause();
-              if (!v.ended) v.play().catch(() => {});
-            }
-
-            let live = false, animK = 1;
-            if (S.mode === 'over') {
-              live = v.currentTime >= t0 && v.currentTime < t0 + bDur;
-              if (live) animK = calcAnimFactor(v.currentTime - t0, bDur);
-            } else if (frozenAt) {
-              live = true;
-              animK = calcAnimFactor((performance.now() - frozenAt) / 1000, bDur);
-            }
-            syncPreviewBanner(live, t0);
-            applyPreviewVolumes(live);
-
-            const [bw, bh] = dims();
-            compositeFrame(ctx, w, h, {
-              mainSource: v,
-              bannerSource: img && (!isV() || img.readyState >= 2) ? img : null,
-              bannerW: bw,
-              bannerH: bh,
-              isFrozen: !!frozenAt,
-              bannerActive: live,
-              animK,
-              isEditPreview: false
-            });
-
-            setProgress(Math.min(99, (elapsed / Math.max(0.1, totalDur)) * 100), 'Совместимый экспорт...', '', '');
-            if (v.ended && !frozenAt && elapsed >= totalDur - 0.1) { clearInterval(timer); return resolve(); }
-          }, Math.round(1000 / targetFps));
-        });
-
-        v.pause();
-        if (isV()) img.pause();
-        if (rec.state !== 'inactive') rec.stop();
-        await donePromise;
-        setPreviewRes();
-
-        if (cancelled) return null;
-        const isMp4 = mime.startsWith('video/mp4');
-        const ext = isMp4 ? 'mp4' : 'webm';
-        return {
-          kind: 'single',
-          file: new File(chunks, `rez_${Date.now().toString().slice(-5)}.${ext}`, { type: mime.split(';')[0] }),
-          outW: w,
-          outH: h,
-          elapsedTotal: ((performance.now() - startPerf) / 1000).toFixed(1)
-        };
-      }
-
       async function startExport() {
-        if (!vfile) {
+        if (!S.batchOn && !vfile) {
           toast('Сначала загрузи основное видео', 'err');
+          return;
+        }
+        if (S.batchOn && !batchFiles.length) {
+          toast('Добавь видеофайлы в очередь', 'err');
           return;
         }
         if (exporting) {
@@ -5014,12 +5443,13 @@
         hold = null;
         heldKey = null;
         v.pause();
+        if (sv.src) sv.pause();
         if (isV()) img.pause();
 
         document.body.classList.add('exp');
         $('#res').classList.remove('on');
         $('#pbox').classList.add('on');
-        $('#go').textContent = S.sliceOn ? 'Остановить и упаковать готовые' : 'Отменить рендер';
+        $('#go').textContent = (S.sliceOn || S.batchOn) ? 'Остановить и упаковать готовые' : 'Отменить рендер';
         $('#go').classList.add('cancel');
         $('#topExportBtn').disabled = true;
 
@@ -5029,19 +5459,12 @@
           }
 
           let result = null;
-          if (S.sliceOn) {
+          if (S.batchOn) {
+            result = await runBatchQueueExport();
+          } else if (S.sliceOn) {
             result = await runBatchSliceExport();
-          } else if (typeof VideoEncoder !== 'undefined') {
-            try {
-              result = await runOfflineExport();
-            } catch (err) {
-              if (!cancelled) {
-                console.warn('WebCodecs failed, trying fallback:', err);
-                result = await runLegacyFallbackExport();
-              }
-            }
           } else {
-            result = await runLegacyFallbackExport();
+            result = await runOfflineExport();
           }
 
           if (result && result.file) {
@@ -5062,8 +5485,8 @@
             if (result.kind === 'zip') {
               bumpUserStats(result.clips.length);
               $('#resTitle').textContent = result.partial
-                ? `Сохранено ${result.clips.length} клипов (остановлено)`
-                : `ZIP готов (${result.clips.length} клипов)`;
+                ? `Сохранено ${result.clips.length} видео (остановлено)`
+                : `ZIP готов (${result.clips.length} видео)`;
               $('#resMeta').textContent = `${result.outW}×${result.outH} • ${mb} МБ • за ${result.elapsedTotal}с`;
               dl.textContent = `Скачать ZIP (${result.clips.length} видео • ${mb} МБ)`;
 
@@ -5113,14 +5536,84 @@
           document.body.classList.remove('exp');
           $('#pbox').classList.remove('on');
           $('#go').classList.remove('cancel');
-          $('#topExportBtn').disabled = !vfile;
           ui(false);
           try { if (wakeLock) await wakeLock.release(); wakeLock = null; } catch (_) {}
         }
       }
 
       /* =====================================================================
-       * 14. СОБЫТИЯ ИНТЕРФЕЙСА, ЗАГРУЗЧИКА И ТИКЕТ-СИСТЕМЫ
+       * 14. АВТО-РАСПОЗНАВАНИЕ РЕЧИ ИЗ ВИДЕО (WEB SPEECH API)
+       * ===================================================================== */
+      function runAutoTranscribe() {
+        if (!v.src) {
+          toast('Сначала загрузи видео', 'err');
+          return;
+        }
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          toast('Браузер не поддерживает авто-распознавание — вставь текст вручную', 'err');
+          return;
+        }
+
+        const btn = $('#autoTranscribeBtn');
+        const recog = new SR();
+        recog.lang = 'ru-RU';
+        recog.continuous = true;
+        recog.interimResults = false;
+
+        let segStart = 0;
+        const lines = [];
+
+        recog.onstart = () => {
+          btn.disabled = true;
+          btn.textContent = 'Слушаю видео...';
+          $('#subsStatusHint').textContent = 'Идёт воспроизведение и распознавание речи... Не выключай звук.';
+          v.pause();
+          v.currentTime = 0;
+          segStart = 0;
+          playPreview();
+        };
+
+        recog.onresult = (e) => {
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+              const phrase = e.results[i][0].transcript.trim();
+              const nowT = Math.max(segStart + 0.6, v.currentTime);
+              if (phrase) {
+                lines.push(`${fmt(segStart)} - ${fmt(nowT)} | ${phrase}`);
+                $('#subsEditorText').value = lines.join('\n');
+                parseSubtitlesFromText();
+              }
+              segStart = nowT;
+            }
+          }
+        };
+
+        const finishRecog = () => {
+          btn.disabled = false;
+          btn.textContent = 'Распознать речь из видео';
+          $('#subsStatusHint').textContent = lines.length
+            ? `Готово! Распознано фраз: ${lines.length}. Можешь подправить текст ниже.`
+            : 'Речь не обнаружена — попробуй прибавить громкость или впиши фразы вручную.';
+          persistSettings(true);
+        };
+
+        recog.onerror = finishRecog;
+        recog.onend = finishRecog;
+
+        v.addEventListener('ended', () => {
+          try { recog.stop(); } catch (_) {}
+        }, { once: true });
+
+        try {
+          recog.start();
+        } catch (_) {
+          finishRecog();
+        }
+      }
+
+      /* =====================================================================
+       * 15. СОБЫТИЯ ИНТЕРФЕЙСА, ЗАГРУЗЧИКА И ТИКЕТ-СИСТЕМЫ
        * ===================================================================== */
       $('#openDrawerBtn').onclick = openDrawer;
       $('#closeDrawerBtn').onclick = closeDrawer;
@@ -5274,14 +5767,7 @@
       };
 
       $$('#tabs button').forEach(b => {
-        b.onclick = () => {
-          switchMainTab(b.dataset.tab);
-          if (b.dataset.tab === 'slice' && !S.sliceOn) {
-            S.sliceOn = true;
-            $('#sliceOn').checked = true;
-            ui(true);
-          }
-        };
+        b.onclick = () => switchMainTab(b.dataset.tab);
       });
 
       $$('.seg').forEach(g => {
@@ -5295,6 +5781,12 @@
             $('#sliceSec').value = S.sliceSec;
           } else {
             S[k] = b.dataset.v;
+          }
+          if (k === 'uniqLevel') {
+            if (S.uniqLevel === 'soft') { S.uniqZoom = 1; S.uniqSpeed = 1; S.uniqColor = 1; }
+            else if (S.uniqLevel === 'hard') { S.uniqZoom = 3.5; S.uniqSpeed = 2.5; S.uniqColor = 4; }
+            else { S.uniqZoom = 2; S.uniqSpeed = 1.5; S.uniqColor = 2; }
+            syncInputs();
           }
           if (k === 'aspect') {
             setPreviewRes();
@@ -5359,14 +5851,57 @@
       });
 
       $('#vf').onchange = (e) => { if (e.target.files[0]) loadVideo(e.target.files[0]); e.target.value = ''; };
+      $('#svf').onchange = (e) => { if (e.target.files[0]) loadSplitVideo(e.target.files[0]); e.target.value = ''; };
       $('#bf').onchange = (e) => { if (e.target.files[0]) loadBanner(e.target.files[0], false); e.target.value = ''; };
+
+      // Пакетная очередь файлов
+      $('#batchFilesInput').onchange = (e) => {
+        const files = [...(e.target.files || [])].filter(f => f.type.startsWith('video/') || /\.(mp4|mov|webm|mkv|m4v)$/i.test(f.name));
+        if (files.length) {
+          batchFiles.push(...files);
+          S.batchOn = true;
+          S.sliceOn = false;
+          $('#batchOn').checked = true;
+          $('#sliceOn').checked = false;
+          if (!vfile) loadVideo(files[0]);
+          renderBatchQueueUI();
+          ui(true);
+          toast(`Добавлено в очередь: ${files.length} видео`, 'ok');
+        }
+        e.target.value = '';
+      };
+
+      $('#clearBatchBtn').onclick = () => {
+        batchFiles = [];
+        renderBatchQueueUI();
+        ui(false);
+      };
+
+      $('#clearSplitVidBtn').onclick = () => {
+        if (sv.src && sv.src.startsWith('blob:')) URL.revokeObjectURL(sv.src);
+        sv.removeAttribute('src');
+        svfile = null;
+        $('#svName').textContent = 'Файл не выбран';
+        $('#splitDurBadge').textContent = 'Нет файла';
+        toast('Нижнее видео удалено');
+      };
 
       const drop = $('#drop');
       ['dragover', 'dragenter'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); drop.classList.add('over'); }));
       ['dragleave', 'drop'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); drop.classList.remove('over'); }));
       document.addEventListener('drop', e => {
-        const f = e.dataTransfer && e.dataTransfer.files[0];
-        if (f) loadVideo(f);
+        const files = [...(e.dataTransfer?.files || [])];
+        if (files.length > 1) {
+          batchFiles.push(...files);
+          S.batchOn = true;
+          $('#batchOn').checked = true;
+          if (!vfile) loadVideo(files[0]);
+          renderBatchQueueUI();
+          ui(true);
+          toast(`В очередь добавлено ${files.length} видео`, 'ok');
+        } else if (files[0]) {
+          loadVideo(files[0]);
+        }
       });
 
       $('#clearBannerBtn').onclick = async (e) => {
@@ -5451,11 +5986,56 @@
 
       $('#sliceOn').onchange = e => {
         S.sliceOn = e.target.checked;
+        if (S.sliceOn) { S.batchOn = false; $('#batchOn').checked = false; }
         heldKey = null;
         hold = null;
         ui(true);
-        if (S.sliceOn) toast('Пакетная нарезка в ZIP включена', 'ok');
+        if (S.sliceOn) toast('Нарезка на клипы в ZIP включена', 'ok');
       };
+
+      $('#batchOn').onchange = e => {
+        S.batchOn = e.target.checked;
+        if (S.batchOn) { S.sliceOn = false; $('#sliceOn').checked = false; }
+        ui(true);
+        if (S.batchOn) toast('Пакетная очередь роликов включена', 'ok');
+      };
+
+      $('#uniqOn').onchange = e => {
+        S.uniqOn = e.target.checked;
+        ui(true);
+        if (S.uniqOn) toast('Уникализатор (Анти-дубль) включён', 'ok');
+      };
+
+      $('#splitOn').onchange = e => {
+        S.splitOn = e.target.checked;
+        if (S.splitOn && S.aspect === 'orig') {
+          S.aspect = 'v_crop';
+          setPreviewRes();
+          place();
+        }
+        ui(true);
+        if (S.splitOn) toast('Режим Split-screen включён', 'ok');
+      };
+
+      $('#subsOn').onchange = e => {
+        S.subsOn = e.target.checked;
+        if (S.subsOn && !$('#subsEditorText').value.trim()) loadSampleSubtitles(false);
+        ui(true);
+        if (S.subsOn) toast('Авто-субтитры включены', 'ok');
+      };
+
+      $('#subsEditorText').oninput = () => {
+        parseSubtitlesFromText();
+        persistSettings(false);
+      };
+      $('#autoTranscribeBtn').onclick = runAutoTranscribe;
+      $('#sampleSubsBtn').onclick = () => {
+        S.subsOn = true;
+        $('#subsOn').checked = true;
+        loadSampleSubtitles(true);
+        ui(true);
+      };
+
       $('#sliceSec').oninput = e => { S.sliceSec = +e.target.value; ui(false); };
       $('#sliceSec').onchange = () => persistSettings(true);
       $('#sliceCustomSec').oninput = e => { S.sliceCustomSec = +e.target.value; heldKey = null; ui(false); };
@@ -5513,6 +6093,7 @@
       $('#resetBtn').onclick = () => {
         S = { ...DEFAULT_S };
         syncInputs();
+        parseSubtitlesFromText();
         setPreviewRes();
         if (D()) { timing(); place(); }
         ui(true);
@@ -5553,17 +6134,18 @@
       });
 
       /* =====================================================================
-       * 15. ИНИЦИАЛИЗАЦИЯ
+       * 16. ИНИЦИАЛИЗАЦИЯ
        * ===================================================================== */
       async function init() {
         const shareUrl = encodeURIComponent(window.location.href);
-        const shareText = encodeURIComponent('rez — оффлайн-студия для вставки баннеров, нарезки Shorts/Reels и загрузки видео по ссылке');
+        const shareText = encodeURIComponent('rez — оффлайн-студия для вставки баннеров, нарезки, split-screen и уникализации видео');
         const tgShareHref = `https://t.me/share/url?url=${shareUrl}&text=${shareText}`;
         $('#drawerShareLink').href = tgShareHref;
         $('#footerShareLink').href = tgShareHref;
 
         updateStatsUI();
         renderTicketHistory();
+        renderBatchQueueUI();
         setInterval(updateStatsUI, 30000);
 
         loadSlot(activeSlot);
